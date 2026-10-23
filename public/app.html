@@ -1201,6 +1201,27 @@
   #agentBootScreen.boot-final .boot-scanline { animation-duration: 0.65s; }
   #agentBootScreen.boot-final .boot-eq span { animation-duration: 0.45s; }
   #agentBootScreen.boot-final .boot-status { color: #6ee7b7; text-shadow: 0 0 10px rgba(52,211,153,0.55); }
+  /* ==== TASK 18: per-page AI sequence engine (45s) ==== */
+  #agentBootScreen .boot-robot-wrap { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; }
+  #agentBootScreen .boot-robot-img { width: 126px; height: 126px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--seq-a, #22d3ee); box-shadow: 0 0 30px color-mix(in srgb, var(--seq-a, #22d3ee) 55%, transparent), 0 0 80px rgba(139,92,246,0.35); animation: bootRobotPulse 2.8s ease-in-out infinite; background: #14092e; }
+  #agentBootScreen .boot-robot-ring { position: absolute; inset: 2px; border-radius: 50%; border: 1.5px dashed var(--seq-a, #22d3ee); opacity: .5; animation: bootSpin 16s linear infinite; }
+  #agentBootScreen .boot-robot-ring.r2 { inset: -9px; border-color: var(--seq-b, #8b5cf6); opacity: .4; animation-direction: reverse; animation-duration: 22s; }
+  @keyframes bootRobotPulse { 0%,100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.045); filter: brightness(1.14); } }
+  @keyframes bootSpin { to { transform: rotate(360deg); } }
+  #agentBootScreen.boot-fast .boot-robot-ring { animation-duration: 5s; opacity: .8; }
+  #agentBootScreen.boot-fast .boot-robot-ring.r2 { animation-duration: 7s; }
+  #agentBootScreen .boot-status { color: var(--seq-a, #6ee7b7); text-shadow: 0 0 10px color-mix(in srgb, var(--seq-a, #6ee7b7) 50%, transparent); }
+  #agentBootScreen .boot-ring-a circle, #agentBootScreen .boot-ring-b circle { stroke: var(--seq-a, #22d3ee); }
+  #agentBootScreen .boot-percent { color: var(--seq-a, #e2e8f0); }
+  #agentBootScreen .boot-skip-btn { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); padding: 7px 18px; border-radius: 100px; background: rgba(255,255,255,0.08); border: 1px solid var(--seq-a, #22d3ee); color: #e2e8f0; font-size: 11px; font-weight: 800; letter-spacing: .3px; backdrop-filter: blur(6px); z-index: 5; }
+  #agentBootScreen .boot-terminal { max-height: 118px; overflow: hidden; }
+  /* ==== TASK 18: generative music collections ==== */
+  .gen-track-row { background: #fff; border: 1px solid var(--surface-container-highest, #e7e0ec); border-radius: 18px; padding: 10px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 4px rgba(20,10,50,0.05); }
+  .gen-play-btn { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; box-shadow: 0 3px 10px rgba(20,10,50,0.18); transition: transform .15s ease; }
+  .gen-play-btn:active { transform: scale(0.9); }
+  .gen-prog { height: 4px; border-radius: 4px; background: #ece5f3; overflow: hidden; margin-top: 7px; }
+  .gen-prog > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--gen-a, #8b5cf6), var(--gen-b, #22d3ee)); transition: width .6s linear; }
+  .gen-badge { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 100px; background: linear-gradient(90deg, rgba(139,92,246,.14), rgba(34,211,238,.14)); color: #7c3aed; border: 1px solid rgba(139,92,246,.25); }
   @keyframes bootEyeGlowFast { 0%, 100% { filter: drop-shadow(0 0 5px rgba(34,211,238,0.9)); } 50% { filter: drop-shadow(0 0 14px rgba(34,211,238,1)); } }
   @keyframes bootHeadGlow { 0%, 100% { filter: drop-shadow(0 0 14px rgba(34,211,238,0.4)); } 50% { filter: drop-shadow(0 0 26px rgba(34,211,238,0.75)); } }
 
@@ -1349,25 +1370,7 @@
           <circle cx="100" cy="8" r="3.5" fill="#22d3ee"/>
         </svg>
         <div class="boot-head-wrap" style="width:92px;height:92px;">
-          <svg class="boot-head" viewBox="0 0 120 120" aria-hidden="true">
-            <defs>
-              <linearGradient id="appBootGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#22d3ee"/>
-                <stop offset="1" stop-color="#8b5cf6"/>
-              </linearGradient>
-            </defs>
-            <line x1="60" y1="13" x2="60" y2="24" stroke="url(#appBootGrad)" stroke-width="3" stroke-linecap="round"/>
-            <circle class="boot-antenna" cx="60" cy="9" r="4" fill="#22d3ee"/>
-            <rect x="26" y="24" width="68" height="60" rx="18" fill="rgba(34,211,238,0.07)" stroke="url(#appBootGrad)" stroke-width="2.5"/>
-            <rect x="16" y="44" width="8" height="20" rx="4" fill="rgba(34,211,238,0.22)" stroke="rgba(34,211,238,0.5)" stroke-width="1.5"/>
-            <rect x="96" y="44" width="8" height="20" rx="4" fill="rgba(34,211,238,0.22)" stroke="rgba(34,211,238,0.5)" stroke-width="1.5"/>
-            <rect class="boot-eye" x="39" y="46" width="13" height="9" rx="4.5" fill="#22d3ee"/>
-            <rect class="boot-eye" x="68" y="46" width="13" height="9" rx="4.5" fill="#22d3ee"/>
-            <rect x="46" y="64" width="28" height="7" rx="3.5" fill="none" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
-            <line x1="53" y1="65.5" x2="53" y2="69.5" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
-            <line x1="60" y1="65.5" x2="60" y2="69.5" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
-            <line x1="67" y1="65.5" x2="67" y2="69.5" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
-          </svg>
+          <div class="boot-robot-wrap"><div class="boot-robot-ring r2" aria-hidden="true"></div><img id="bootRobotImg" class="boot-robot-img" alt="ربات دستیار هوشمند — چهره رو به بیننده" /><div class="boot-robot-ring" aria-hidden="true"></div></div>
           <div class="boot-scanline"></div>
         </div>
       </div>
@@ -1385,7 +1388,7 @@
   <header class="fixed top-0 w-full z-40 pt-safe glass-strong">
     <div class="h-16 px-4 flex items-center justify-between gap-3 max-w-lg mx-auto">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-primary font-bold text-lg">
+        <div onclick="openPageWithSequence('home')" role="button" title="سکانس خانه" class="w-9 h-9 rounded-xl bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-primary font-bold text-lg cursor-pointer active:scale-90 transition-transform">
           <span class="material-symbols-outlined text-[20px]">mountain_flag</span>
         </div>
         <div class="flex flex-col">
@@ -1404,7 +1407,7 @@
           <span class="material-symbols-outlined text-[20px]">notifications</span>
           <span class="absolute -top-1 -left-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-extrabold flex items-center justify-center shadow-sm border border-white" id="headerNotifBadge" style="display: none;">۰</span>
         </button>
-        <button onclick="openModal('profileModal')" aria-label="پروفایل" class="w-10 h-10 rounded-full bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform">
+        <button onclick="openPageWithSequence('profile')" aria-label="پروفایل" class="w-10 h-10 rounded-full bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform">
           <span class="material-symbols-outlined text-[21px]">person</span>
         </button>
       </div>
@@ -1519,23 +1522,23 @@
           <span class="material-symbols-outlined text-[24px] text-primary">home</span>
           <span class="text-[10px] font-bold text-primary">خانه</span>
         </button>
-        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openModal('mountainModal')">
+        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openPageWithSequence('mountain')">
           <span class="material-symbols-outlined text-[24px] text-on-surface-variant">mountain_flag</span>
           <span class="text-[10px] font-medium text-on-surface-variant">کوه‌ها</span>
         </button>
         
         <div class="flex-1 flex items-center justify-center relative -top-4">
-          <button onclick="openModal('addHabitModal')" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-container to-primary text-on-primary flex items-center justify-center shadow-[0_6px_16px_rgba(99,14,212,0.4)] active:scale-90 transition-all border-2 border-white">
+          <button onclick="openPageWithSequence('plus')" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-container to-primary text-on-primary flex items-center justify-center shadow-[0_6px_16px_rgba(99,14,212,0.4)] active:scale-90 transition-all border-2 border-white">
             <span class="material-symbols-outlined text-[28px]">add</span>
             <div class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-tertiary-fixed text-tertiary flex items-center justify-center text-[11px] font-extrabold shadow-sm border border-white/25">+</div>
           </button>
         </div>
 
-        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openMusicPage()">
+        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openPageWithSequence('music')">
           <span class="material-symbols-outlined text-[24px] text-emerald-600">library_music</span>
           <span class="text-[10px] font-medium text-on-surface-variant">موزیک</span>
         </button>
-        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openModal('profileModal')">
+        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openPageWithSequence('profile')">
           <span class="material-symbols-outlined text-[24px] text-on-surface-variant">person</span>
           <span class="text-[10px] font-medium text-on-surface-variant">پروفایل</span>
         </button>
@@ -1546,7 +1549,7 @@
   <!-- ================= AGENT BOOT SCREEN (CINEMATIC ROBOT) ================= -->
   <div id="agentBootScreen" aria-hidden="true">
     <div class="boot-grid-bg"></div>
-    <div class="boot-hud-title">هسته دستیار هوشمند<span class="boot-hud-ver">نسخه ۲.۲</span></div>
+    <div class="boot-hud-title"><span id="bootHudTitle">هسته دستیار هوشمند</span><span class="boot-hud-ver" id="bootHudVer">نسخه ۲.۳</span></div>
     <div class="boot-tag boot-tag-tl">اتصال: پایدار</div>
     <div class="boot-tag boot-tag-br">رمزگذاری: فعال</div>
     <div class="boot-corner boot-c-tl"></div><div class="boot-corner boot-c-tr"></div>
@@ -1590,7 +1593,8 @@
       <div class="boot-percent" id="bootPercent">۰٪</div>
       <div class="boot-status" id="bootStatus">فاز ۱ — انرژی‌رسانی هسته</div>
     </div>
-    <div class="boot-skip-hint">برای رد کردن، لمس کن</div>
+    <button type="button" class="boot-skip-btn">رد کردن سکانس ⏭</button>
+    <div class="boot-skip-hint">لمس صفحه = رد کردن</div>
     <div class="boot-flash" id="bootFlash"></div>
   </div>
 
@@ -2338,6 +2342,23 @@
             </button>
           </div>
           
+          <!-- Smart duration advisor (TASK 18) -->
+          <div class="flex items-center justify-between gap-2 bg-gradient-to-l from-violet-500/10 via-fuchsia-500/5 to-transparent border border-violet-500/25 rounded-2xl px-3 py-2.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="material-symbols-outlined text-[17px] text-violet-500">auto_awesome</span>
+              <span class="text-[11px] font-bold text-on-surface leading-snug truncate" id="smartTipLine">توصیه هوشمند: برای شروع، ۲۱ روز بهترین تعادل بین «تثبیت» و «طاقت‌فرسا نبودن» است.</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-2 -mt-1">
+            <span class="text-[11px] font-bold text-on-surface-variant">روز سفارشی:</span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="setCustomDuration(-7)" class="w-8 h-8 rounded-xl bg-surface-container-low border border-surface-container-highest text-on-surface font-extrabold active:scale-90 transition-transform">−۷</button>
+              <span class="min-w-[64px] text-center text-[13px] font-extrabold text-primary" id="customDurLabel">۲۱ روز</span>
+              <button type="button" onclick="setCustomDuration(7)" class="w-8 h-8 rounded-xl bg-surface-container-low border border-surface-container-highest text-on-surface font-extrabold active:scale-90 transition-transform">+۷</button>
+              <button type="button" onclick="applyCustomDuration()" class="px-3 h-8 rounded-xl bg-primary text-on-primary text-[10.5px] font-extrabold active:scale-95 transition-transform">اعمال</button>
+            </div>
+          </div>
+
           <!-- Mountain Preview (always visible) -->
           <div class="bg-surface rounded-2xl p-3 border border-surface-container-highest flex flex-col gap-2.5 shadow-inner">
             <div class="flex items-center justify-between text-right px-0.5">
@@ -2351,6 +2372,16 @@
               <svg id="mountainPreviewSvg" viewBox="0 0 300 100" class="w-full h-full" preserveAspectRatio="none"></svg>
             </div>
             <div class="flex items-center justify-between text-[9px] font-bold text-on-surface-variant px-0.5" id="mountainPreviewLabels"></div>
+          </div>
+
+          <!-- Summit route camps (TASK 18) -->
+          <div class="bg-surface rounded-2xl p-3 border border-surface-container-highest flex flex-col gap-2.5">
+            <div class="flex items-center gap-1.5 text-[12px] font-bold text-on-surface">
+              <span class="material-symbols-outlined text-[17px] text-tertiary">flag_circle</span>
+              <span>مسیر قله — کمپ‌های صعود:</span>
+            </div>
+            <div class="relative flex items-start justify-between gap-1 px-0.5 pt-1" id="campsRow"></div>
+            <div class="text-[10px] text-on-surface-variant font-medium leading-relaxed" id="routeEndDate"></div>
           </div>
         </div>
       </div>
@@ -2411,14 +2442,40 @@
         <div class="flex justify-between gap-2" id="moodScorePicker"></div>
       </div>
       <div>
+        <label class="text-xs font-bold text-on-surface mb-2 block">حال تو با کدام جمله نزدیک‌تر است؟</label>
+        <div class="grid grid-cols-3 gap-1.5" id="moodFeelingChips">
+          <button type="button" onclick="pickMoodFeeling(this,'آرام')" class="mood-feel py-2 rounded-xl text-[11px] font-bold bg-surface-container-low border border-surface-container-highest text-on-surface-variant active:scale-95 transition-all">😌 آرام</button>
+          <button type="button" onclick="pickMoodFeeling(this,'خوشحال')" class="mood-feel py-2 rounded-xl text-[11px] font-bold bg-surface-container-low border border-surface-container-highest text-on-surface-variant active:scale-95 transition-all">😄 خوشحال</button>
+          <button type="button" onclick="pickMoodFeeling(this,'پرانرژی')" class="mood-feel py-2 rounded-xl text-[11px] font-bold bg-surface-container-low border border-surface-container-highest text-on-surface-variant active:scale-95 transition-all">⚡ پرانرژی</button>
+          <button type="button" onclick="pickMoodFeeling(this,'خسته')" class="mood-feel py-2 rounded-xl text-[11px] font-bold bg-surface-container-low border border-surface-container-highest text-on-surface-variant active:scale-95 transition-all">😮‍💨 خسته</button>
+          <button type="button" onclick="pickMoodFeeling(this,'مضطرب')" class="mood-feel py-2 rounded-xl text-[11px] font-bold bg-surface-container-low border border-surface-container-highest text-on-surface-variant active:scale-95 transition-all">😰 مضطرب</button>
+          <button type="button" onclick="pickMoodFeeling(this,'غمگین')" class="mood-feel py-2 rounded-xl text-[11px] font-bold bg-surface-container-low border border-surface-container-highest text-on-surface-variant active:scale-95 transition-all">😔 غمگین</button>
+        </div>
+      </div>
+      <div>
         <label class="text-xs font-bold text-on-surface mb-2 block">بازتاب روز</label>
-        <textarea id="reflectionText" rows="4" placeholder="امروز چه حسی داشتی؟" class="w-full bg-surface-container-low border border-surface-container-highest rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:outline-none placeholder:text-on-surface-variant resize-none"></textarea>
+        <textarea id="reflectionText" rows="3" placeholder="امروز چه گذشت؟ چه چیزی خوب/بد بود؟ (حتی دو خط کوتاه کافی است)" class="w-full bg-surface-container-low border border-surface-container-highest rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:outline-none placeholder:text-on-surface-variant resize-none"></textarea>
       </div>
+      <div class="grid grid-cols-1 gap-2">
+        <div class="flex items-center gap-2 bg-surface-container-low border border-surface-container-highest rounded-xl px-3 py-2">
+          <span class="text-[16px]">🙏</span>
+          <input id="moodGratitude" type="text" placeholder="یک چیزی که امروز بابتش شکرگزار بودی..." class="flex-1 bg-transparent text-[12px] text-on-surface focus:outline-none placeholder:text-on-surface-variant">
+        </div>
+        <div class="flex items-center gap-2 bg-surface-container-low border border-surface-container-highest rounded-xl px-3 py-2">
+          <span class="text-[16px]">🏅</span>
+          <input id="moodWin" type="text" placeholder="کوچک‌ترین برد امروزت چه بود؟" class="flex-1 bg-transparent text-[12px] text-on-surface focus:outline-none placeholder:text-on-surface-variant">
+        </div>
+      </div>
+      <div id="moodInsightCard" class="rounded-2xl p-3.5 border border-primary/25 bg-primary/5"></div>
+      <div id="moodYesterdayRow" class="text-[11px] text-on-surface-variant"></div>
       <div class="bg-surface-container-low rounded-2xl p-3 flex items-start gap-2 border border-surface-container-highest">
-        <span class="material-symbols-outlined text-[16px] text-tertiary flex-shrink-0 mt-0.5">info</span>
-        <p class="text-[11px] text-on-surface-variant leading-relaxed">با ثبت منظم حال و بازتاب، می‌توانی رابطه‌ی بین عادت‌ها و سلامت روانت را بهتر درک کنی.</p>
+        <span class="material-symbols-outlined text-[16px] text-tertiary flex-shrink-0 mt-0.5">tips_and_updates</span>
+        <p class="text-[11px] text-on-surface-variant leading-relaxed">با ثبت منظم، اپ رابطه‌ی عادت‌ها و انرژی‌ات را کشف می‌کند: مثلاً می‌فهمد بعد از ورزش یا مطالعه، حالت چند درجه بهتر می‌شود.</p>
       </div>
-      <button onclick="saveMoodAndReflection()" class="w-full py-3.5 rounded-xl bg-primary text-on-primary font-bold text-sm active:scale-95 transition-transform shadow-md">ذخیره حال و بازتاب</button>
+      <button onclick="saveMoodAndReflection()" class="w-full py-3.5 rounded-xl bg-primary text-on-primary font-bold text-sm active:scale-95 transition-transform shadow-md flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">favorite</span>
+        ذخیره حال و بازتاب
+      </button>
     </div>
   </div>
 
@@ -2966,6 +3023,86 @@
       return entry;
     }
 
+    // ================= TASK 18: OFFLINE AI ENGINE (works on phone / file://) =================
+    function offlineAgentIntent(msg) {
+      const m = (msg || '').toLowerCase();
+      const has = (...ws) => ws.some(w => m.indexOf(w) !== -1);
+      if (has('سلام', 'درود', 'هی', 'hello', 'hi')) return 'greet';
+      if (has('انگیزه', 'دلسرد', 'خسته', 'نمی‌توانم', 'نمیتوانم', 'نمی تونم', 'بی‌حال', 'بیحال', 'ماندم')) return 'motivate';
+      if (has('برنامه', 'عادت جدید', 'روتین', 'بساز', 'طراحی کن', 'پیشنهاد عادت')) return 'plan';
+      if (has('استریک', 'آمار', 'پیشرفت', 'گزارش', 'چند روز', 'وضعیت')) return 'stats';
+      if (has('اینستاگرام', 'سوشال', 'شبکه اجتماعی', 'لینکدین', 'پست')) return 'social';
+      if (has('موزیک', 'آهنگ', 'موسیقی', 'آرامش صوتی')) return 'music';
+      if (has('حالم', 'احساس', 'غم', 'افسرده', 'اضطراب', 'استرس')) return 'mood';
+      if (has('تشکر', 'ممنون', 'مرسی')) return 'thanks';
+      if (has('تو کی', 'کی هستی', 'توسعه‌دهنده', 'سازنده', 'درباره تو')) return 'about';
+      return 'fallback';
+    }
+
+    function offlineAgentStatsText() {
+      const habits = state.habits || [];
+      const doneToday = habits.filter(h => h.completions && h.completions[today()]).length;
+      const best = habits.length ? Math.max(0, ...habits.map(h => h.streak || 0)) : 0;
+      const ticks = habits.reduce((a, h) => a + Object.keys(h.completions || {}).length, 0);
+      return '📊 گزارش لحظه‌ای تو:\n• عادت‌های فعال: ' + toPersian(habits.length) + '\n• امروز: ' + toPersian(doneToday) + ' از ' + toPersian(habits.length) + ' تکمیل شده\n• بهترین استریک: ' + toPersian(best) + ' روز 🔥\n• کل تیک‌های تاریخ: ' + toPersian(ticks) + '\n\nهر عدد از این‌ها یک قله فتح‌شده است!';
+    }
+
+    function offlineAgentPlanFor(msg) {
+      const m = (msg || '').toLowerCase();
+      const has = (...ws) => ws.some(w => m.indexOf(w) !== -1);
+      const P = (name, icon, cat, time) => ({ name, icon, category: cat, alarmTime: time });
+      const bank = [];
+      if (has('ورزش', 'باشگاه', 'بدنسازی', 'دویدن', 'حرکت')) bank.push(P('۱۰ دقیقه حرکت و نرمش', '🏃', 'productivity', '07:00'), P('پیاده‌روی روزانه', '🚶', 'productivity', '18:00'));
+      if (has('مطالعه', 'کتاب', 'درس', 'یادگیری')) bank.push(P('۱۵ دقیقه مطالعه کتاب', '📚', 'productivity', '21:00'), P('مرور جزوه یا یادداشت', '📝', 'productivity', '20:00'));
+      if (has('آب', 'نوشیدن', 'هیدرات')) bank.push(P('۸ لیوان آب', '💧', 'self-care', '09:00'));
+      if (has('خواب', 'بیدار', 'صبح', 'سحرخیز')) bank.push(P('خواب سر ساعت ۲۳', '😴', 'self-care', '22:30'), P('بیدارباش بدون چرت‌زدن', '🌅', 'self-care', '06:30'));
+      if (has('مدیتیشن', 'آرامش', 'تنفس', 'ذهن')) bank.push(P('۵ دقیقه تنفس آرام', '🧘', 'self-care', '08:00'));
+      if (has('اینستاگرام', 'سوشال', 'شبکه اجتماعی', 'پست', 'لینکدین')) bank.push(P('۳۰ دقیقه ساخت محتوا', '🎬', 'productivity', '17:00'), P('ساعت طلایی بدون موبایل', '📵', 'self-care', '21:00'));
+      if (has('زبان', 'انگلیسی', 'لغت')) bank.push(P('۱۰ لغت جدید انگلیسی', '🗣️', 'productivity', '19:00'));
+      if (has('کار', 'پروژه', 'تمرکز')) bank.push(P('۹۰ دقیقه تمرکز عمیق', '🎯', 'productivity', '10:00'));
+      if (!bank.length) bank.push(P('۵ دقیقه تنفس آرام', '🧘', 'self-care', '08:00'), P('۱۵ دقیقه مطالعه کتاب', '📚', 'productivity', '21:00'), P('۸ لیوان آب', '💧', 'self-care', '09:00'), P('پیاده‌روی روزانه', '🚶', 'productivity', '18:00'));
+      const uniq = []; const seen = {};
+      bank.forEach(h => { if (!seen[h.name]) { seen[h.name] = 1; uniq.push(h); } });
+      const planHabits = uniq.slice(0, 4);
+      const names = ['پرواز اول', 'پلکان صعود', 'نسیم تازه', 'مسیر قله', 'ستاره راهنما', 'قدم‌های محکم'];
+      return {
+        name: names[Math.floor(Math.random() * names.length)],
+        duration: 21,
+        habits: planHabits
+      };
+    }
+
+    function offlineAgentReply(msg) {
+      const intent = offlineAgentIntent(msg);
+      const habits = state.habits || [];
+      const doneToday = habits.filter(h => h.completions && h.completions[today()]).length;
+      const best = habits.length ? Math.max(0, ...habits.map(h => h.streak || 0)) : 0;
+      if (intent === 'greet') {
+        return { reply: 'سلام رفیق! 👋 من اینجا هستم تا هر روز کنارت باشم.\nالان ' + toPersian(doneToday) + ' از ' + toPersian(habits.length) + ' عادت امروزت انجام شده.\n\nمی‌خواهی برنامه جدید بسازیم، گزارش بگیری یا فقط انگیزه بگیری؟' };
+      }
+      if (intent === 'motivate') {
+        const quotes = ['قله‌ها را قدم‌به‌قدم فتح می‌کنند 🏔️', 'روزهای سخت، استریک‌های طلایی می‌سازند ✨', 'تو فقط به قدم بعدی نیاز داری، نه به یک جهش 🚀'];
+        return { reply: 'شنیدم حالت خوب نیست... طبیعیه، مسیر صعود همیشه سربالایی نیست 🌤️\n\nبهترین استریک تو تا حالا ' + toPersian(best) + ' روز بوده — این یعنی تو توانش را داری.\n\n' + quotes[Math.floor(Math.random() * quotes.length)] + '\n\nپیشنهاد: فقط یکی از عادت‌های سبک را امروز تیک بزن، بقیه‌اش خودش می‌آید 💪' };
+      }
+      if (intent === 'plan') {
+        const plan = offlineAgentPlanFor(msg);
+        return { reply: 'برنامه «' + plan.name + '» را بر اساس حرف‌هایت طراحی کردم 🛠️\nشامل ' + toPersian(plan.habits.length) + ' عادت برای یک چالش ' + toPersian(plan.duration) + ' روزه با مسیر قله مشخص.\n\nاگر دکمه اعمال را بزنی، مستقیم به روزهایت اضافه می‌شود — مسیر قله‌اش هم در صفحه کوه رسم می‌شود! 🏔️', plan: plan };
+      }
+      if (intent === 'stats') return { reply: offlineAgentStatsText() };
+      if (intent === 'social') {
+        return { reply: 'برای شبکه اجتماعی‌کردن، بخش «برنامه‌ساز شبکه اجتماعی» در همین صفحه را ببین — می‌توانی حوزه‌ات (هوش مصنوعی، برنامه‌نویسی، آموزش...) را انتخاب کنی تا یک برنامه انتشار محتوا برایت بچینم 🎬', plan: offlineAgentPlanFor('اینستاگرام پست محتوا') };
+      }
+      if (intent === 'music') {
+        return { reply: '🎧 کلکسیون‌های تولیدی من آماده‌اند: آرامش (۲۴ قطعه)، تمرکز (۲۴)، انرژی (۲۴)، خواب (۱۸)، طبیعت (۲۴) و انگیزه (۱۸).\n\nبه کتابخانه موزیک برو و «آرامش» را باز کن — قطعه‌ها همین‌جا ساخته می‌شوند، بدون اینترنت!' };
+      }
+      if (intent === 'mood') {
+        return { reply: 'حالت تو برایم مهم است 💜\nهمین حالا «حال و بازتاب امروز» را ثبت کن — حتی دو خط کوتاه.\nبعداً نمودار ۷ روزه نشان می‌دهد کدام عادت‌ها حالت را بهتر کرده‌اند.\n\nیادت باشد: احساسات هم مثل آب‌وهواست، می‌گذرد 🌈' };
+      }
+      if (intent === 'thanks') return { reply: 'خواهش می‌کنم رفیق! 🙏 من همیشه همین‌جاام. حالا برو و آن تیک امروزم را بزن 😉' };
+      if (intent === 'about') return { reply: 'من دستیار هوشمند این اپ هستم 🤖\nاین برنامه را غدیر سروری (Ghadir Sarvari) ساخته — با عشق برای ساختن روزهای بهتر.\n\nمن کاملاً آفلاین کار می‌کنم؛ همه حرف‌هایت فقط روی همین گوشی می‌ماند 🔒' };
+      return { reply: 'می‌توانم این کارها را برایت بکنم:\n\n• 📊 «گزارش بده» — آمار و استریک‌هایت\n• 🛠️ «برنامه بساز برای ورزش/مطالعه/خواب...» — برنامه عادت آماده\n• 🔥 «انگیزه بده» — کمی سوخت برای ادامه\n• 🎧 «موزیک آرامش» — پیشنهاد قطعه\n• 💜 «حالم خوب نیست» — همدلی و راه‌حل\n\nکدام را می‌خواهی؟' };
+    }
+
     async function sendAgentMessage(text) {
       const input = document.getElementById('agentChatInput');
       const msg = (typeof text === 'string' && text.trim()) ? text.trim() : (input ? input.value.trim() : '');
@@ -2981,17 +3118,26 @@
           .filter(m => m.role === 'user' || m.role === 'agent')
           .slice(-8)
           .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }));
-        const res = await fetch('/api/agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: msg,
-            history: history,
-            context: getAgentContext()
-          })
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
+        const canHTTP = location.protocol === 'http:' || location.protocol === 'https:';
+        let data = null;
+        if (canHTTP) {
+          try {
+            const res = await fetch('/api/agent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: msg,
+                history: history,
+                context: getAgentContext()
+              })
+            });
+            if (res.ok) data = await res.json();
+          } catch (netErr) { data = null; }
+        }
+        if (!data) {
+          await new Promise(r => setTimeout(r, 700 + Math.random() * 900));
+          data = offlineAgentReply(msg);
+        }
         showAgentTyping(false);
         const reply = (data && data.reply) ? data.reply : 'پاسخی دریافت نشد 🙏';
         const plan = (data && data.plan) ? data.plan : null;
@@ -3004,7 +3150,7 @@
         if (state.settings.agent && state.settings.agent.voiceEnabled) speakText(reply);
       } catch (e) {
         showAgentTyping(false);
-        pushAgentMessage('agent', 'اوپس! ارتباط با مغز هوشمندم برقرار نشد 📡 لطفاً چند لحظه بعد دوباره امتحان کن.');
+        pushAgentMessage('agent', 'اوپس! یک لحظه مغزم قفل کرد 📡 دوباره امتحان کن — اگر اینترنت هم نباشد، مغز محلی‌ام جواب می‌دهد.');
       } finally {
         agentChatBusy = false;
         if (btn) btn.disabled = false;
@@ -4073,18 +4219,40 @@
 
     function renderTodayMoodPreview() {
       const preview = document.getElementById('todayMoodPreview');
-      const todayLog = state.moodLog.find(m => m.date === today());
+      if (!preview) return;
+      const emojis = ['😫', '😕', '😐', '🙂', '🤩'];
+      const todayLog = (state.moodLog || []).find(m => m.date === today());
+      const last7 = [];
+      for (let i = 6; i >= 0; i--) {
+        const iso = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+        const m = (state.moodLog || []).find(x => x.date === iso);
+        last7.push(m ? (m.score || 3) : 0);
+      }
+      const bars = last7.map(s => {
+        const h = s ? Math.round(6 + (s / 5) * 16) : 4;
+        const c = s >= 4 ? '#34d399' : (s >= 3 ? '#a78bfa' : (s > 0 ? '#f59e0b' : '#e2e0ea'));
+        return '<div style="width:7px;height:' + h + 'px;border-radius:3px;background:' + c + ';"></div>';
+      }).join('');
+      const streak = moodStreakDays();
       if (todayLog) {
-        const emojis = ['😫', '😕', '😐', '🙂', '🤩'];
         preview.innerHTML = `
-          <span class="text-[10px] text-on-surface-variant">امروز:</span>
           <div class="flex items-center gap-2">
-            <span class="text-lg">${emojis[todayLog.score - 1]}</span>
-            <span class="text-[10px] text-tertiary font-bold">انرژی: ${toPersian(todayLog.score)}/۵</span>
+            <span class="text-lg">${emojis[(todayLog.score || 3) - 1]}</span>
+            <div class="flex flex-col">
+              <span class="text-[10px] text-tertiary font-extrabold">ثبت شد · انرژی ${toPersian(todayLog.score || 3)}/۵${todayLog.feeling ? ' · ' + todayLog.feeling : ''}</span>
+              <span class="text-[9px] text-on-surface-variant font-bold">🔥 استریک بازتاب: ${toPersian(streak)} روز</span>
+            </div>
           </div>
+          <div class="flex items-end gap-1">${bars}</div>
         `;
       } else {
-        preview.innerHTML = `<span class="text-[10px] text-on-surface-variant">وضعیت امروز:</span><span class="text-[10px] text-on-surface-variant">هنوز ثبت نشده</span>`;
+        preview.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-on-surface-variant font-bold">وضعیت امروز: هنوز ثبت نشده</span>
+            ${streak > 0 ? '<span class="text-[9px] text-tertiary font-extrabold">🔥 ' + toPersian(streak) + ' روز پیوسته — قطع نکن!</span>' : ''}
+          </div>
+          <div class="flex items-end gap-1">${bars}</div>
+        `;
       }
     }
 
@@ -4751,6 +4919,82 @@
       document.getElementById('timelineSubtitle').textContent = `${durationLabels[duration] || '۲۱ روزه'} • مسیر صعود به قله`;
       
       renderMountainPreview(duration);
+      renderChallengeCamps(duration);
+      renderSmartTip(duration);
+      const cl = document.getElementById('customDurLabel');
+      if (cl) cl.textContent = toPersian(duration) + ' روز';
+      window.customDuration = duration;
+    }
+
+    // ===== TASK 18: summit camps + smart advisor =====
+    const JM_NAMES = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+    function jalaliDateAfterOffset(days) {
+      try {
+        const d = new Date(Date.now() + days * 86400000);
+        const iso = d.toISOString().slice(0, 10);
+        const j = jalaliFromIso(iso);
+        return toPersian(j.jd) + ' ' + JM_NAMES[(j.jm || 1) - 1];
+      } catch (e) { return ''; }
+    }
+    function renderChallengeCamps(duration) {
+      const row = document.getElementById('campsRow');
+      if (!row) return;
+      const camps = [
+        { at: 0, label: 'پایگاه', icon: 'camping', desc: 'شروع سفر' },
+        { at: 0.25, label: 'کمپ ۱', icon: 'flag', desc: 'گره خوردن' },
+        { at: 0.55, label: 'کمپ ۲', icon: 'landscape', desc: 'نیمه راه' },
+        { at: 0.85, label: 'کمپ ۳', icon: 'filter_hdr', desc: 'هوای رقیق' },
+        { at: 1, label: 'قله', icon: 'emoji_events', desc: 'فتح!' }
+      ];
+      row.innerHTML = camps.map((c, i) => {
+        const day = Math.max(1, Math.round(duration * c.at));
+        const date = jalaliDateAfterOffset(day - 1);
+        const isPeak = i === camps.length - 1;
+        return '<div class="flex flex-col items-center gap-1 flex-1 min-w-0">' +
+          '<div class="' + (isPeak ? 'w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-md' : 'w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary') + ' flex items-center justify-center">' +
+            '<span class="material-symbols-outlined text-[16px]">' + c.icon + '</span></div>' +
+          '<span class="text-[9.5px] font-extrabold ' + (isPeak ? 'text-amber-600' : 'text-on-surface') + '">' + c.label + '</span>' +
+          '<span class="text-[8.5px] text-on-surface-variant font-bold leading-tight text-center">روز ' + toPersian(day) + '</span>' +
+          (date ? '<span class="text-[8px] text-on-surface-variant/80 text-center leading-tight">' + date + '</span>' : '') +
+        '</div>';
+      }).join('');
+      const endEl = document.getElementById('routeEndDate');
+      if (endEl) endEl.innerHTML = '🏁 رسیدن به قله: روز ' + toPersian(duration) + ' — حدود <b>' + jalaliDateAfterOffset(duration - 1) + '</b>' + (duration >= 40 ? ' · این مسیر نشان «استاد» دارد 🥇' : '');
+    }
+    function renderSmartTip(duration) {
+      const el = document.getElementById('smartTipLine');
+      if (!el) return;
+      const durs = (state.habits || []).map(h => h.duration || 21);
+      let tip;
+      if (duration >= 100) tip = 'ریشه‌داری! مخصوص عادت‌هایی که می‌خواهی هویتت شوند — مسیر طولانی ولی دگرگون‌کننده.';
+      else if (duration >= 70) tip = 'چالش استاد 🥇 — فقط برای عادت‌هایی که واقعاً به آن‌ها تعهد داری.';
+      else if (duration >= 40) tip = '۴۰ روز، مرز طلایی تثبیت — نصف راه را که بروی، بدن خودش دنبال می‌کند.';
+      else if (duration >= 21) tip = '۲۱ روز، تعادل علمی بین ساخت عادت و فرسایش انگیزه — انتخاب هوشمندانه!';
+      else if (duration >= 7) tip = '۷ روز، برای آزمودن عادت عالی است — اگر نشست، بعداً به ۲۱ ارتقا بده.';
+      else tip = 'چالش کوتاه و سبک — برای شروع‌های بی‌استرس مناسب است.';
+      if (durs.length) {
+        const avg = Math.round(durs.reduce((a, b) => a + b, 0) / durs.length);
+        tip += ' (میانگین چالش‌های قبلی تو: ' + toPersian(avg) + ' روز)';
+      }
+      el.textContent = 'توصیه هوشمند: ' + tip;
+    }
+    function setCustomDuration(delta) {
+      window.customDuration = Math.max(3, Math.min(365, (window.customDuration || 21) + delta));
+      const cl = document.getElementById('customDurLabel');
+      if (cl) cl.textContent = toPersian(window.customDuration) + ' روز';
+    }
+    function applyCustomDuration() {
+      const d = window.customDuration || 21;
+      document.querySelectorAll('.duration-btn').forEach(el => {
+        el.className = 'duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all';
+      });
+      window.selectedDuration = d;
+      document.getElementById('progressLabel').textContent = '۰ از ' + toPersian(d) + ' روز';
+      document.getElementById('timelineSubtitle').textContent = toPersian(d) + ' روزه (سفارشی) • مسیر صعود به قله';
+      renderMountainPreview(d);
+      renderChallengeCamps(d);
+      renderSmartTip(d);
+      showToast('چالش ' + toPersian(d) + ' روزه سفارشی اعمال شد 🎯');
     }
 
     function selectHabitEmoji(btn, emoji) {
@@ -4907,16 +5151,90 @@
 
     function saveMoodAndReflection() {
       const text = document.getElementById('reflectionText').value.trim();
+      const grat = (document.getElementById('moodGratitude') || {}).value ? document.getElementById('moodGratitude').value.trim() : '';
+      const win = (document.getElementById('moodWin') || {}).value ? document.getElementById('moodWin').value.trim() : '';
       const todayStr = today();
-      
+
       state.moodLog = state.moodLog.filter(m => m.date !== todayStr);
-      state.moodLog.push({ date: todayStr, score: selectedMoodScore, reflection: text });
+      state.moodLog.push({
+        date: todayStr,
+        score: selectedMoodScore,
+        reflection: text,
+        feeling: window.selectedMoodFeeling || '',
+        gratitude: grat,
+        win: win
+      });
 
       saveState();
       closeAllModals();
       document.getElementById('reflectionText').value = '';
-      showToast('حال و بازتاب امروز ذخیره شد ✍️');
+      window.selectedMoodFeeling = '';
+      document.querySelectorAll('#moodFeelingChips .mood-feel').forEach(b => b.classList.remove('mood-feel-on'));
+      const doneBefore = (state.moodLog || []).length;
+      const dayStreak = moodStreakDays();
+      showToast('حال و بازتاب امروز ذخیره شد ✍️ (استریک بازتاب: ' + toPersian(dayStreak) + ' روز)');
+      try { triggerConfetti(); } catch (e) {}
+      if (dayStreak > 0 && dayStreak % 7 === 0) {
+        try { addNotification('achievement', 'استریک بازتاب!', toPersian(dayStreak) + ' روز پیوسته حالت را ثبت کردی — خودشناسی حرفه‌ای!', 'psychology'); } catch (e) {}
+      }
       renderAll();
+    }
+    function moodStreakDays() {
+      const logs = (state.moodLog || []).map(m => m.date);
+      let n = 0;
+      const d = new Date();
+      for (;;) {
+        const iso = d.toISOString().slice(0, 10);
+        if (logs.indexOf(iso) !== -1) { n++; d.setDate(d.getDate() - 1); } else break;
+      }
+      return n;
+    }
+    function pickMoodFeeling(btn, label) {
+      window.selectedMoodFeeling = label;
+      document.querySelectorAll('#moodFeelingChips .mood-feel').forEach(b => {
+        b.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'mood-feel-on');
+        b.classList.add('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+      });
+      btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+      btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'mood-feel-on');
+    }
+    function renderMoodInsights() {
+      const card = document.getElementById('moodInsightCard');
+      if (!card) return;
+      const logs = (state.moodLog || []).slice().sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 7);
+      if (!logs.length) {
+        card.innerHTML = '<div class="flex items-start gap-2"><span class="text-[18px]">🌱</span><p class="text-[11.5px] text-on-surface-variant leading-relaxed font-medium">هنوز داده‌ای برای تحلیل نداریم. بعد از چند روز ثبت، اینجا می‌گویم مثلاً «روزهایی که مطالعه کردی، حالت ۲۰٪ بهتر بوده».</p></div>';
+        const yRow = document.getElementById('moodYesterdayRow');
+        if (yRow) yRow.textContent = '';
+        return;
+      }
+      const avg = logs.reduce((a, m) => a + (m.score || 3), 0) / logs.length;
+      const recent3 = logs.slice(0, 3).reduce((a, m) => a + (m.score || 3), 0) / 3;
+      const prev3 = logs.slice(3, 6);
+      const prevAvg = prev3.length ? prev3.reduce((a, m) => a + (m.score || 3), 0) / prev3.length : null;
+      const trend = prevAvg === null ? '' : (recent3 >= prevAvg + 0.4 ? ' 📈 روند صعودی — داریم بهتر می‌شویم!' : (recent3 <= prevAvg - 0.4 ? ' 📉 کمی افت کرده‌ایم — خودت را نلا نکن، یک قدم کوچک کافی است.' : ' ➖ روند پایدار.'));
+      // correlate: on higher-mood days, which habits were done more?
+      const habits = state.habits || [];
+      const highDays = logs.filter(m => (m.score || 3) >= 4).map(m => m.date);
+      const lowDays = logs.filter(m => (m.score || 3) <= 2).map(m => m.date);
+      let corr = '';
+      if (highDays.length && lowDays.length) {
+        const rates = habits.map(h => {
+          const hi = highDays.filter(d => h.completions && h.completions[d]).length / highDays.length;
+          const lo = lowDays.filter(d => h.completions && h.completions[d]).length / lowDays.length;
+          return { name: h.name || 'عادت', diff: hi - lo };
+        }).sort((a, b) => b.diff - a.diff)[0];
+        if (rates && rates.diff >= 0.25) corr = '<div class="mt-2 pt-2 border-t border-primary/15 text-[11px] font-bold text-primary">💡 کشف من: روزهایی که «' + rates.name + '» را انجام دادی، حالت معنادار بهتر بوده!</div>';
+      }
+      const yRow = document.getElementById('moodYesterdayRow');
+      if (yRow) {
+        const yIso = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        const yLog = (state.moodLog || []).find(m => m.date === yIso);
+        yRow.innerHTML = yLog ? ('دیروز: ' + ['😫', '😕', '😐', '🙂', '🤩'][(yLog.score || 3) - 1] + ' ' + (yLog.feeling ? '· ' + yLog.feeling + ' ' : '') + '· ' + (yLog.reflection ? escapeHtml(yLog.reflection).slice(0, 60) : 'بدون متن')) : 'دیروز ثبت نکردی — امروز شروع کن 🌟';
+      }
+      const emojis = ['😫', '😕', '😐', '🙂', '🤩'];
+      card.innerHTML = '<div class="flex items-center justify-between mb-1.5"><span class="text-[11.5px] font-extrabold text-on-surface">بینش ۷ روز اخیر</span><span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">میانگین: ' + avg.toFixed(1).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]) + ' از ۵ ' + emojis[Math.min(4, Math.round(avg) - 1)] + '</span></div>' +
+        '<p class="text-[11px] text-on-surface-variant leading-relaxed">بر اساس ' + toPersian(logs.length) + ' بازتاب اخیر تو' + (trend ? ' — ' + trend : '') + '</p>' + corr;
     }
 
     function saveJournal() {
@@ -4928,6 +5246,267 @@
       document.getElementById('journalText').value = '';
       showToast('ژورنال ذخیره شد 📓');
       renderAll();
+    }
+
+    // ================= TASK 18: GENERATIVE MUSIC ENGINE (offline, dozens of tracks per collection) =================
+    const GEN_COLLECTIONS = [
+      { id: 'calm',     name: 'آرامش',  emoji: '🧘', grad: 'linear-gradient(135deg,#6366f1,#8b5cf6 55%,#a78bfa)', a: '#8b5cf6', b: '#22d3ee', count: 24, bpm: 58,  scale: [0, 3, 5, 7, 10],  root: 220.0,  wave: 'calm' },
+      { id: 'focus',    name: 'تمرکز',  emoji: '🎯', grad: 'linear-gradient(135deg,#0ea5e9,#6366f1 60%,#8b5cf6)', a: '#0ea5e9', b: '#8b5cf6', count: 24, bpm: 72,  scale: [0, 2, 5, 7, 9],   root: 261.6,  wave: 'flow' },
+      { id: 'energy',   name: 'انرژی',  emoji: '⚡', grad: 'linear-gradient(135deg,#f59e0b,#ef4444 55%,#ec4899)', a: '#f59e0b', b: '#ef4444', count: 24, bpm: 112, scale: [0, 2, 4, 7, 9],   root: 293.7,  wave: 'drive' },
+      { id: 'sleep',    name: 'خواب',   emoji: '🌙', grad: 'linear-gradient(135deg,#312e81,#4c1d95 60%,#1e1b4b)', a: '#6366f1', b: '#312e81', count: 18, bpm: 44,  scale: [0, 3, 7, 10],     root: 174.6,  wave: 'drift' },
+      { id: 'nature',   name: 'طبیعت',  emoji: '🌿', grad: 'linear-gradient(135deg,#10b981,#059669 55%,#34d399)', a: '#10b981', b: '#34d399', count: 24, bpm: 64,  scale: [0, 2, 4, 7, 9],   root: 196.0,  wave: 'air' },
+      { id: 'motivate', name: 'انگیزه', emoji: '🔥', grad: 'linear-gradient(135deg,#f43f5e,#8b5cf6 60%,#f59e0b)', a: '#f43f5e', b: '#f59e0b', count: 18, bpm: 96,  scale: [0, 3, 5, 7, 10],  root: 246.9,  wave: 'rise' }
+    ];
+    const GEN_TOTAL_TRACKS = GEN_COLLECTIONS.reduce((a, c) => a + c.count, 0);
+    const GEN_NAMES = {
+      calm: ['نفس عمیق', 'دریای آرام', 'مه صبحگاهی', 'شمع و سایه', 'قصه شب', 'پرنده سپید', 'ابریشم', 'نجوای خاموش', 'رسیدن به ساحل', 'برگ و باران', 'آسمان کدر', 'نور ملایم', 'آرامش ذهن', 'رودخانه', 'ستاره‌ها', 'شب بی‌خیال', 'چای داغ', 'کتاب و پتو', 'زمستان آرام', 'باران نرم', 'ابرها', 'عطر باغ', 'صدای دوردست', 'خواب سبک'],
+      focus: ['تاندون ذهن', 'جریان عمیق', 'اتاق شیشه‌ای', 'پالس متمرکز', 'مدار بسته', 'خط مستقیم', 'نقطه نور', 'چرخ‌دنده', 'سکوت کار', 'تختال فولادی', 'عقربه‌ها', 'دوگانه حل', 'مرز روشن', 'لنگر ذهن', 'پرواز کروز', 'ثبات', 'نظم زرد', 'شبکه سیمی', 'زنجیره حلقه', 'دقیقه نود', 'تیزی', 'آهن‌ربا', 'چشم عقاب', 'پروژه کامل'],
+      energy: ['طلوع برقی', 'ضربان سریع', 'آتش‌بازی', 'صبحانه ورزشی', 'ماشین دویدن', 'ریتم پا', 'خیزران', 'باد پشت سر', 'قله نزدیک', 'توربین', 'شتاب', 'موج پرفشار', 'جام قهرمانی', 'صاعقه', 'دوچرخه کوهستان', 'پمپ', 'جهش', 'خط پایان', 'کهکشان روشن', 'موتور', 'فواره', 'برق نقره', 'بازی تمام‌عیار', 'شعله'],
+      sleep: ['وارونگی شب', 'پنجمین پلک', 'بادبادک ابری', 'قندیل نور', 'شب‌تاب', 'لحظه صفر', 'رؤیای آب', 'سکوت سنگین', 'بالشت ستاره', 'چتر مه', 'ماه کج', 'لالایی', 'عمق آبی', 'تخت ستاره', 'ساعت کند', 'خواب زمستانی', 'گل شب', 'رود ماه'],
+      nature: ['جنگل بارانی', 'آبشار', 'زمین بعد از باران', 'گلزار', 'باد کوهستان', 'چمن شبنم', 'ساحل صخره‌ای', 'صدای جنگل', 'نسیم دریا', 'دره سبز', 'کاج‌ستان', 'برکه', 'صبح کوهستان', 'خزه و سنگ', 'درخت کهن', 'گل صحرایی', 'جویبار', 'پرواز پرنده', 'افق باز', 'زمستان جنگل', 'تپه نور', 'غار صدا', 'رگبار تابستانی', 'رعد دور'],
+      motivate: ['خط عقب نیست', 'امروز همان روز است', 'یک قدم بیشتر', 'دیوار را بپران', 'رویای بزرگ', 'صدای قلب', 'سه دقیقه شجاعت', 'بلندپرواز', 'نترسیدن', 'ضربه آخر', 'پیش به سوی قله', 'آتش درون', 'مسیر من', 'روز من است', 'تا پرچم', 'قدرت عادت', 'مرد آهنی', 'نگهدار قول']
+    };
+    function genHash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+    function genRng(seed) { let x = seed >>> 0; return function () { x = Math.imul(x ^ (x >>> 15), 2246822519); x = Math.imul(x ^ (x >>> 13), 3266489917); x ^= x >>> 16; return (x >>> 0) / 4294967296; }; }
+    function genTrackMeta(colId, n) {
+      const col = GEN_COLLECTIONS.find(c => c.id === colId);
+      if (!col) return null;
+      const names = GEN_NAMES[colId] || [];
+      const r = genRng(genHash(colId + ':' + n));
+      const dur = 52 + Math.floor(r() * 56);
+      return {
+        id: 'gen:' + colId + ':' + n,
+        colId: colId,
+        n: n,
+        name: (names[n % names.length] || 'قطعه ' + (n + 1)),
+        dur: dur,
+        col: col
+      };
+    }
+    function genCollectionTracks(colId) {
+      const col = GEN_COLLECTIONS.find(c => c.id === colId);
+      if (!col) return [];
+      const out = [];
+      for (let i = 0; i < col.count; i++) out.push(genTrackMeta(colId, i));
+      return out;
+    }
+
+    let genAudioCtx = null;
+    let genSource = null;
+    let genPlayingId = null;
+    let genStartedAt = 0;
+    let genBufferDur = 0;
+    let genProgressTimer = null;
+    let genQueueCol = null;
+
+    function genEnsureCtx() {
+      if (!genAudioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        genAudioCtx = new AC();
+      }
+      if (genAudioCtx.state === 'suspended') { try { genAudioCtx.resume(); } catch (e) {} }
+      return genAudioCtx;
+    }
+    function stopGenTrack(silent) {
+      try { if (genSource) { genSource.onended = null; try { genSource.stop(); } catch (e) {} genSource = null; } } catch (e) {}
+      try { if (genProgressTimer) { clearInterval(genProgressTimer); genProgressTimer = null; } } catch (e) {}
+      const was = genPlayingId;
+      genPlayingId = null;
+      genQueueCol = null;
+      if (was && !silent) renderGenList(document.getElementById('musicTrackList'));
+    }
+    function renderSynthTrack(meta) {
+      const col = meta.col;
+      const sr = 22050;
+      const dur = meta.dur;
+      const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      const ctx = new OAC(1, Math.ceil(dur * sr), sr);
+      const rng = genRng(genHash(meta.id));
+      const master = ctx.createGain();
+      master.gain.value = 0.9;
+      master.connect(ctx.destination);
+      // space echo
+      const delay = ctx.createDelay(1.2);
+      delay.delayTime.value = Math.max(0.2, 60 / col.bpm * 0.75);
+      const fb = ctx.createGain(); fb.gain.value = col.wave === 'drive' ? 0.18 : 0.34;
+      const wet = ctx.createGain(); wet.gain.value = 0.3;
+      delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(master);
+      // pad chord (root + fifth + octave, detuned)
+      const padFilter = ctx.createBiquadFilter();
+      padFilter.type = 'lowpass';
+      padFilter.frequency.value = col.wave === 'drive' ? 1600 : (col.wave === 'drift' ? 520 : 900);
+      const padGain = ctx.createGain();
+      padGain.gain.setValueAtTime(0.0001, 0);
+      padGain.gain.linearRampToValueAtTime(col.wave === 'drift' ? 0.16 : 0.12, 4);
+      padGain.gain.setValueAtTime(0.12, dur - 5);
+      padGain.gain.linearRampToValueAtTime(0.0001, dur - 0.2);
+      padFilter.connect(padGain); padGain.connect(master); padGain.connect(delay);
+      [[1, 'sine'], [1.5, 'triangle'], [2, 'sine']].forEach((p, i) => {
+        const o = ctx.createOscillator();
+        o.type = p[1];
+        o.frequency.value = col.root * p[0] * (1 + (rng() - 0.5) * 0.006);
+        const g = ctx.createGain(); g.gain.value = 0.5 / (i + 1);
+        o.connect(g); g.connect(padFilter);
+        o.start(0); o.stop(dur);
+      });
+      // slow filter LFO
+      const lfo = ctx.createOscillator(); lfo.frequency.value = 0.06 + rng() * 0.05;
+      const lfoG = ctx.createGain(); lfoG.gain.value = padFilter.frequency.value * 0.4;
+      lfo.connect(lfoG); lfoG.connect(padFilter.frequency); lfo.start(0); lfo.stop(dur);
+      // sequencer
+      const stepDur = 60 / col.bpm / 2;
+      const totalSteps = Math.floor(dur / stepDur);
+      const bassStep = col.wave === 'drive' ? 4 : 8;
+      let prevNote = 0;
+      for (let s = 0; s < totalSteps; s++) {
+        const t = s * stepDur;
+        // arp melody
+        if (s % (col.wave === 'drift' ? 4 : 2) === 0 && rng() < (col.wave === 'drive' ? 0.92 : 0.66)) {
+          const deg = col.scale[Math.floor(rng() * col.scale.length)];
+          const oct = rng() < 0.3 ? 2 : 1;
+          const freq = col.root * Math.pow(2, deg / 12) * oct;
+          prevNote = freq;
+          const o = ctx.createOscillator();
+          o.type = col.wave === 'drive' ? 'square' : 'triangle';
+          o.frequency.value = freq;
+          const g = ctx.createGain();
+          const len = stepDur * (col.wave === 'drive' ? 0.9 : 1.8);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(col.wave === 'drive' ? 0.11 : 0.075, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+          const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 2400;
+          o.connect(fl); fl.connect(g); g.connect(master); g.connect(delay);
+          o.start(t); o.stop(Math.min(dur, t + len + 0.05));
+        }
+        // bass
+        if (s % bassStep === 0) {
+          const o = ctx.createOscillator(); o.type = 'sine';
+          o.frequency.value = col.root * 0.5 * (rng() < 0.2 ? 0.75 : 1);
+          const g = ctx.createGain();
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.14, t + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + stepDur * 3);
+          o.connect(g); g.connect(master);
+          o.start(t); o.stop(t + stepDur * 3.1);
+        }
+        // hats for energetic moods
+        if ((col.wave === 'drive' || col.wave === 'rise') && s % 2 === 1 && rng() < 0.8) {
+          const nb = ctx.createBuffer(1, 900, sr);
+          const nd = nb.getChannelData(0);
+          for (let i = 0; i < 900; i++) nd[i] = (rng() * 2 - 1) * Math.pow(1 - i / 900, 2.5);
+          const ns = ctx.createBufferSource(); ns.buffer = nb;
+          const nf = ctx.createBiquadFilter(); nf.type = 'highpass'; nf.frequency.value = 6000;
+          const ng = ctx.createGain(); ng.gain.value = 0.05;
+          ns.connect(nf); nf.connect(ng); ng.connect(master);
+          ns.start(t);
+        }
+        // air shimmer for calm/nature/sleep
+        if ((col.wave === 'calm' || col.wave === 'air' || col.wave === 'drift') && s % 16 === 0 && rng() < 0.6) {
+          const o2 = ctx.createOscillator(); o2.type = 'sine';
+          o2.frequency.value = col.root * Math.pow(2, col.scale[Math.floor(rng() * col.scale.length)] / 12) * 4;
+          const g2 = ctx.createGain();
+          g2.gain.setValueAtTime(0.0001, t);
+          g2.gain.exponentialRampToValueAtTime(0.02, t + 1.2);
+          g2.gain.exponentialRampToValueAtTime(0.0001, t + 3.5);
+          o2.connect(g2); g2.connect(master); g2.connect(delay);
+          o2.start(t); o2.stop(Math.min(dur, t + 3.6));
+        }
+      }
+      return ctx.startRendering();
+    }
+    function playGenTrack(id) {
+      const parts = String(id).split(':');
+      if (parts.length !== 3 || parts[0] !== 'gen') return;
+      const meta = genTrackMeta(parts[1], parseInt(parts[2], 10));
+      if (!meta) return;
+      // stop uploaded audio if playing
+      try { if (typeof musicAudio !== 'undefined' && musicAudio && !musicAudio.paused) musicAudio.pause(); } catch (e) {}
+      try { if (typeof currentPlayingId !== 'undefined') currentPlayingId = null; } catch (e) {}
+      stopGenTrack(true);
+      try { if (typeof renderMusicList === 'function') renderMusicList(); } catch (e) {}
+      genEnsureCtx();
+      genPlayingId = id;
+      renderGenList(document.getElementById('musicTrackList'));
+      showToast('در حال ساختن «' + meta.name + '»... 🎼');
+      renderSynthTrack(meta).then(buf => {
+        if (genPlayingId !== id) return;
+        const ctx = genEnsureCtx();
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.9, 0.4);
+        src.connect(g); g.connect(ctx.destination);
+        src.onended = () => {
+          if (genPlayingId !== id) return;
+          // auto-advance within collection
+          if (genQueueCol) {
+            const list = genCollectionTracks(genQueueCol);
+            const idx = list.findIndex(t => t.id === id);
+            const next = list[(idx + 1) % list.length];
+            setTimeout(() => { if (genPlayingId === id || !genPlayingId) playGenTrack(next.id); }, 600);
+            return;
+          }
+          stopGenTrack();
+        };
+        genSource = src;
+        genBufferDur = buf.duration;
+        genStartedAt = Date.now();
+        src.start();
+        genProgressTimer = setInterval(() => {
+          const p = Math.min(100, ((Date.now() - genStartedAt) / 1000 / genBufferDur) * 100);
+          document.querySelectorAll('.gen-prog > div').forEach(d => { d.style.width = p + '%'; });
+          if (p >= 100) { try { clearInterval(genProgressTimer); } catch (e) {} }
+        }, 900);
+        renderGenList(document.getElementById('musicTrackList'));
+      }).catch(() => { showToast('ساخت قطعه ممکن نشد 😕'); stopGenTrack(true); });
+    }
+    function playGenCollection(colId) {
+      genQueueCol = colId;
+      const list = genCollectionTracks(colId);
+      if (list.length) playGenTrack(list[Math.floor(Math.random() * list.length)].id);
+    }
+    function renderGenList(container) {
+      if (!container) return;
+      const colId = String(currentMusicTab).slice(4);
+      const col = GEN_COLLECTIONS.find(c => c.id === colId);
+      if (!col) return;
+      const tracks = genCollectionTracks(colId);
+      container.innerHTML =
+        '<div class="rounded-2xl p-3.5 mb-3 flex items-center justify-between" style="background:' + col.grad + ';">' +
+          '<div><div class="text-white font-extrabold text-[15px]">' + col.emoji + ' کلکسیون ' + col.name + '</div>' +
+          '<div class="text-white/85 text-[10.5px] font-bold mt-0.5">' + toPersian(col.count) + ' قطعه‌ی تولیدی · همین‌جا ساخته می‌شود · آفلاین ✨</div></div>' +
+          '<button onclick="playGenCollection(\'' + colId + '\')" class="w-10 h-10 rounded-full bg-white/25 text-white flex items-center justify-center active:scale-90 transition-transform"><span class="material-symbols-outlined text-[20px]">play_arrow</span></button>' +
+        '</div>' +
+        tracks.map(t => {
+          const playing = genPlayingId === t.id;
+          return '<div class="gen-track-row" data-gen="' + t.id + '">' +
+            '<button onclick="' + (playing ? 'stopGenTrack()' : 'playGenTrack(\'' + t.id + '\')') + '" class="gen-play-btn" style="background:' + col.grad + ';">' +
+              '<span class="material-symbols-outlined text-[22px]">' + (playing ? 'stop' : 'play_arrow') + '</span></button>' +
+            '<div class="flex-1 min-w-0">' +
+              '<div class="flex items-center gap-1.5"><span class="text-[13px] font-bold text-on-surface truncate">' + t.name + '</span>' +
+              '<span class="gen-badge">هوشمند</span></div>' +
+              '<div class="text-[10px] text-on-surface-variant font-medium mt-0.5">' + col.emoji + ' ' + col.name + ' · ' + toPersian(Math.floor(t.dur / 60)) + ':' + toPersian(String(t.dur % 60).padStart(2, '0')) + '</div>' +
+              (playing ? '<div class="gen-prog" style="--gen-a:' + col.a + ';--gen-b:' + col.b + '"><div></div></div>' : '') +
+            '</div></div>';
+        }).join('');
+    }
+    function buildGenCollectionCards() {
+      return GEN_COLLECTIONS.map(c => {
+        const spines = genCollectionTracks(c.id).slice(0, 6).map((t, i) =>
+          '<div class="music-book-spine" style="height:' + [84, 66, 76, 58, 80, 70][i] + 'px; transform:rotate(' + [-2.5, 1.6, -1, 2.4, -1.8, 1.2][i] + 'deg); background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.04) 55%), ' + c.grad + '; z-index:' + (10 - i) + ';">' + c.emoji + '</div>'
+        ).join('');
+        return '<div class="music-collection-card relative overflow-hidden rounded-[28px] p-4 cursor-pointer active:scale-[0.98] transition-transform" style="background:' + c.grad + ';" onclick="setMusicTab(\'gen:' + c.id + '\')">' +
+          '<span class="absolute top-3 left-3 text-xl opacity-85 select-none">✨</span>' +
+          '<div class="flex items-start justify-between mb-3 relative z-10">' +
+            '<div><h4 class="text-white font-extrabold text-[16px] drop-shadow-sm">' + c.emoji + ' ' + c.name + ' · هوشمند</h4>' +
+            '<span class="text-white/85 text-[10.5px] font-bold">' + toPersian(c.count) + ' قطعه تولیدی — بدون اینترنت</span></div>' +
+            '<button onclick="event.stopPropagation(); playGenCollection(\'' + c.id + '\')" class="w-9 h-9 rounded-full bg-white/25 hover:bg-white/40 text-white flex items-center justify-center transition-all active:scale-90 shadow-md"><span class="material-symbols-outlined text-[18px]">play_arrow</span></button>' +
+          '</div>' +
+          '<div class="music-shelf-row relative z-10">' + spines + '</div>' +
+          '<div class="music-shelf-line relative z-10"></div>' +
+        '</div>';
+      }).join('');
     }
 
     // ================= MUSIC LIBRARY =================
@@ -5222,7 +5801,7 @@
     }
     function updateMusicCountLabel() {
       const el = document.getElementById('musicCountLabel');
-      if (el) el.textContent = `${toPersian(state.musicTracks.length)} موزیک در قفسه`;
+      if (el) el.textContent = `${toPersian(state.musicTracks.length)} موزیک شخصی · ${toPersian(GEN_TOTAL_TRACKS)} قطعه هوشمند`;
     }
 
     // ---- Rendering ----
@@ -5231,7 +5810,9 @@
       if (!wrap) return;
       const cats = allMusicCats();
       const countIn = k => state.musicTracks.filter(t => t.category === k).length;
+      const genTabs = GEN_COLLECTIONS.map(c => ({ id: 'gen:' + c.id, label: `${c.emoji} ${c.name} (${toPersian(c.count)})` }));
       const tabs = [
+        ...genTabs,
         { id: 'all', label: `همه (${toPersian(state.musicTracks.length)})` },
         ...Object.keys(cats).map(k => ({ id: k, label: `${cats[k].emoji} ${cats[k].label} (${toPersian(countIn(k))})` })),
         { id: 'fav', label: `⭐ محبوب‌ها (${toPersian(state.musicTracks.filter(t => t.favorite).length)})` },
@@ -5255,7 +5836,7 @@
       wrap.classList.remove('hidden');
       const heights = [84, 66, 76, 58, 80, 70];
       const tilts = [-2.5, 1.6, -1, 2.4, -1.8, 1.2];
-      wrap.innerHTML = keys.map(k => {
+      wrap.innerHTML = buildGenCollectionCards() + keys.map(k => {
         const c = cats[k];
         const tracks = state.musicTracks.filter(t => t.category === k);
         const shown = tracks.slice(0, 6);
@@ -5296,6 +5877,7 @@
     function renderMusicList() {
       const list = document.getElementById('musicTrackList');
       if (!list) return;
+      if (String(currentMusicTab).indexOf('gen:') === 0) { renderGenList(list); return; }
       const tracks = musicFilteredTracks();
       if (state.musicTracks.length === 0) {
         list.innerHTML = `
@@ -5715,6 +6297,7 @@
 
     // ================= MODAL HELPERS =================
     function openModal(id) {
+      try { if (id === 'moodModal') renderMoodInsights(); } catch (e) {}
       document.getElementById('modalBackdrop').classList.remove('hidden');
       document.getElementById('modalBackdrop').classList.add('visible');
       document.getElementById(id).classList.remove('hidden');
@@ -5991,99 +6574,257 @@
       openModal('agentModal');
     }
 
+    // ================= TASK 18: PER-PAGE 45s AI SEQUENCE ENGINE =================
+    const ROBOT_AVATAR = 'data:image/webp;base64,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';
+    const SEQ_DUR = 45000;
+    let seqTargetOpen = null;
+
+    const SEQ_THEMES = {
+      agent: {
+        title: 'هسته دستیار هوشمند', tagTL: 'اتصال: پایدار', accent: '#22d3ee', accent2: '#8b5cf6',
+        motto: 'دستیار آنلاین است — بپرس تا بسازیم ✨',
+        open: () => { try { openAgentModalMaterialized(); } catch (e) { openModal('agentModal'); } },
+        phases: ['انرژی‌رسانی هسته', 'متریالایز پوسته ربات', 'اتصال شبکه عصبی', 'همگام‌سازی حافظه بلندمدت', 'بارگذاری شخصیت فارسی‌زبان', 'تحلیل الگوهای رفتاری تو', 'کالیبره ماژول انگیزش', 'تست امنیت و حریم خصوصی', 'آماده‌به‌کار نهایی'],
+        lines: () => {
+          const habits = state.habits || [];
+          const doneToday = habits.filter(h => h.completions && h.completions[today()]).length;
+          return [
+            'بوت کردن مغز دیجیتال...',
+            'اتصال به شبکه عصبی مرکزی... ✓',
+            'شناسایی ' + toPersian(habits.length) + ' عادت فعال... ✓',
+            'بارگذاری مدل زبانی فارسی... ✓',
+            'پیشرفت امروز: ' + toPersian(doneToday) + ' از ' + toPersian(habits.length),
+            'همگام‌سازی حافظه کوتاه و بلندمدت... ✓',
+            'روشن‌کردن ماژول انگیزه و شوخ‌طبعی... ✓',
+            'رمزگذاری حریم خصوصی... ✓',
+            'قفل گشوده شد — دستیار آماده است ✓'
+          ];
+        }
+      },
+      home: {
+        title: 'هسته خانه و روز جدید', tagTL: 'روز: امیدبخش', accent: '#a78bfa', accent2: '#22d3ee',
+        motto: 'خانه آماده است — امروز را فتح کن ☀️',
+        open: () => { try { renderAll(); showToast('روز جدید روشن شد ☀️'); } catch (e) {} },
+        phases: ['بیدارکردن خانه هوشمند', 'خواندن حافظه روزهای قبل', 'چیدن عادت‌های امروز', 'روشن‌کردن زنجیره استریک', 'محاسبه ارتفاع کوه پیشرفت', 'هماهنگی انگیزه‌سنج', 'تنظیم نور امید', 'مرور بازتاب دیروز', 'آماده‌سازی روز جدید'],
+        lines: () => {
+          const habits = state.habits || [];
+          const done = habits.filter(h => h.completions && h.completions[today()]).length;
+          const streak = state.habits ? Math.max(0, ...habits.map(h => h.streak || 0)) : 0;
+          const moods = (state.moodLog || []).length;
+          return [
+            'بیدارکردن هسته خانه...',
+            'بارگذاری روزهای گذشته از حافظه... ✓',
+            'چیدن ' + toPersian(habits.length) + ' عادت برای امروز... ✓',
+            'بررسی زنجیره: بهترین ' + toPersian(streak) + ' روز پیوسته 🔥',
+            'انرژی ثبت‌شده تا امروز: ' + toPersian(moods) + ' بازتاب',
+            done > 0 ? 'کارهای امروز شروع شده: ' + toPersian(done) + ' ✓' : 'صبحت بخیر — امروز صفحه سفیدی برای شروع داری ✨',
+            'کالیبره‌کردن انگیزه‌سنج...',
+            'نور امید روی بیشینه...',
+            'خانه آماده است ✓'
+          ];
+        }
+      },
+      mountain: {
+        title: 'سامانه کوه و قله', tagTL: 'ارتفاع‌سنج: فعال', accent: '#34d399', accent2: '#8b5cf6',
+        motto: 'کوه‌ها آماده‌اند — قدم بعدی رو بزن 🏔️',
+        open: () => { try { openModal('mountainModal'); } catch (e) {} },
+        phases: ['فعال‌سازی ارتفاع‌سنج', 'بررسی هوا و مسیر صعود', 'شمردن کمپ‌های هر کوه', 'بارگذاری نقشه قله‌ها', 'محاسبه شیب پیشرفت', 'بازبینی روزهای اردو', 'چک‌لیست تجهیزات صعود', 'قفل‌گشایی مسیرهای فتح‌شده', 'اعلام وضعیت صعود'],
+        lines: () => {
+          const habits = state.habits || [];
+          const conquered = habits.filter(h => (h.streak || 0) >= (h.duration || 21)).length;
+          const climbing = habits.length - conquered;
+          return [
+            'روشن‌کردن ارتفاع‌سنج کوانتومی...',
+            'اسکن ' + toPersian(habits.length) + ' کوه پیشرفت... ✓',
+            conquered ? 'کوه‌های فتح‌شده: ' + toPersian(conquered) + ' 🏔️ ✓' : 'هنوز قله‌ای فتح نشده — اولین قدم منتظر است',
+            climbing ? toPersian(climbing) + ' صعود فعال در جریان است...' : 'همه قله‌ها فتح شده‌اند!',
+            'بررسی هوا: مناسب برای عادت‌های جدید ✓',
+            'کمپ‌ها و پرچم‌ها نصب شد...',
+            'نقشه مسیر قله ترسیم شد ✓',
+            'تجهیزات صعود آماده...',
+            'وضعیت: آماده صعود ✓'
+          ];
+        }
+      },
+      plus: {
+        title: 'کارخانه ساخت عادت', tagTL: 'کارگاه: باز', accent: '#8b5cf6', accent2: '#34d399',
+        motto: 'کارخانه روشن شد — عادت بعدی‌ات را بساز 🛠️',
+        open: () => { try { openModal('addHabitModal'); } catch (e) {} },
+        phases: ['روشن‌کردن کارخانه', 'بارگذاری قالب‌های عادت', 'کالیبره مدت‌های چالش', 'ترسیم مسیرهای قله', 'همگام‌سازی با صفحه کوه', 'فعال‌سازی یادآور هوشمند', 'تنظیم سخت‌گیر و مهربان', 'بازبینی پیشنهادهای شخصی', 'بازکردن درب کارگاه'],
+        lines: () => [
+          'روشن‌کردن کارخانه ساخت عادت...',
+          'بارگذاری ۲۰+ قالب آماده... ✓',
+          'کالیبره مدت‌ها: ۷ / ۲۱ / ۴۰ / ۷۰ / ۱۰۰ ✓',
+          'ترسیم مسیر قله برای هر مدت... ✓',
+          'اتصال به سامانه کوه... ✓',
+          'یادآور هوشمند تنظیم شد ⏰ ✓',
+          'پیشنهادهای شخصی بر اساس عادت‌های تو آماده شد',
+          'تست کیفیت مسیر... ✓',
+          'درب کارگاه باز شد ✓'
+        ]
+      },
+      music: {
+        title: 'استودیو موزیک', tagTL: 'استودیو: آماده', accent: '#34d399', accent2: '#f59e0b',
+        motto: 'استودیو آماده است — آرامش را پخش کن 🎧',
+        open: () => { try { openMusicPage(); } catch (e) {} },
+        phases: ['روشن‌کردن استودیو', 'بارگذاری قفسه موزیک', 'کوک سازهای کلکسیون‌ها', 'آماده‌سازی آهنگساز هوشمند', 'تنظیم اکولایزر آرامش', 'فعال‌سازی پخش‌خودکار زمانی', 'کالیبره صدای محیطی', 'اتصال بلندگوهای مجازی', 'شمارش معکوس پخش'],
+        lines: () => {
+          const n = (state.musicTracks || []).length;
+          const gens = [['آرامش', 24], ['تمرکز', 24], ['انرژی', 24], ['خواب', 18], ['طبیعت', 24], ['انگیزه', 18]];
+          const gtotal = gens.reduce((a, g) => a + g[1], 0);
+          return [
+            'روشن‌کردن استودیو موزیک...',
+            'بارگذاری قفسه: ' + toPersian(n) + ' موزیک شخصی ✓',
+            'آهنگساز هوشمند آنلاین شد 🎼 ✓',
+            toPersian(gtotal) + ' قطعه تولیدی در ۶ کلکسیون آماده است',
+            'کلکسیون آرامش: ' + toPersian(24) + ' قطعه ✓',
+            'کلکسیون تمرکز: ' + toPersian(24) + ' قطعه ✓',
+            'اکولایزر روی حالت «آرامش ذهنی»...',
+            'پخش‌خودکار زمانی فعال ⏰ ✓',
+            'استودیو آماده پخش ✓'
+          ];
+        }
+      },
+      profile: {
+        title: 'اتاق افتخارات', tagTL: 'افتخارات: در حال شمارش', accent: '#f59e0b', accent2: '#8b5cf6',
+        motto: 'اتاق افتخارات باز شد — به خودت افتخار کن 🏆',
+        open: () => { try { openModal('profileModal'); } catch (e) {} },
+        phases: ['بازکردن درب اتاق افتخارات', 'تمیزکردن قاب مدال‌ها', 'شمردن روزهای پیوسته', 'بازخوانی داستان صعود تو', 'برق‌انداختن تندیس‌ها', 'محاسبه سطح و تجربه', 'بازبینی رکوردهای شخصی', 'چیدن افتخارات جدید', 'اعلام افتخار امروز'],
+        lines: () => {
+          const habits = state.habits || [];
+          const ticks = habits.reduce((a, h) => a + Object.keys(h.completions || {}).length, 0);
+          const best = habits.length ? Math.max(0, ...habits.map(h => h.streak || 0)) : 0;
+          return [
+            'بازکردن درب اتاق افتخارات...',
+            'پرداخت تندیس‌های برنز تا الماس ✓',
+            'شمارش تیک‌های تاریخ تو: ' + toPersian(ticks) + ' ✓',
+            'بهترین استریک: ' + toPersian(best) + ' روز 🔥',
+            'بازخوانی داستان صعود تو...',
+            'محاسبه XP و سطح...',
+            'برق‌انداختن ویترین ✓',
+            'هدف بعدی در حال محاسبه...',
+            'اتاق آماده بازدید است ✓'
+          ];
+        }
+      }
+    };
+
+    function stopBootTimers() { bootTimers.forEach(clearTimeout); bootTimers = []; }
+
     function hideBootScreen(thenOpen) {
       stopBootTimers();
       const scr = document.getElementById('agentBootScreen');
       if (!scr || !scr.classList.contains('active')) {
-        if (thenOpen) openAgentModalMaterialized();
+        if (thenOpen) { const f = seqTargetOpen || (() => openAgentModalMaterialized()); seqTargetOpen = null; f(); }
         return;
       }
       scr.classList.remove('active');
       scr.classList.remove('boot-final');
+      scr.classList.remove('boot-fast');
       bootActive = false;
-      if (thenOpen) setTimeout(() => openAgentModalMaterialized(), 140);
+      if (thenOpen) {
+        const f = seqTargetOpen || (() => openAgentModalMaterialized());
+        seqTargetOpen = null;
+        setTimeout(() => { try { f(); } catch (e) {} }, 140);
+      }
     }
 
-    function openAgentWithBoot() {
+    function openPageWithSequence(themeId) {
+      const theme = SEQ_THEMES[themeId] || SEQ_THEMES.agent;
       if (bootActive) return;
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        openModal('agentModal');
-        return;
-      }
-      bootActive = true;
-      playBootSound();
-      const scr = document.getElementById('agentBootScreen');
-      const term = document.getElementById('bootTerminal');
-      const fill = document.getElementById('bootProgressFill');
-      const pct = document.getElementById('bootPercent');
-      const flash = document.getElementById('bootFlash');
-      const status = document.getElementById('bootStatus');
-      const eq = document.getElementById('bootEq');
-      term.innerHTML = '';
-      fill.style.width = '0%';
-      pct.textContent = '۰٪';
-      status.textContent = 'فاز ۱ — انرژی‌رسانی هسته';
-      flash.classList.remove('fire');
-      scr.classList.remove('boot-final');
-      eq.classList.remove('on');
-      if (!eq.childElementCount) {
-        for (let i = 0; i < 13; i++) {
-          const bar = document.createElement('span');
-          bar.style.animationDelay = (-(Math.random() * 0.9)).toFixed(2) + 's';
-          bar.style.animationDuration = (0.6 + Math.random() * 0.7).toFixed(2) + 's';
-          eq.appendChild(bar);
+      try {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { theme.open(); return; }
+        bootActive = true;
+        seqTargetOpen = theme.open;
+        try { playBootSound(); } catch (e) {}
+        const scr = document.getElementById('agentBootScreen');
+        const term = document.getElementById('bootTerminal');
+        const fill = document.getElementById('bootProgressFill');
+        const pct = document.getElementById('bootPercent');
+        const flash = document.getElementById('bootFlash');
+        const status = document.getElementById('bootStatus');
+        const eq = document.getElementById('bootEq');
+        const rImg = document.getElementById('bootRobotImg');
+        const tEl = document.getElementById('bootHudTitle');
+        if (tEl) tEl.textContent = theme.title;
+        scr.style.setProperty('--seq-a', theme.accent);
+        scr.style.setProperty('--seq-b', theme.accent2);
+        if (rImg) { try { rImg.src = ROBOT_AVATAR; } catch (e) {} }
+        term.innerHTML = '';
+        fill.style.width = '0%';
+        pct.textContent = '۰٪';
+        status.textContent = 'فاز ۱ از ۹ — ' + theme.phases[0];
+        flash.classList.remove('fire');
+        scr.classList.remove('boot-final', 'boot-fast');
+        eq.classList.remove('on');
+        if (!eq.childElementCount) {
+          for (let i = 0; i < 13; i++) {
+            const bar = document.createElement('span');
+            bar.style.animationDelay = (-(Math.random() * 0.9)).toFixed(2) + 's';
+            bar.style.animationDuration = (0.6 + Math.random() * 0.7).toFixed(2) + 's';
+            eq.appendChild(bar);
+          }
         }
-      }
-      scr.classList.add('active');
-      const setPhase = (txt) => { if (bootActive) status.textContent = txt; };
-      const LINES = buildBootLines();
-      const t0 = performance.now(), DUR = 5250;
-      const plateau = (v) => {
-        if (v > 0.32 && v < 0.4) v = 0.32 + (v - 0.32) * 0.22;
-        if (v > 0.68 && v < 0.76) v = 0.68 + (v - 0.68) * 0.22;
-        return v;
-      };
-      const step = (t) => {
-        if (!bootActive) return;
-        const k = Math.min(1, (t - t0) / DUR);
-        const eased = plateau(1 - Math.pow(1 - k, 1.25));
-        const v = Math.round(eased * 100);
-        fill.style.width = v + '%';
-        pct.textContent = toPersian(v) + '٪';
-        if (k < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-      bootTimers.push(setTimeout(() => setPhase('فاز ۲ — متریالایز پوسته ربات'), 900));
-      bootTimers.push(setTimeout(() => { if (bootActive) eq.classList.add('on'); }, 2050));
-      bootTimers.push(setTimeout(() => setPhase('فاز ۳ — اتصال شبکه عصبی'), 2150));
-      bootTimers.push(setTimeout(() => setPhase('فاز ۴ — همگام‌سازی حافظه'), 3550));
-      LINES.forEach((line, i) => {
+        scr.classList.add('active');
+        const LINES = theme.lines();
+        const t0 = performance.now(), DUR = SEQ_DUR;
+        const plateau = (v) => {
+          if (v > 0.32 && v < 0.42) v = 0.32 + (v - 0.32) * 0.25;
+          if (v > 0.70 && v < 0.80) v = 0.70 + (v - 0.70) * 0.25;
+          return v;
+        };
+        const step = (t) => {
+          if (!bootActive) return;
+          const k = Math.min(1, (t - t0) / DUR);
+          const eased = plateau(1 - Math.pow(1 - k, 1.2));
+          const v = Math.round(eased * 100);
+          fill.style.width = v + '%';
+          pct.textContent = toPersian(v) + '٪';
+          if (k < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+        const NP = theme.phases.length;
+        for (let i = 0; i < NP; i++) {
+          bootTimers.push(setTimeout(() => {
+            if (!bootActive) return;
+            status.textContent = 'فاز ' + toPersian(i + 1) + ' از ' + toPersian(NP) + ' — ' + theme.phases[i];
+          }, Math.round(i * DUR / NP)));
+        }
+        const lineStart = 3500, lineEnd = DUR - 4200, n = LINES.length;
+        LINES.forEach((line, i) => {
+          const at = lineStart + Math.round((lineEnd - lineStart) * (i / Math.max(1, n - 1)));
+          bootTimers.push(setTimeout(() => {
+            if (!bootActive) return;
+            term.querySelectorAll('.cur').forEach(cc => cc.remove());
+            const div = document.createElement('div');
+            div.className = 'boot-line';
+            div.innerHTML = line + ' <span class="cur"></span>';
+            term.appendChild(div);
+            while (term.childElementCount > 7) { try { term.removeChild(term.firstChild); } catch (e) { break; } }
+          }, at));
+        });
+        bootTimers.push(setTimeout(() => { if (bootActive) eq.classList.add('on'); }, Math.round(DUR * 0.16)));
+        bootTimers.push(setTimeout(() => { if (bootActive) scr.classList.add('boot-fast'); }, Math.round(DUR * 0.62)));
+        bootTimers.push(setTimeout(() => { if (bootActive) scr.classList.add('boot-final'); }, Math.round(DUR * 0.87)));
         bootTimers.push(setTimeout(() => {
           if (!bootActive) return;
           term.querySelectorAll('.cur').forEach(cc => cc.remove());
-          const div = document.createElement('div');
-          div.className = 'boot-line';
-          div.innerHTML = line + ' <span class="cur"></span>';
-          term.appendChild(div);
-        }, 1150 + i * 430));
-      });
-      bootTimers.push(setTimeout(() => {
-        if (!bootActive) return;
-        scr.classList.add('boot-final');
-        setPhase('فاز ۵ — آماده‌به‌کار نهایی');
-      }, 4700));
-      bootTimers.push(setTimeout(() => {
-        if (!bootActive) return;
-        term.querySelectorAll('.cur').forEach(cc => cc.remove());
-        const ok = document.createElement('div');
-        ok.className = 'boot-line ok';
-        ok.textContent = '✅ دستیار هوشمند آنلاین است — خوش آمدی';
-        term.appendChild(ok);
-      }, 4820));
-      bootTimers.push(setTimeout(() => { if (bootActive) flash.classList.add('fire'); }, 5300));
-      bootTimers.push(setTimeout(() => { if (bootActive) hideBootScreen(true); }, 5650));
-      bootTimers.push(setTimeout(() => { if (bootActive) hideBootScreen(true); }, 9000));
+          const ok = document.createElement('div');
+          ok.className = 'boot-line ok';
+          ok.textContent = '✅ ' + theme.motto;
+          term.appendChild(ok);
+        }, Math.round(DUR * 0.94)));
+        bootTimers.push(setTimeout(() => { if (bootActive) flash.classList.add('fire'); }, Math.round(DUR * 0.975)));
+        bootTimers.push(setTimeout(() => { if (bootActive) hideBootScreen(true); }, DUR - 150));
+        bootTimers.push(setTimeout(() => { if (bootActive) hideBootScreen(true); }, DUR + 8000));
+      } catch (e) {
+        bootActive = false;
+        stopBootTimers();
+        try { theme.open(); } catch (e2) {}
+      }
     }
+
+    function openAgentWithBoot() { openPageWithSequence('agent'); }
 
     document.getElementById('agentBootScreen').addEventListener('pointerdown', () => hideBootScreen(true));
 

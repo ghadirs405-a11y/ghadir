@@ -1,0 +1,2002 @@
+     1→
+     2→    tailwind.config = {
+     3→      theme: {
+     4→        extend: {
+     5→          colors: {
+     6→            surface: '#fcf8ff',
+     7→            'surface-container': '#efebff',
+     8→            'surface-container-low': '#f6f2ff',
+     9→            'surface-container-high': '#e9e5ff',
+    10→            'surface-container-highest': '#e3dfff',
+    11→            'on-surface': '#181445',
+    12→            'on-surface-variant': '#4a4455',
+    13→            primary: '#630ed4',
+    14→            'primary-container': '#7c3aed',
+    15→            'on-primary': '#ffffff',
+    16→            'on-primary-container': '#ede0ff',
+    17→            secondary: '#6b38d4',
+    18→            'secondary-container': '#8455ef',
+    19→            'on-secondary': '#ffffff',
+    20→            tertiary: '#843700',
+    21→            'tertiary-container': '#aa4900',
+    22→            'on-tertiary': '#ffffff',
+    23→            'tertiary-fixed': '#ffdbca',
+    24→            'on-tertiary-fixed': '#341100',
+    25→            error: '#ba1a1a',
+    26→            outline: '#7b7487',
+    27→            'outline-variant': '#ccc3d8',
+    28→            spiritual: '#a78bfa',
+    29→            productivity: '#34d399',
+    30→            'self-care': '#f472b6',
+    31→            gold: '#fbbf24',
+    32→            silver: '#94a3b8',
+    33→            bronze: '#d97706',
+    34→            'agent-primary': '#8b5cf6',
+    35→            'agent-secondary': '#06b6d4',
+    36→            'agent-accent': '#f59e0b'
+    37→          },
+    38→          fontFamily: { sans: ['Vazirmatn', 'sans-serif'] },
+    39→          borderRadius: { '4xl': '2rem' }
+    40→        }
+    41→      }
+    42→    }
+    43→  
+    44→;
+    45→
+    46→    // ================= STATE =================
+    47→    const STORAGE_KEY = 'habits_tracker_agent_v1';
+    48→    const today = () => new Date().toISOString().split('T')[0];
+    49→    const currentMonth = () => new Date().toISOString().slice(0, 7);
+    50→
+    51→    const defaultState = {
+    52→      habits: [],
+    53→      moodLog: [],
+    54→      journal: {},
+    55→      journalingResponses: {},
+    56→      notebookEntries: [],
+    57→      settings: { 
+    58→        sound: true, 
+    59→        notifications: true, 
+    60→        masterVolume: 50, 
+    61→        weather: 'sunny', 
+    62→        batterySaver: false, 
+    63→        breathType: '478',
+    64→        // NEW: Agent settings
+    65→        agent: {
+    66→          wakeTime: '06:30',
+    67→          wakeEnabled: false,
+    68→          voiceEnabled: false,
+    69→          lastCheckin: null,
+    70→          checkinHistory: [],
+    71→          moodHistory: []
+    72→        }
+    73→      },
+    74→      chellehStartDate: null,
+    75→      isFirstRun: true,
+    76→      notifications: [],
+    77→      musicTracks: []
+    78→    };
+    79→
+    80→    let state;
+    81→    
+    82→    try {
+    83→      const saved = localStorage.getItem(STORAGE_KEY);
+    84→      if (saved) {
+    85→        state = JSON.parse(saved);
+    86→        // Merge agent settings if missing
+    87→        if (!state.settings.agent) state.settings.agent = defaultState.settings.agent;
+    88→        if (!state.moodLog) state.moodLog = [];
+    89→        if (!state.journal) state.journal = {};
+    90→        if (!state.journalingResponses) state.journalingResponses = {};
+    91→        if (!state.notebookEntries) state.notebookEntries = [];
+    92→        if (!state.settings) state.settings = defaultState.settings;
+    93→        if (!state.chellehStartDate) state.chellehStartDate = today();
+    94→        if (!state.notifications) state.notifications = [];
+    95→        if (!state.agentChat) state.agentChat = [];
+    96→        if (state.agentWeeklyReport === undefined) state.agentWeeklyReport = null;
+    97→        if (!Array.isArray(state.agentSocialPlans)) state.agentSocialPlans = [];
+    98→        if (!Array.isArray(state.musicTracks)) state.musicTracks = [];
+    99→        state.musicTracks.forEach(t => {
+   100→          if (!t.schedule) t.schedule = { enabled: false, time: '07:00', lastPlayedOn: null };
+   101→          if (!t.category) t.category = 'calm';
+   102→          if (typeof t.playCount !== 'number') t.playCount = 0;
+   103→          if (typeof t.favorite !== 'boolean') t.favorite = false;
+   104→          if (!t.emoji) t.emoji = '🎵';
+   105→        });
+   106→        if (state.isFirstRun === undefined) state.isFirstRun = false;
+   107→        state.habits.forEach(h => { 
+   108→          if (!h.notes) h.notes = []; 
+   109→          if (!h.category) h.category = 'productivity';
+   110→          if (!h.duration) h.duration = 21;
+   111→          if (!h.completions) h.completions = {};
+   112→          if (!h.streak) h.streak = 0;
+   113→        });
+   114→      } else {
+   115→        state = JSON.parse(JSON.stringify(defaultState));
+   116→        state.chellehStartDate = today();
+   117→      }
+   118→    } catch (e) {
+   119→      state = JSON.parse(JSON.stringify(defaultState));
+   120→      state.chellehStartDate = today();
+   121→    }
+   122→
+   123→    function saveState() { 
+   124→      localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
+   125→    }
+   126→
+   127→    // ================= CATEGORIES =================
+   128→    const categories = {
+   129→      spiritual: { label: 'معنوی و پاکی', color: '#a78bfa', icon: 'self_improvement', emoji: '🕊️' },
+   130→      productivity: { label: 'بهره‌وری و کار', color: '#34d399', icon: 'bolt', emoji: '' },
+   131→      'self-care': { label: 'مراقبت از خود', color: '#f472b6', icon: 'favorite', emoji: '💖' },
+   132→      family: { label: 'خانواده و مهر', color: '#843700', icon: 'family_restroom', emoji: '👨‍‍👧' }
+   133→    };
+   134→
+   135→    // ================= QUOTES =================
+   136→    const quotes = [
+   137→      "ریشه‌های اراده در سکوت رشد می‌کنند و شاخه‌های آرامش، سایه‌بان کانون گرم خانواده می‌شوند.",
+   138→      "نظم، پل میان اهداف و دستاوردهاست.",
+   139→      "آینده متعلق به کسانی است که به زیبایی رویاهایشان باور دارند.",
+   140→      "هر روز فرصتی جدید برای ساختن نسخه بهتری از خودت است.",
+   141→      "استمرار، کلید تبدیل غیرممکن به ممکن است.",
+   142→      "ذهن آرام، قوی‌ترین سلاح برای فتح دنیای بیرون است.",
+   143→      "عادت‌های کوچک، زندگی‌های بزرگ می‌سازند.",
+   144→      "تو همان چیزی هستی که مکرراً انجام می‌دهی.",
+   145→      "رشد، نتیجه‌ی تصمیم‌های کوچک روزمره است.",
+   146→      "هر قدم کوچک، تو را به نسخه‌ی ایده‌آلت نزدیک‌تر می‌کند.",
+   147→      "تمرکز، هنر نادیده گرفتن چیزهای بی‌اهمیت است.",
+   148→      "ریشه‌های اراده در سکوت رشد می‌کنند.",
+   149→      "امروز، بذر فردای توست.",
+   150→      "باغبان صبور، زیباترین گل‌ها را می‌پروراند.",
+   151→      "ذهنت باغ توست؛ آن را با افکار زیبا آبیار.",
+   152→      "از امروز شروع کن، نه از شنبه.",
+   153→      "نظم شخصی، آزادی واقعی می‌آفریند.",
+   154→      "استقامت، هنر ادامه دادن وقتی همه چیز سخت می‌شود.",
+   155→      "تغییر، با یک تصمیم کوچک آغاز می‌شود.",
+   156→      "آرامش، پاداش ذهنی است که تمرین کرده."
+   157→    ];
+   158→    let currentQuoteIndex = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24) % quotes.length;
+   159→
+   160→    function setDailyQuote() {
+   161→      document.getElementById('dailyQuote').textContent = `«${quotes[currentQuoteIndex]}»`;
+   162→    }
+   163→
+   164→    // ================= AUDIO ENGINE =================
+   165→    let audioCtx = null;
+   166→    let activeSounds = {};
+   167→    let masterGain = null;
+   168→
+   169→    function initAudio() {
+   170→      if (!audioCtx) {
+   171→        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+   172→        masterGain = audioCtx.createGain();
+   173→        masterGain.gain.value = (state.settings.masterVolume || 50) / 100;
+   174→        masterGain.connect(audioCtx.destination);
+   175→      }
+   176→      if (audioCtx.state === 'suspended') audioCtx.resume();
+   177→    }
+   178→
+   179→    function createNoiseBuffer(type = 'white', duration = 2) {
+   180→      const sampleRate = audioCtx.sampleRate;
+   181→      const length = sampleRate * duration;
+   182→      const buffer = audioCtx.createBuffer(1, length, sampleRate);
+   183→      const data = buffer.getChannelData(0);
+   184→      let lastOut = 0;
+   185→      for (let i = 0; i < length; i++) {
+   186→        const white = Math.random() * 2 - 1;
+   187→        if (type === 'white') data[i] = white;
+   188→        else if (type === 'pink' || type === 'brown') {
+   189→          data[i] = (lastOut + (0.02 * white)) / 1.02;
+   190→          lastOut = data[i];
+   191→          data[i] *= 3.5;
+   192→        }
+   193→      }
+   194→      return buffer;
+   195→    }
+   196→
+   197→    function playCrystalChime() {
+   198→      if (state.settings.batterySaver) return;
+   199→      initAudio();
+   200→      const frequencies = [1318.51, 1567.98, 2093.00, 2637.02];
+   201→      const now = audioCtx.currentTime;
+   202→      const gain = audioCtx.createGain();
+   203→      gain.gain.setValueAtTime(0, now);
+   204→      gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+   205→      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+   206→      gain.connect(masterGain);
+   207→      frequencies.forEach((freq, i) => {
+   208→        const osc = audioCtx.createOscillator();
+   209→        const oscGain = audioCtx.createGain();
+   210→        osc.type = 'sine';
+   211→        osc.frequency.value = freq;
+   212→        oscGain.gain.setValueAtTime(0, now);
+   213→        oscGain.gain.linearRampToValueAtTime(0.3 / (i + 1), now + 0.01 + i * 0.05);
+   214→        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+   215→        osc.connect(oscGain);
+   216→        oscGain.connect(gain);
+   217→        osc.start(now + i * 0.05);
+   218→        osc.stop(now + 1.5);
+   219→      });
+   220→    }
+   221→
+   222→    // NEW: Text-to-Speech for Agent
+   223→    function speakText(text) {
+   224→      if (!state.settings.agent.voiceEnabled) return;
+   225→      if ('speechSynthesis' in window) {
+   226→        window.speechSynthesis.cancel();
+   227→        const utterance = new SpeechSynthesisUtterance(text);
+   228→        utterance.lang = 'fa-IR';
+   229→        utterance.rate = 0.9;
+   230→        utterance.pitch = 1.1;
+   231→        window.speechSynthesis.speak(utterance);
+   232→      }
+   233→    }
+   234→    // ================= NOTIFICATIONS =================
+   235→    function addNotification(type, title, message, icon) {
+   236→      const notification = {
+   237→        id: 'n' + Date.now(),
+   238→        type,
+   239→        title,
+   240→        message,
+   241→        icon,
+   242→        time: new Date().toISOString(),
+   243→        read: false
+   244→      };
+   245→      state.notifications.unshift(notification);
+   246→      if (state.notifications.length > 20) {
+   247→        state.notifications = state.notifications.slice(0, 20);
+   248→      }
+   249→      saveState();
+   250→      renderNotifications();
+   251→    }
+   252→
+   253→    function renderNotifications() {
+   254→      const container = document.getElementById('notificationsList');
+   255→      if (!container) return;
+   256→      
+   257→      if (state.notifications.length === 0) {
+   258→        container.innerHTML = `
+   259→          <div class="text-center text-on-surface-variant text-xs py-8">
+   260→            <span class="material-symbols-outlined text-4xl opacity-30 block mb-2">notifications_none</span>
+   261→            <p>هنوز اعلانی ندارید</p>
+   262→            <p class="text-[10px] mt-1">با تکمیل عادت‌ها، اعلان‌ها اینجا نمایش داده می‌شوند</p>
+   263→          </div>
+   264→        `;
+   265→        document.getElementById('notificationCount').textContent = '۰';
+   266→        return;
+   267→      }
+   268→
+   269→      const unreadCount = state.notifications.filter(n => !n.read).length;
+   270→      document.getElementById('notificationCount').textContent = toPersian(unreadCount);
+   271→
+   272→      container.innerHTML = state.notifications.map(notif => {
+   273→        const d = new Date(notif.time);
+   274→        const timeStr = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+   275→        const dateStr = d.toLocaleDateString('fa-IR', { day: 'numeric', month: 'short' });
+   276→        const iconColors = {
+   277→          'habit': 'bg-primary/10 text-primary',
+   278→          'streak': 'bg-tertiary-fixed text-tertiary',
+   279→          'achievement': 'bg-secondary/10 text-secondary',
+   280→          'reminder': 'bg-surface-container-low text-on-surface-variant',
+   281→          'agent': 'bg-agent-primary/10 text-agent-primary'
+   282→        };
+   283→        const iconEmojis = {
+   284→          'habit': '️',
+   285→          'streak': '',
+   286→          'achievement': '🏆',
+   287→          'reminder': '⏰',
+   288→          'agent': '🤖'
+   289→        };
+   290→        
+   291→        return `
+   292→          <div class="notification-item ${notif.read ? '' : 'unread'}" onclick="markNotificationRead('${notif.id}')">
+   293→            <div class="flex items-start gap-3">
+   294→              <div class="notification-icon ${iconColors[notif.type] || iconColors.reminder}">
+   295→                ${iconEmojis[notif.type] || notif.icon || '📌'}
+   296→              </div>
+   297→              <div class="flex-1 min-w-0">
+   298→                <div class="text-xs font-bold text-on-surface mb-0.5">${notif.title}</div>
+   299→                <div class="text-[11px] text-on-surface-variant leading-relaxed">${notif.message}</div>
+   300→                <div class="notification-time">${dateStr} • ${timeStr}</div>
+   301→              </div>
+   302→              ${!notif.read ? '<div class="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2"></div>' : ''}
+   303→            </div>
+   304→          </div>
+   305→        `;
+   306→      }).join('');
+   307→    }
+   308→
+   309→    function markNotificationRead(id) {
+   310→      const notif = state.notifications.find(n => n.id === id);
+   311→      if (notif && !notif.read) {
+   312→        notif.read = true;
+   313→        saveState();
+   314→        renderNotifications();
+   315→      }
+   316→    }
+   317→
+   318→    function clearAllNotifications() {
+   319→      if (confirm('آیا مطمئن هستید که می‌خواهید همه اعلان‌ها را پاک کنید؟')) {
+   320→        state.notifications = [];
+   321→        saveState();
+   322→        renderNotifications();
+   323→      }
+   324→    }
+   325→
+   326→    // ================= AI AGENT: CHAT & AUTOMATION ENGINE =================
+   327→    let agentChatBusy = false;
+   328→
+   329→    function getAgentContext() {
+   330→      const t = today();
+   331→      const habitList = state.habits.map(h => ({
+   332→        name: h.name,
+   333→        category: h.category,
+   334→        streak: h.streak || 0,
+   335→        duration: h.duration,
+   336→        completedToday: !!h.completions[t]
+   337→      }));
+   338→      let totalSlots = 0, doneSlots = 0;
+   339→      for (let i = 0; i < 7; i++) {
+   340→        const d = new Date(); d.setDate(d.getDate() - i);
+   341→        const ds = d.toISOString().split('T')[0];
+   342→        state.habits.forEach(h => { totalSlots++; if (h.completions[ds]) doneSlots++; });
+   343→      }
+   344→      const rate = totalSlots > 0 ? Math.round((doneSlots / totalSlots) * 100) : 0;
+   345→      const moodToday = (state.moodLog || []).find(m => m.date === t);
+   346→      let dateFa = '';
+   347→      try { dateFa = new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) {}
+   348→      return {
+   349→        dateFa: dateFa,
+   350→        wakeTime: (state.settings.agent && state.settings.agent.wakeTime) || '06:30',
+   351→        streak: calculateCurrentStreak(),
+   352→        completionRate7: rate,
+   353→        habits: habitList,
+   354→        moodToday: moodToday ? moodToday.score : undefined
+   355→      };
+   356→    }
+   357→
+   358→    function seedAgentWelcome() {
+   359→      if (!Array.isArray(state.agentChat)) state.agentChat = [];
+   360→      if (state.agentChat.length === 0) {
+   361→        state.agentChat.push({
+   362→          id: 'm' + Date.now(),
+   363→          role: 'agent',
+   364→          content: 'سلام! من ایجنت اتوماسیون هوشمند تو هستم 🤖✨\nکافیه بگی چه هدفی داری یا چه برنامه‌ای می‌خوای — مثلاً «برای کنکور برنامه بده» یا «می‌خوام صبح‌ها زود بیدار شم» — تا یک برنامه تخصصی عادت‌سازی برات طراحی کنم و با یک کلیک، خودکار روی برنامه‌هات نصبش کنم.\nاز وضعیت عادت‌ها و استریک‌هات هم خبر دارم؛ هر سوالی داری بپرس!\nهر هفته یک «گزارش هفتگی» خودکار از پیشرفتت می‌سازم (تب 📈) و در تب «📱 فضای مجازی» اگر شغلت را بگویی، برنامه محتوای اینستاگرام و لینکدین با پرامت آماده به‌ات می‌دهم. 💜',
+   365→          plan: null,
+   366→          ts: Date.now()
+   367→        });
+   368→        saveState();
+   369→      }
+   370→      renderAgentChat();
+   371→    }
+   372→
+   373→    function showAgentTyping(show) {
+   374→      const row = document.getElementById('agentTypingRow');
+   375→      if (!row) return;
+   376→      if (show) {
+   377→        row.classList.add('visible');
+   378→        setTimeout(() => { try { row.scrollIntoView({ block: 'end', behavior: 'smooth' }); } catch (e) {} }, 50);
+   379→      } else {
+   380→        row.classList.remove('visible');
+   381→      }
+   382→    }
+   383→
+   384→    function agentPlanCardHtml(plan, msgId) {
+   385→      const catLabels = { spiritual: '🕊️ معنوی', productivity: '⚡ بهره‌وری', 'self-care': '💖 خودمراقبتی', family: '👨‍👩‍👧 خانواده' };
+   386→      let habitsHtml = '';
+   387→      (plan.habits || []).forEach(h => {
+   388→        habitsHtml += `
+   389→          <div class="agent-plan-habit">
+   390→            <div class="agent-plan-habit-icon">${h.icon || '🏔️'}</div>
+   391→            <div class="flex-1 min-w-0">
+   392→              <div class="agent-plan-habit-name">${escapeHtml(h.name || '')}</div>
+   393→              <div class="agent-plan-habit-meta">⏰ ${toPersian(h.alarmTime || '--:--')} · ${catLabels[h.category] || '⚡ بهره‌وری'} · ${toPersian(h.duration || plan.duration || 21)} روزه</div>
+   394→              ${h.tip ? `<div class="agent-plan-habit-tip">💡 ${escapeHtml(h.tip)}</div>` : ''}
+   395→            </div>
+   396→          </div>
+   397→        `;
+   398→      });
+   399→      return `
+   400→        <div class="agent-plan-card">
+   401→          <div class="agent-plan-head">
+   402→            <div class="agent-plan-name">🏔️ ${escapeHtml(plan.name || 'برنامه تخصصی')}</div>
+   403→            <div class="agent-plan-summary">${escapeHtml(plan.summary || '')}</div>
+   404→            <div class="agent-plan-meta">
+   405→              <span class="agent-plan-pill">📅 ${toPersian(plan.duration || 21)} روز</span>
+   406→              <span class="agent-plan-pill">✅ ${toPersian((plan.habits || []).length)} عادت</span>
+   407→            </div>
+   408→          </div>
+   409→          <div class="agent-plan-habits">${habitsHtml}</div>
+   410→          <div class="agent-plan-foot">
+   411→            <button onclick="applyAgentPlan('${msgId}')" class="agent-btn agent-btn-primary flex-1">
+   412→              <span class="material-symbols-outlined text-[16px]">bolt</span>
+   413→              اعمال خودکار برنامه
+   414→            </button>
+   415→          </div>
+   416→        </div>
+   417→      `;
+   418→    }
+   419→
+   420→    function renderAgentChat() {
+   421→      const container = document.getElementById('agentChatMessages');
+   422→      if (!container) return;
+   423→      const msgs = Array.isArray(state.agentChat) ? state.agentChat : [];
+   424→      if (msgs.length === 0) {
+   425→        container.innerHTML = '<div class="text-center text-on-surface-variant text-xs py-6">گفتگویی وجود ندارد؛ اولین پیامت را بنویس! ✨</div>';
+   426→        return;
+   427→      }
+   428→      let html = '';
+   429→      msgs.forEach(m => {
+   430→        if (m.role === 'user') {
+   431→          html += `<div class="agent-msg-row me"><div class="agent-msg me">${escapeHtml(m.content).replace(/\n/g, '<br>')}</div></div>`;
+   432→        } else {
+   433→          let planHtml = '';
+   434→          if (m.plan && !m.applied) {
+   435→            planHtml = agentPlanCardHtml(m.plan, m.id);
+   436→          } else if (m.plan && m.applied) {
+   437→            planHtml = `<div class="agent-plan-applied">✅ این برنامه اعمال شد — ${toPersian(m.appliedCount || 0)} عادت به برنامه‌های تو اضافه شد</div>`;
+   438→          }
+   439→          html += `<div class="agent-msg-row bot"><div class="agent-msg-avatar">🤖</div><div class="agent-msg bot">${escapeHtml(m.content).replace(/\n/g, '<br>')}${planHtml}</div></div>`;
+   440→        }
+   441→      });
+   442→      container.innerHTML = html;
+   443→      container.scrollTop = container.scrollHeight;
+   444→    }
+   445→
+   446→    function pushAgentMessage(role, content, plan) {
+   447→      if (!Array.isArray(state.agentChat)) state.agentChat = [];
+   448→      const entry = {
+   449→        id: 'm' + Date.now() + Math.floor(Math.random() * 1000),
+   450→        role: role,
+   451→        content: content,
+   452→        plan: plan || null,
+   453→        ts: Date.now()
+   454→      };
+   455→      state.agentChat.push(entry);
+   456→      if (state.agentChat.length > 50) state.agentChat = state.agentChat.slice(-50);
+   457→      saveState();
+   458→      renderAgentChat();
+   459→      return entry;
+   460→    }
+   461→
+   462→    async function sendAgentMessage(text) {
+   463→      const input = document.getElementById('agentChatInput');
+   464→      const msg = (typeof text === 'string' && text.trim()) ? text.trim() : (input ? input.value.trim() : '');
+   465→      if (!msg || agentChatBusy) return;
+   466→      if (input) input.value = '';
+   467→      pushAgentMessage('user', msg);
+   468→      agentChatBusy = true;
+   469→      const btn = document.getElementById('agentSendBtn');
+   470→      if (btn) btn.disabled = true;
+   471→      showAgentTyping(true);
+   472→      try {
+   473→        const history = (state.agentChat || []).slice(0, -1)
+   474→          .filter(m => m.role === 'user' || m.role === 'agent')
+   475→          .slice(-8)
+   476→          .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }));
+   477→        const res = await fetch('/api/agent', {
+   478→          method: 'POST',
+   479→          headers: { 'Content-Type': 'application/json' },
+   480→          body: JSON.stringify({
+   481→            message: msg,
+   482→            history: history,
+   483→            context: getAgentContext()
+   484→          })
+   485→        });
+   486→        if (!res.ok) throw new Error('HTTP ' + res.status);
+   487→        const data = await res.json();
+   488→        showAgentTyping(false);
+   489→        const reply = (data && data.reply) ? data.reply : 'پاسخی دریافت نشد 🙏';
+   490→        const plan = (data && data.plan) ? data.plan : null;
+   491→        pushAgentMessage('agent', reply, plan);
+   492→        if (plan) {
+   493→          playCrystalChime();
+   494→          updateAgentBadge();
+   495→          addNotification('agent', 'برنامه آماده شد!', `برنامه «${plan.name}» با ${toPersian(plan.habits.length)} عادت آماده اعمال است.`, 'auto_awesome');
+   496→        }
+   497→        if (state.settings.agent && state.settings.agent.voiceEnabled) speakText(reply);
+   498→      } catch (e) {
+   499→        showAgentTyping(false);
+   500→        pushAgentMessage('agent', 'اوپس! ارتباط با مغز هوشمندم برقرار نشد 📡 لطفاً چند لحظه بعد دوباره امتحان کن.');
+   501→      } finally {
+   502→        agentChatBusy = false;
+   503→        if (btn) btn.disabled = false;
+   504→        showAgentTyping(false);
+   505→      }
+   506→    }
+   507→
+   508→    function applyAgentPlan(msgId) {
+   509→      const msg = (state.agentChat || []).find(m => m.id === msgId);
+   510→      if (!msg || !msg.plan) return;
+   511→      if (msg.applied) { showToast('این برنامه قبلاً اعمال شده ✅'); return; }
+   512→      const plan = msg.plan;
+   513→      const fallbackIcons = { spiritual: '🕊️', productivity: '⚡', 'self-care': '💖', family: '👨‍👩‍👧' };
+   514→      let added = 0, skipped = 0;
+   515→      (plan.habits || []).forEach(h => {
+   516→        const name = String(h.name || '').trim();
+   517→        if (!name) return;
+   518→        if (state.habits.some(x => (x.name || '').trim() === name)) { skipped++; return; }
+   519→        state.habits.push({
+   520→          id: 'h' + Date.now() + Math.floor(Math.random() * 100000),
+   521→          name: name,
+   522→          icon: h.icon || fallbackIcons[h.category] || '🏔️',
+   523→          category: h.category || 'productivity',
+   524→          completions: {},
+   525→          streak: 0,
+   526→          alarmTime: h.alarmTime || '08:00',
+   527→          alarmEnabled: true,
+   528→          notes: [],
+   529→          duration: plan.duration || 21
+   530→        });
+   531→        added++;
+   532→      });
+   533→      msg.applied = true;
+   534→      msg.appliedCount = added;
+   535→      saveState();
+   536→      renderAll();
+   537→      renderAgentChat();
+   538→      updateAgentBadge();
+   539→      if (added > 0) {
+   540→        triggerConfetti();
+   541→        playCrystalChime();
+   542→        showToast(`برنامه «${plan.name}» فعال شد! ${toPersian(added)} عادت جدید اضافه شد 🎉`);
+   543→        addNotification('habit', 'برنامه جدید فعال شد', `${toPersian(added)} عادت از برنامه «${plan.name}» به روزهای تو اضافه شد.`, 'auto_awesome');
+   544→      } else {
+   545→        showToast('همه عادت‌های این برنامه از قبل وجود داشتند 🙂');
+   546→      }
+   547→    }
+   548→
+   549→    function clearAgentChat() {
+   550→      state.agentChat = [];
+   551→      saveState();
+   552→      seedAgentWelcome();
+   553→      showToast('گفتگو پاک شد 🧹');
+   554→    }
+   555→
+   556→    // ================= AI AGENT: SOCIAL MEDIA CONTROL =================
+   557→    let socialPlanBusy = false;
+   558→    const socialPlatforms = { instagram: true, linkedin: true };
+   559→
+   560→    const socialFieldChips = [
+   561→      { icon: '🤖', label: 'هوش مصنوعی', text: 'در حوزه هوش مصنوعی کار می‌کنم و می‌خواهم هر هفته یک پست آموزشی منتشر کنم' },
+   562→      { icon: '💻', label: 'برنامه‌نویسی', text: 'برنامه‌نویس هستم و می‌خواهم تجربه‌ها و پروژه‌های فنی‌ام را به اشتراک بگذارم' },
+   563→      { icon: '🎓', label: 'آموزش', text: 'معلم و مدرس هستم و می‌خواهم محتوای آموزشی تولید کنم' },
+   564→      { icon: '💪', label: 'فیتنس', text: 'مربی تناسب اندام هستم و می‌خواهم برنامه‌های ورزشی و سبک زندگی سالم معرفی کنم' },
+   565→      { icon: '🍳', label: 'آشپزی', text: 'آشپز هستم و می‌خواهم دستورپخت‌های خاصم را نمایش بدهم' },
+   566→      { icon: '🎨', label: 'طراحی', text: 'طراح گرافیک هستم و می‌خواهم نمونه‌کارهایم را نشان بدهم' }
+   567→    ];
+   568→
+   569→    function setSocialField(i) {
+   570→      const inp = document.getElementById('agentSocialField');
+   571→      if (inp) inp.value = socialFieldChips[i].text;
+   572→    }
+   573→
+   574→    function renderSocialChips() {
+   575→      const wrap = document.getElementById('agentSocialChips');
+   576→      if (!wrap) return;
+   577→      wrap.innerHTML = socialFieldChips.map((c, i) =>
+   578→        `<button class="agent-quick-chip" onclick="setSocialField(${i})">${c.icon} ${c.label}</button>`
+   579→      ).join('');
+   580→    }
+   581→
+   582→    function toggleSocialPlatform(btn) {
+   583→      const p = btn.dataset.platform;
+   584→      socialPlatforms[p] = !socialPlatforms[p];
+   585→      btn.classList.toggle('active', socialPlatforms[p]);
+   586→    }
+   587→
+   588→    function renderSocialTab() {
+   589→      renderSocialChips();
+   590→      const wrap = document.getElementById('agentSocialPlans');
+   591→      if (!wrap) return;
+   592→      const plans = Array.isArray(state.agentSocialPlans) ? state.agentSocialPlans : [];
+   593→      if (plans.length === 0) {
+   594→        wrap.innerHTML = '<div class="agent-insight-card"><div class="agent-bubble-text">حوزه کاری‌ات را بنویس (مثلاً «در حوزه هوش مصنوعی کار می‌کنم») تا برایت یک برنامه محتوای ۴ هفته‌ای بسازم؛ هر هفته دقیقاً یک پست برای اینستاگرام و لینکدین با پرامت آماده کپی، کپشن، هشتگ و بهترین زمان انتشار 📱✨</div></div>';
+   595→        return;
+   596→      }
+   597→      const platMeta = { instagram: '📸 اینستاگرام', linkedin: '💼 لینکدین' };
+   598→      wrap.innerHTML = plans.map(p => {
+   599→        const plan = p.plan || {};
+   600→        const weeksHtml = (plan.weeks || []).map(w => {
+   601→          const plats = ['instagram', 'linkedin'].filter(k => w[k]).map(k => {
+   602→            const b = w[k] || {};
+   603→            return `
+   604→              <div class="agent-social-platform">
+   605→                <div class="agent-social-platform-title">${platMeta[k]}</div>
+   606→                ${b.topic ? `<div class="agent-social-meta">🎯 موضوع: ${escapeHtml(b.topic)}</div>` : ''}
+   607→                <div class="agent-prompt-box">${escapeHtml(b.prompt || '')}<button class="agent-copy-btn" onclick="copySocialPrompt('${p.id}', ${w.week || 0}, '${k}')" title="کپی پرامت"><span class="material-symbols-outlined text-[13px]">content_copy</span></button></div>
+   608→                ${b.caption ? `<div class="agent-social-meta">✍️ کپشن آماده: ${escapeHtml(b.caption)}</div>` : ''}
+   609→                ${b.hashtags && b.hashtags.length ? `<div class="agent-social-meta">#️⃣ ${b.hashtags.map(escapeHtml).join(' ')}</div>` : ''}
+   610→                ${b.bestTime ? `<div class="agent-social-meta">⏰ بهترین زمان انتشار: ${escapeHtml(b.bestTime)}</div>` : ''}
+   611→              </div>`;
+   612→          }).join('');
+   613→          return `<div class="agent-social-week">🗓️ هفته ${toPersian(w.week || '')} — ${escapeHtml(w.theme || '')}</div>${plats}`;
+   614→        }).join('');
+   615→        return `
+   616→          <div class="agent-social-card">
+   617→            <div class="agent-plan-name">🚀 ${escapeHtml(plan.title || 'برنامه محتوای هفتگی')}</div>
+   618→            ${plan.audience ? `<div class="agent-plan-summary">👥 مخاطب هدف: ${escapeHtml(plan.audience)}</div>` : ''}
+   619→            <div class="agent-report-date">حوزه: ${escapeHtml(p.field || '')} · ${new Date(p.createdAt || Date.now()).toLocaleDateString('fa-IR', { day: 'numeric', month: 'long' })}</div>
+   620→            ${weeksHtml}
+   621→            <div class="agent-plan-foot">
+   622→              <button onclick="applySocialHabit('${p.id}')" class="agent-btn agent-btn-primary flex-1">
+   623→                <span class="material-symbols-outlined text-[16px]">notifications_active</span>
+   624→                یادآور پست هفتگی
+   625→              </button>
+   626→              <button onclick="deleteSocialPlan('${p.id}')" class="agent-btn agent-btn-secondary" title="حذف برنامه">
+   627→                <span class="material-symbols-outlined text-[16px]">delete</span>
+   628→              </button>
+   629→            </div>
+   630→          </div>`;
+   631→      }).join('');
+   632→    }
+   633→
+   634→    async function generateSocialPlan() {
+   635→      if (socialPlanBusy) return;
+   636→      const fieldInput = document.getElementById('agentSocialField');
+   637→      const field = fieldInput ? fieldInput.value.trim() : '';
+   638→      const platforms = Object.keys(socialPlatforms).filter(k => socialPlatforms[k]);
+   639→      if (!field) { showToast('اول بنویس چه کار می‌کنی یا در چه حوزه‌ای هستی 🙂'); return; }
+   640→      if (platforms.length === 0) { showToast('حداقل یک پلتفرم انتخاب کن 📱'); return; }
+   641→      socialPlanBusy = true;
+   642→      const btn = document.getElementById('agentSocialBtn');
+   643→      const oldHtml = btn ? btn.innerHTML : '';
+   644→      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">hourglass_top</span> در حال طراحی برنامه محتوا...'; }
+   645→      try {
+   646→        const res = await fetch('/api/agent', {
+   647→          method: 'POST',
+   648→          headers: { 'Content-Type': 'application/json' },
+   649→          body: JSON.stringify({ mode: 'social-plan', field: field, platforms: platforms, context: getAgentContext() })
+   650→        });
+   651→        if (!res.ok) throw new Error('HTTP ' + res.status);
+   652→        const data = await res.json();
+   653→        const plan = data && data.socialPlan;
+   654→        if (!plan || !Array.isArray(plan.weeks) || plan.weeks.length === 0) throw new Error('bad plan');
+   655→        if (!Array.isArray(state.agentSocialPlans)) state.agentSocialPlans = [];
+   656→        state.agentSocialPlans.unshift({
+   657→          id: 'sp' + Date.now(),
+   658→          field: field,
+   659→          platforms: platforms,
+   660→          createdAt: Date.now(),
+   661→          plan: plan
+   662→        });
+   663→        state.agentSocialPlans = state.agentSocialPlans.slice(0, 3);
+   664→        saveState();
+   665→        renderSocialTab();
+   666→        playCrystalChime();
+   667→        showToast('برنامه محتوای ' + toPersian(plan.weeks.length) + ' هفته‌ای آماده شد! 🎉');
+   668→        addNotification('agent', 'برنامه محتوا آماده شد', '«' + (plan.title || 'برنامه محتوا') + '» با پرامت‌های آماده در تب فضای مجازی ایجنت ذخیره شد.', 'smartphone');
+   669→      } catch (e) {
+   670→        showToast('ساخت برنامه محتوا ناموفق بود؛ دوباره تلاش کن 🙏');
+   671→      } finally {
+   672→        socialPlanBusy = false;
+   673→        if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+   674→      }
+   675→    }
+   676→
+   677→    function buildFullPostPrompt(b, platform) {
+   678→      const tone = platform === 'instagram'
+   679→        ? 'لحن صمیمی و پرانرژی، مناسب اینستاگرام'
+   680→        : 'لحن حرفه‌ای و آموزشی، مناسب لینکدین';
+   681→      let t = '';
+   682→      if (b.topic) t += 'یک پست با موضوع «' + b.topic + '» برام بنویس.\n';
+   683→      if (b.prompt) t += 'شرح پست: ' + b.prompt + '\n';
+   684→      t += 'ساختار: هوک جذاب در خط اول، بدنه آموزشی کوتاه (۳ تا ۵ نکته)، دعوت به اقدام در انتها.\n';
+   685→      t += tone + '.\n';
+   686→      t += 'خروجی: ۱) متن کامل پست ۲) پیشنهاد تصویر یا قالب ۳) پنج هشتگ مرتبط.';
+   687→      return t;
+   688→    }
+   689→
+   690→    function copySocialPrompt(planId, week, platform) {
+   691→      const p = (state.agentSocialPlans || []).find(x => x.id === planId);
+   692→      if (!p || !p.plan) return;
+   693→      const w = (p.plan.weeks || []).find(x => Number(x.week) === Number(week));
+   694→      if (!w || !w[platform]) return;
+   695→      const b = w[platform];
+   696→      let text = buildFullPostPrompt(b, platform);
+   697→      if (b.caption) text += '\n\nکپشن آماده:\n' + b.caption;
+   698→      if (b.hashtags && b.hashtags.length) text += '\n\nهشتگ‌ها: ' + b.hashtags.join(' ');
+   699→      copyToClipboard(text, 'پرامت کامل کپی شد! ببرش به ابزار هوش مصنوعی 📋');
+   700→    }
+   701→
+   702→    function copyToClipboard(text, okMsg) {
+   703→      const done = () => showToast(okMsg || 'کپی شد 📋');
+   704→      if (navigator.clipboard && navigator.clipboard.writeText) {
+   705→        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+   706→      } else fallbackCopy(text, done);
+   707→    }
+   708→
+   709→    function fallbackCopy(text, done) {
+   710→      try {
+   711→        const ta = document.createElement('textarea');
+   712→        ta.value = text;
+   713→        ta.style.position = 'fixed';
+   714→        ta.style.opacity = '0';
+   715→        document.body.appendChild(ta);
+   716→        ta.select();
+   717→        document.execCommand('copy');
+   718→        document.body.removeChild(ta);
+   719→        done();
+   720→      } catch (e) { showToast('کپی خودکار ممکن نشد؛ دستی کپی کن 🙏'); }
+   721→    }
+   722→
+   723→    function applySocialHabit(planId) {
+   724→      const p = (state.agentSocialPlans || []).find(x => x.id === planId);
+   725→      if (!p) return;
+   726→      const name = '✍️ آماده‌سازی پست هفتگی';
+   727→      if (state.habits.some(h => h.name === name)) { showToast('یادآور از قبل ساخته شده ✅'); return; }
+   728→      state.habits.push({
+   729→        id: 'h' + Date.now() + Math.floor(Math.random() * 100000),
+   730→        name: name,
+   731→        icon: '📱',
+   732→        category: 'productivity',
+   733→        completions: {},
+   734→        streak: 0,
+   735→        alarmTime: '17:30',
+   736→        alarmEnabled: true,
+   737→        notes: [],
+   738→        duration: 21
+   739→      });
+   740→      saveState();
+   741→      renderAll();
+   742→      triggerConfetti();
+   743→      showToast('یادآور «آماده‌سازی پست هفتگی» به برنامه‌ات اضافه شد 🎉');
+   744→      addNotification('habit', 'یادآور محتوا فعال شد', 'هر هفته یک پست برای فضای مجازی آماده کن؛ برنامه و پرامت‌ها در ایجنت منتظرت است.', 'smartphone');
+   745→    }
+   746→
+   747→    function deleteSocialPlan(planId) {
+   748→      state.agentSocialPlans = (state.agentSocialPlans || []).filter(x => x.id !== planId);
+   749→      saveState();
+   750→      renderSocialTab();
+   751→      showToast('برنامه محتوا حذف شد 🗑️');
+   752→    }
+   753→
+   754→    function updateAgentBadge() {
+   755→      const badge = document.getElementById('agentBadge');
+   756→      if (!badge) return;
+   757→      const pending = (state.agentChat || []).some(m => m.role === 'agent' && m.plan && !m.applied);
+   758→      badge.style.display = pending ? 'flex' : 'none';
+   759→      badge.textContent = '۱';
+   760→    }
+   761→
+   762→    // ================= AI AGENT: AUTO WEEKLY REPORT =================
+   763→    let weeklyReportBusy = false;
+   764→
+   765→    function isoWeekKey(d) {
+   766→      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+   767→      const dayNum = date.getUTCDay() || 7;
+   768→      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+   769→      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+   770→      const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+   771→      return date.getUTCFullYear() + '-W' + weekNo;
+   772→    }
+   773→
+   774→    function computeWeeklyStats() {
+   775→      const days = [];
+   776→      for (let i = 6; i >= 0; i--) {
+   777→        const d = new Date(); d.setDate(d.getDate() - i);
+   778→        days.push(d.toISOString().split('T')[0]);
+   779→      }
+   780→      const dayNames = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+   781→      const perDay = days.map(ds => {
+   782→        const d = new Date(ds + 'T00:00:00');
+   783→        return { date: ds, dayFa: dayNames[d.getDay()], total: state.habits.length, done: state.habits.filter(h => h.completions[ds]).length };
+   784→      });
+   785→      const totalSlots = perDay.reduce((a, d) => a + d.total, 0);
+   786→      const totalDone = perDay.reduce((a, d) => a + d.done, 0);
+   787→      const rate7 = totalSlots > 0 ? Math.round((totalDone / totalSlots) * 100) : 0;
+   788→      const bestStreak = state.habits.length ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+   789→      const moodScores = (state.moodLog || []).filter(m => days.includes(m.date)).map(m => m.score);
+   790→      const moodAvg = moodScores.length ? Math.round((moodScores.reduce((a, b) => a + b, 0) / moodScores.length) * 10) / 10 : null;
+   791→      const ranked = perDay.filter(d => d.total > 0).slice().sort((a, b) => (b.done / b.total) - (a.done / a.total));
+   792→      const habitRows = state.habits.map(h => ({ name: h.name, category: h.category, streak: h.streak || 0, done7: days.filter(ds => h.completions[ds]).length }));
+   793→      habitRows.sort((a, b) => b.done7 - a.done7);
+   794→      return {
+   795→        rate7: rate7,
+   796→        totalDone: totalDone,
+   797→        totalSlots: totalSlots,
+   798→        totalHabits: state.habits.length,
+   799→        bestStreak: bestStreak,
+   800→        moodAvg: moodAvg,
+   801→        moodCount: moodScores.length,
+   802→        bestDay: ranked.length ? ranked[0].dayFa : null,
+   803→        weakDay: ranked.length > 1 ? ranked[ranked.length - 1].dayFa : null,
+   804→        topHabits: habitRows.slice(0, 3),
+   805→        zeroHabits: habitRows.filter(h => h.done7 === 0).map(h => h.name).slice(0, 5),
+   806→        perDay: perDay
+   807→      };
+   808→    }
+   809→
+   810→    function renderWeeklyReportTab() {
+   811→      const statsWrap = document.getElementById('agentWeekStats');
+   812→      const body = document.getElementById('agentWeeklyReportBody');
+   813→      if (!statsWrap || !body) return;
+   814→      const s = computeWeeklyStats();
+   815→      const cell = (val, label) => `<div class="agent-week-stat"><div class="agent-week-stat-val">${val}</div><div class="agent-week-stat-label">${label}</div></div>`;
+   816→      statsWrap.innerHTML =
+   817→        cell(toPersian(s.rate7) + '٪', 'تکمیل ۷ روز گذشته') +
+   818→        cell(toPersian(s.totalDone), 'کل تکمیل‌ها') +
+   819→        cell(toPersian(s.bestStreak), 'بهترین استریک') +
+   820→        cell(s.moodAvg !== null ? toPersian(String(s.moodAvg).replace('.', '٫')) : '—', 'میانگین حال') +
+   821→        cell(s.bestDay ? s.bestDay : '—', 'بهترین روز') +
+   822→        cell(s.topHabits.length ? escapeHtml(s.topHabits[0].name) : '—', 'عادت برتر هفته');
+   823→
+   824→      const toggle = document.getElementById('agentAutoReportToggle');
+   825→      if (toggle) toggle.checked = !(state.settings && state.settings.autoWeeklyReport === false);
+   826→
+   827→      const r = state.agentWeeklyReport;
+   828→      const wk = isoWeekKey(new Date());
+   829→      if (!r || !r.report) {
+   830→        body.innerHTML = '<div class="agent-insight-card"><div class="agent-bubble-text">هنوز گزارشی برای این هفته نداریم 📊\nروی «ساخت گزارش تازه این هفته» بزن تا هوش مصنوعی یک تحلیل کامل و صمیمی از هفته‌ات برایت بنویسد. از هفته بعد هم خودکار می‌سازم ✨</div></div>';
+   831→        return;
+   832→      }
+   833→      const isCurrent = r.weekKey === wk;
+   834→      const rep = r.report;
+   835→      const list = (items, icon) => (items || []).map(x => `<div class="agent-report-item">${icon} ${escapeHtml(x)}</div>`).join('');
+   836→      body.innerHTML = `
+   837→        <div class="agent-report-card">
+   838→          ${isCurrent ? '' : '<div class="agent-report-date">⚠️ این گزارش هفته قبل است — برای هفته جاری دوباره بساز</div>'}
+   839→          <div class="agent-report-headline">📈 ${escapeHtml(rep.headline || 'گزارش هفتگی تو')}</div>
+   840→          <div class="agent-report-summary">${escapeHtml(rep.summary || '')}</div>
+   841→          ${list(rep.highlights, '✅')}
+   842→          ${list(rep.issues, '⚠️')}
+   843→          ${list(rep.suggestions, '💡')}
+   844→          ${rep.focus ? `<div class="agent-report-focus">🎯 تمرکز هفته آینده: ${escapeHtml(rep.focus)}</div>` : ''}
+   845→          ${rep.motivation ? `<div class="agent-report-motivation">🔥 ${escapeHtml(rep.motivation)}</div>` : ''}
+   846→          <div class="agent-report-date">تاریخ تولید: ${new Date(r.generatedAt || Date.now()).toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+   847→        </div>`;
+   848→    }
+   849→
+   850→    async function generateWeeklyReport(auto) {
+   851→      if (weeklyReportBusy) return;
+   852→      weeklyReportBusy = true;
+   853→      const btn = document.getElementById('agentReportBtn');
+   854→      const oldHtml = btn ? btn.innerHTML : '';
+   855→      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">hourglass_top</span> در حال تحلیل هفته‌ات...'; }
+   856→      try {
+   857→        const res = await fetch('/api/agent', {
+   858→          method: 'POST',
+   859→          headers: { 'Content-Type': 'application/json' },
+   860→          body: JSON.stringify({ mode: 'weekly-report', stats: computeWeeklyStats(), context: getAgentContext() })
+   861→        });
+   862→        if (!res.ok) throw new Error('HTTP ' + res.status);
+   863→        const data = await res.json();
+   864→        if (!data || !data.report) throw new Error('no report');
+   865→        state.agentWeeklyReport = { weekKey: isoWeekKey(new Date()), generatedAt: Date.now(), report: data.report };
+   866→        saveState();
+   867→        renderWeeklyReportTab();
+   868→        if (!auto) {
+   869→          playCrystalChime();
+   870→          showToast('گزارش هفتگی آماده شد! 📊');
+   871→        }
+   872→        addNotification('agent', 'گزارش هفتگی آماده شد', data.reply || 'تحلیل کامل هفته‌ات را در تب گزارش هفتگی ایجنت ببین.', 'monitoring');
+   873→      } catch (e) {
+   874→        if (!auto) showToast('ساخت گزارش ناموفق بود؛ دوباره تلاش کن 🙏');
+   875→      } finally {
+   876→        weeklyReportBusy = false;
+   877→        if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+   878→      }
+   879→    }
+   880→
+   881→    function toggleAutoWeeklyReport(chk) {
+   882→      if (!state.settings) state.settings = {};
+   883→      state.settings.autoWeeklyReport = !!chk.checked;
+   884→      saveState();
+   885→      showToast(chk.checked ? 'گزارش هفتگی خودکار فعال شد ✅' : 'تولید خودکار گزارش خاموش شد');
+   886→    }
+   887→
+   888→    function maybeAutoWeeklyReport() {
+   889→      renderWeeklyReportTab();
+   890→      if (state.settings && state.settings.autoWeeklyReport === false) return;
+   891→      if (weeklyReportBusy) return;
+   892→      const wk = isoWeekKey(new Date());
+   893→      if (state.agentWeeklyReport && state.agentWeeklyReport.weekKey === wk) return;
+   894→      setTimeout(() => generateWeeklyReport(true), 800);
+   895→    }
+   896→
+   897→    function switchAgentTab(tabName) {
+   898→      // Update tabs
+   899→      document.querySelectorAll('.agent-tab').forEach(tab => {
+   900→        tab.classList.remove('active');
+   901→        if (tab.dataset.tab === tabName) tab.classList.add('active');
+   902→      });
+   903→      
+   904→      // Update content
+   905→      document.querySelectorAll('.agent-tab-content').forEach(content => {
+   906→        content.classList.add('hidden');
+   907→      });
+   908→      document.getElementById('agentTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
+   909→      
+   910→      // Render tab-specific content
+   911→      if (tabName === 'chat') {
+   912→        renderAgentChat();
+   913→      } else if (tabName === 'report') {
+   914→        renderWeeklyReportTab();
+   915→      } else if (tabName === 'social') {
+   916→        renderSocialTab();
+   917→      }
+   918→    }
+   919→
+   920→    function updateAgentGreeting() {
+   921→      const hour = new Date().getHours();
+   922→      let greeting = '';
+   923→      let subGreeting = '';
+   924→      
+   925→      if (hour >= 5 && hour < 12) {
+   926→        greeting = 'صبح بخیر! ️';
+   927→        subGreeting = 'امروز چه برنامه‌ای داری؟';
+   928→      } else if (hour >= 12 && hour < 17) {
+   929→        greeting = 'ظهر بخیر! 🌤️';
+   930→        subGreeting = 'نیمه روز را چطور پیش می‌بری؟';
+   931→      } else if (hour >= 17 && hour < 21) {
+   932→        greeting = 'عصر بخیر! 🌆';
+   933→        subGreeting = 'چه دستاوردهایی داشتی؟';
+   934→      } else {
+   935→        greeting = 'شب بخیر! 🌙';
+   936→        subGreeting = 'وقت مرور روز است';
+   937→      }
+   938→      
+   939→      document.getElementById('agentGreeting').textContent = greeting;
+   940→      document.getElementById('agentSubGreeting').textContent = subGreeting;
+   941→    }
+   942→
+   943→    // ================= INIT =================
+   944→    document.addEventListener('DOMContentLoaded', () => {
+   945→      updateDate();
+   946→      setDailyQuote();
+   947→      renderMoodScorePicker();
+   948→      renderAll();
+   949→      requestNotificationPermission();
+   950→      startAlarmChecker();
+   951→      initMusicLibrary();
+   952→      startMusicScheduler();
+   953→      
+   954→      if (state.settings.batterySaver) {
+   955→        document.body.classList.add('battery-saver');
+   956→        updateBatterySaverToggle();
+   957→      }
+   958→      
+   959→      // Check for unread agent notifications
+   960→      const unreadAgent = state.notifications.filter(n => !n.read && n.type === 'agent').length;
+   961→      if (unreadAgent > 0) {
+   962→        const badge = document.getElementById('agentBadge');
+   963→        badge.style.display = 'flex';
+   964→        badge.textContent = toPersian(unreadAgent);
+   965→      } else {
+   966→        updateAgentBadge();
+   967→      }
+   968→    });
+   969→
+   970→    function updateDate() {
+   971→      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+   972→      const dateStr = new Date().toLocaleDateString('fa-IR', options);
+   973→      document.getElementById('headerDate').textContent = dateStr;
+   974→      document.getElementById('modalDate').textContent = dateStr;
+   975→    }
+   976→
+   977→    function requestNotificationPermission() {
+   978→      if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+   979→    }
+   980→
+   981→    function sendNotification(title, body) {
+   982→      if ('Notification' in window && Notification.permission === 'granted') {
+   983→        new Notification(title, { body, tag: 'habits-tracker-alarm' });
+   984→      }
+   985→    }
+   986→
+   987→    function startAlarmChecker() {
+   988→      setInterval(() => {
+   989→        const now = new Date();
+   990→        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+   991→        const todayStr = today();
+   992→        state.habits.forEach(habit => {
+   993→          if (habit.alarmEnabled && habit.alarmTime === currentTime && !habit.completions[todayStr]) {
+   994→            sendNotification('یادآوری عادت', `زمان انجام "${habit.name}" فرا رسیده است!`);
+   995→            addNotification('reminder', `یادآوری: ${habit.name}`, `زمان انجام "${habit.name}" فرا رسیده است!`, 'alarm');
+   996→          }
+   997→        });
+   998→      }, 60000);
+   999→    }
+  1000→
+  1001→    // ================= RENDERING =================
+  1002→    function renderAll() {
+  1003→      renderStreakCalendar();
+  1004→      renderHabits();
+  1005→      renderBadges();
+  1006→      renderTodayMoodPreview();
+  1007→      updateBadgeCount();
+  1008→      renderAlarmSettings();
+  1009→      renderTrophyCase();
+  1010→      renderNotebookPreview();
+  1011→      renderNotifications();
+  1012→    }
+  1013→
+  1014→    // ================= STREAK CALENDAR =================
+  1015→    let streakFilterCategory = 'all';
+  1016→
+  1017→    function renderStreakCalendar() {
+  1018→      const wrapper = document.getElementById('streakCalendarWrapper');
+  1019→      if (!wrapper) return;
+  1020→      
+  1021→      const todayStr = today();
+  1022→      const todayDate = new Date(todayStr);
+  1023→      const numDays = 31;
+  1024→      const dayNames = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+  1025→      
+  1026→      let html = '<div class="streak-category-header">';
+  1027→      html += '<div class="flex items-center gap-2">';
+  1028→      html += '<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">';
+  1029→      html += '<span class="material-symbols-outlined text-[18px] text-primary">calendar_month</span>';
+  1030→      html += '</div>';
+  1031→      html += '<div>';
+  1032→      html += '<div class="text-xs font-bold text-on-surface">۳۱ روز اخیر</div>';
+  1033→      html += '<div class="text-[9px] text-on-surface-variant">مسیر پیوستگی تو</div>';
+  1034→      html += '</div>';
+  1035→      html += '</div>';
+  1036→      html += '<div class="flex items-center gap-1">';
+  1037→      html += '<span class="text-[10px] text-primary font-bold bg-on-primary-container px-2 py-1 rounded-full">';
+  1038→      const totalStreak = state.habits.length > 0 ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+  1039→      html += ` ${toPersian(totalStreak)} روز`;
+  1040→      html += '</span>';
+  1041→      html += '</div>';
+  1042→      html += '</div>';
+  1043→      
+  1044→      html += '<div class="streak-category-tabs">';
+  1045→      const cats = [
+  1046→        { id: 'all', label: 'همه', emoji: '📊' },
+  1047→        { id: 'spiritual', label: 'معنوی', emoji: '🕊️' },
+  1048→        { id: 'productivity', label: 'بهره‌وری', emoji: '⚡' },
+  1049→        { id: 'self-care', label: 'مراقبت', emoji: '💖' },
+  1050→        { id: 'family', label: 'خانواده', emoji: '👨‍👩👧' }
+  1051→      ];
+  1052→      cats.forEach(cat => {
+  1053→        html += `<button class="streak-cat-tab ${streakFilterCategory === cat.id ? 'active' : ''}" onclick="setStreakFilter('${cat.id}')">${cat.emoji} ${cat.label}</button>`;
+  1054→      });
+  1055→      html += '</div>';
+  1056→      
+  1057→      html += '<div class="streak-days-grid">';
+  1058→      
+  1059→      for (let i = numDays - 1; i >= 0; i--) {
+  1060→        const d = new Date(todayDate);
+  1061→        d.setDate(todayDate.getDate() - i);
+  1062→        const dateStr = d.toISOString().split('T')[0];
+  1063→        const isToday = dateStr === todayStr;
+  1064→        const dayNumber = numDays - i;
+  1065→        
+  1066→        let allCompleted = false;
+  1067→        let someCompleted = false;
+  1068→        let relevantHabits = state.habits;
+  1069→        
+  1070→        if (streakFilterCategory !== 'all') {
+  1071→          relevantHabits = state.habits.filter(h => h.category === streakFilterCategory);
+  1072→        }
+  1073→        
+  1074→        if (relevantHabits.length > 0) {
+  1075→          allCompleted = relevantHabits.every(h => h.completions[dateStr]);
+  1076→          someCompleted = relevantHabits.some(h => h.completions[dateStr]);
+  1077→        }
+  1078→        
+  1079→        let cellClass = 'streak-day-cell ';
+  1080→        if (isToday) cellClass += 'today';
+  1081→        else if (allCompleted) cellClass += 'completed';
+  1082→        else if (someCompleted) cellClass += 'partial';
+  1083→        else cellClass += 'future';
+  1084→        
+  1085→        let icon = '';
+  1086→        if (allCompleted && !isToday) icon = '<span class="streak-day-icon">✓</span>';
+  1087→        else if (isToday) icon = '<span class="streak-day-icon" style="color: #fbbf24;">●</span>';
+  1088→        
+  1089→        html += `
+  1090→          <div class="${cellClass}" title="${dateStr}">
+  1091→            ${icon}
+  1092→            <span class="streak-day-label">روز</span>
+  1093→            <span class="streak-day-number">${toPersian(dayNumber)}</span>
+  1094→          </div>
+  1095→        `;
+  1096→      }
+  1097→      
+  1098→      html += '</div>';
+  1099→      
+  1100→      const completedDays = [];
+  1101→      for (let i = numDays - 1; i >= 0; i--) {
+  1102→        const d = new Date(todayDate);
+  1103→        d.setDate(todayDate.getDate() - i);
+  1104→        const dateStr = d.toISOString().split('T')[0];
+  1105→        let relevantHabits = state.habits;
+  1106→        if (streakFilterCategory !== 'all') {
+  1107→          relevantHabits = state.habits.filter(h => h.category === streakFilterCategory);
+  1108→        }
+  1109→        if (relevantHabits.length > 0 && relevantHabits.every(h => h.completions[dateStr])) {
+  1110→          completedDays.push(dateStr);
+  1111→        }
+  1112→      }
+  1113→      
+  1114→      const currentStreak = calculateCurrentStreak();
+  1115→      const longestStreak = calculateLongestStreak(numDays);
+  1116→      const completionRate = numDays > 0 ? Math.round((completedDays.length / numDays) * 100) : 0;
+  1117→      
+  1118→      html += '<div class="streak-stats-row">';
+  1119→      html += `
+  1120→        <div class="streak-stat-card">
+  1121→          <div class="streak-stat-value">${toPersian(currentStreak)}</div>
+  1122→          <div class="streak-stat-label">استریک فعلی 🔥</div>
+  1123→        </div>
+  1124→        <div class="streak-stat-card">
+  1125→          <div class="streak-stat-value" style="color: #fbbf24;">${toPersian(longestStreak)}</div>
+  1126→          <div class="streak-stat-label">طولانی‌ترین ⭐</div>
+  1127→        </div>
+  1128→        <div class="streak-stat-card">
+  1129→          <div class="streak-stat-value" style="color: #34d399;">${toPersian(completionRate)}٪</div>
+  1130→          <div class="streak-stat-label">نرخ تکمیل 📊</div>
+  1131→        </div>
+  1132→      `;
+  1133→      html += '</div>';
+  1134→      
+  1135→      wrapper.innerHTML = html;
+  1136→      
+  1137→      document.getElementById('streakTotalLabel').textContent = toPersian(totalStreak) + ' روز';
+  1138→    }
+  1139→
+  1140→    function setStreakFilter(cat) {
+  1141→      streakFilterCategory = cat;
+  1142→      renderStreakCalendar();
+  1143→    }
+  1144→
+  1145→    function calculateCurrentStreak() {
+  1146→      const todayStr = today();
+  1147→      const todayDate = new Date(todayStr);
+  1148→      let streak = 0;
+  1149→      
+  1150→      for (let i = 0; i < 365; i++) {
+  1151→        const d = new Date(todayDate);
+  1152→        d.setDate(todayDate.getDate() - i);
+  1153→        const dateStr = d.toISOString().split('T')[0];
+  1154→        let relevantHabits = state.habits;
+  1155→        if (streakFilterCategory !== 'all') {
+  1156→          relevantHabits = state.habits.filter(h => h.category === streakFilterCategory);
+  1157→        }
+  1158→        const allCompleted = relevantHabits.length > 0 && relevantHabits.every(h => h.completions[dateStr]);
+  1159→        if (allCompleted) streak++;
+  1160→        else if (i > 0) break;
+  1161→      }
+  1162→      
+  1163→      return streak;
+  1164→    }
+  1165→
+  1166→    function calculateLongestStreak(numDays) {
+  1167→      const todayDate = new Date(today());
+  1168→      let longest = 0;
+  1169→      let current = 0;
+  1170→      
+  1171→      for (let i = numDays - 1; i >= 0; i--) {
+  1172→        const d = new Date(todayDate);
+  1173→        d.setDate(todayDate.getDate() - i);
+  1174→        const dateStr = d.toISOString().split('T')[0];
+  1175→        let relevantHabits = state.habits;
+  1176→        if (streakFilterCategory !== 'all') {
+  1177→          relevantHabits = state.habits.filter(h => h.category === streakFilterCategory);
+  1178→        }
+  1179→        const allCompleted = relevantHabits.length > 0 && relevantHabits.every(h => h.completions[dateStr]);
+  1180→        
+  1181→        if (allCompleted) {
+  1182→          current++;
+  1183→          if (current > longest) longest = current;
+  1184→        } else {
+  1185→          current = 0;
+  1186→        }
+  1187→      }
+  1188→      
+  1189→      return longest;
+  1190→    }
+  1191→
+  1192→    let currentFilter = 'all';
+  1193→    function filterByCategory(cat) {
+  1194→      currentFilter = cat;
+  1195→      document.querySelectorAll('.category-filter-chip').forEach(btn => {
+  1196→        btn.classList.remove('active');
+  1197→        if (btn.dataset.cat === cat) btn.classList.add('active');
+  1198→      });
+  1199→      renderHabits();
+  1200→    }
+  1201→
+  1202→    function renderHabits() {
+  1203→      const list = document.getElementById('habitsList');
+  1204→      list.innerHTML = '';
+  1205→      const todayStr = today();
+  1206→
+  1207→      let filteredHabits = state.habits;
+  1208→      if (currentFilter !== 'all') {
+  1209→        filteredHabits = state.habits.filter(h => h.category === currentFilter);
+  1210→      }
+  1211→
+  1212→      if (filteredHabits.length === 0) {
+  1213→        list.innerHTML = `<div class="text-center py-8 text-on-surface-variant"><span class="text-4xl block mb-2 opacity-50">🏔️</span><p class="text-sm font-medium">${state.habits.length === 0 ? 'هنوز عادتی نساختی' : 'عادتی در این دسته نیست'}</p></div>`;
+  1214→        return;
+  1215→      }
+  1216→
+  1217→      filteredHabits.forEach(habit => {
+  1218→        const isCompleted = habit.completions[todayStr];
+  1219→        const cat = categories[habit.category] || categories.productivity;
+  1220→        
+  1221→        const card = document.createElement('div');
+  1222→        card.className = `habit-card bg-white rounded-2xl p-3.5 transition-all duration-300 shadow-sm border border-surface-container-highest ${isCompleted ? 'completed' : ''}`;
+  1223→        card.dataset.id = habit.id;
+  1224→        card.dataset.category = habit.category;
+  1225→        
+  1226→        let checkState = '';
+  1227→        if (isCompleted) {
+  1228→          checkState = `<div class="w-6 h-6 rounded-lg bg-primary text-on-primary flex items-center justify-center flex-shrink-0 shadow-sm"><span class="material-symbols-outlined text-[16px] font-bold">check</span></div>`;
+  1229→        } else {
+  1230→          checkState = `<div class="w-6 h-6 rounded-lg border-2 border-outline-variant bg-transparent flex items-center justify-center flex-shrink-0"></div>`;
+  1231→        }
+  1232→        
+  1233→        card.innerHTML = `
+  1234→          <div class="flex items-center gap-2">
+  1235→            <div class="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0" style="background: ${cat.color}20; color: ${cat.color};">
+  1236→              <span class="material-symbols-outlined text-[16px]">${cat.icon}</span>
+  1237→            </div>
+  1238→            <div class="flex-1 flex flex-col text-right pr-1 cursor-pointer" onclick="toggleHabitExpand('${habit.id}')">
+  1239→              <div class="flex items-center gap-1.5 flex-wrap">
+  1240→                <span class="text-[13px] font-bold text-on-surface">${habit.name}</span>
+  1241→                ${isCompleted ? `<span class="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-on-primary-container text-primary">تثبیت‌شده</span>` : ''}
+  1242→                <span class="px-1.5 py-0.5 text-[9px] font-bold rounded-md" style="background: ${cat.color}20; color: ${cat.color};">${cat.emoji} ${cat.label}</span>
+  1243→              </div>
+  1244→              <div class="flex items-center gap-2 mt-1">
+  1245→                ${habit.streak > 0 ? `<span class="text-[10px] text-tertiary font-bold flex items-center gap-0.5">🔥 ${toPersian(habit.streak)} روز</span>` : '<span class="text-[10px] text-on-surface-variant">شروع کن</span>'}
+  1246→                <span class="text-[10px] text-on-surface-variant">⏰ ${habit.alarmTime || 'بدون آلارم'}</span>
+  1247→              </div>
+  1248→            </div>
+  1249→            <button onclick="toggleHabit('${habit.id}', event)" class="flex-shrink-0">
+  1250→              ${checkState}
+  1251→            </button>
+  1252→          </div>
+  1253→        `;
+  1254→        list.appendChild(card);
+  1255→      });
+  1256→    }
+  1257→
+  1258→    function toggleHabitExpand(id) {
+  1259→      const card = document.querySelector(`.habit-card[data-id="${id}"]`);
+  1260→      if (card) card.classList.toggle('expanded');
+  1261→    }
+  1262→
+  1263→    function renderTodayMoodPreview() {
+  1264→      const preview = document.getElementById('todayMoodPreview');
+  1265→      const todayLog = state.moodLog.find(m => m.date === today());
+  1266→      if (todayLog) {
+  1267→        const emojis = ['😫', '😕', '😐', '🙂', '🤩'];
+  1268→        preview.innerHTML = `
+  1269→          <span class="text-[10px] text-on-surface-variant">امروز:</span>
+  1270→          <div class="flex items-center gap-2">
+  1271→            <span class="text-lg">${emojis[todayLog.score - 1]}</span>
+  1272→            <span class="text-[10px] text-tertiary font-bold">انرژی: ${toPersian(todayLog.score)}/۵</span>
+  1273→          </div>
+  1274→        `;
+  1275→      } else {
+  1276→        preview.innerHTML = `<span class="text-[10px] text-on-surface-variant">وضعیت امروز:</span><span class="text-[10px] text-on-surface-variant">هنوز ثبت نشده</span>`;
+  1277→      }
+  1278→    }
+  1279→
+  1280→    // ================= XP ANIMATION =================
+  1281→    function triggerXpAnimation(habitCardElement) {
+  1282→      if (state.settings.batterySaver) return;
+  1283→      if (!habitCardElement) return;
+  1284→      
+  1285→      const mountainBtn = document.querySelector('[onclick="openModal(\'mountainModal\')"]');
+  1286→      if (!mountainBtn) return;
+  1287→      
+  1288→      const startRect = habitCardElement.getBoundingClientRect();
+  1289→      const endRect = mountainBtn.getBoundingClientRect();
+  1290→      
+  1291→      const startX = startRect.left + startRect.width / 2;
+  1292→      const startY = startRect.top + startRect.height / 2;
+  1293→      const endX = endRect.left + endRect.width / 2;
+  1294→      const endY = endRect.top + endRect.height / 2;
+  1295→      
+  1296→      const dx = endX - startX;
+  1297→      const dy = endY - startY;
+  1298→      
+  1299→      for (let i = 0; i < 3; i++) {
+  1300→        setTimeout(() => {
+  1301→          const coin = document.createElement('div');
+  1302→          coin.className = 'xp-coin';
+  1303→          coin.style.left = startX + 'px';
+  1304→          coin.style.top = startY + 'px';
+  1305→          coin.style.setProperty('--dx', dx + 'px');
+  1306→          coin.style.setProperty('--dy', dy + 'px');
+  1307→          document.body.appendChild(coin);
+  1308→          setTimeout(() => coin.remove(), 1300);
+  1309→        }, i * 150);
+  1310→      }
+  1311→      
+  1312→      mountainBtn.style.transform = 'scale(1.2)';
+  1313→      setTimeout(() => { mountainBtn.style.transform = ''; }, 300);
+  1314→    }
+  1315→
+  1316→    // ================= MY MOUNTAINS (REBUILT) =================
+  1317→    function mountainStats() {
+  1318→      const totalMountains = state.habits.length;
+  1319→      const totalStreakDays = state.habits.reduce((s, h) => s + (h.streak || 0), 0);
+  1320→      const conquered = state.habits.filter(h => Math.min(1, (h.streak || 0) / (h.duration || 21)) >= 0.95).length;
+  1321→      const avgGrowth = totalMountains > 0
+  1322→        ? state.habits.reduce((s, h) => s + Math.min(1, (h.streak || 0) / (h.duration || 21)), 0) / totalMountains
+  1323→        : 0;
+  1324→      return { totalMountains, totalStreakDays, conquered, avgGrowth, overallPercent: Math.round(avgGrowth * 100) };
+  1325→    }
+  1326→
+  1327→    function mountainStage(percent) {
+  1328→      if (percent >= 95) return { emoji: '🏆', name: 'فتح قله', message: 'قله را فتح کردی! تو یک قهرمانی 🏆' };
+  1329→      if (percent >= 75) return { emoji: '🏔️', name: 'نزدیک قله', message: 'به قله نزدیک شدی؛ آخرین تلاش را بکن' };
+  1330→      if (percent >= 50) return { emoji: '🧗', name: 'نیمه‌راه', message: 'نیمه راه را طی کردی؛ قله نزدیک است' };
+  1331→      if (percent >= 25) return { emoji: '⛺', name: 'پایگاه اول', message: 'پایگاه اول را فتح کردی؛ ادامه بده' };
+  1332→      if (percent > 0) return { emoji: '🥾', name: 'شروع مسیر', message: 'قدم‌های اول را برداشتی؛ مسیر آغاز شده' };
+  1333→      return { emoji: '🥾', name: 'آماده صعود', message: 'اولین قدم را بردار و مسیر صعود را آغاز کن' };
+  1334→    }
+  1335→
+  1336→    function mountainHeroSvg() {
+  1337→      return `<svg class="mtn-hero-svg" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true">
+  1338→        <path d="M0 100 L60 46 L105 72 L175 20 L245 76 L310 38 L400 100 Z" fill="rgba(255,255,255,0.13)"/>
+  1339→        <path d="M140 100 L228 24 L316 100 Z" fill="rgba(255,255,255,0.20)"/>
+  1340→        <path d="M210 40 L228 24 L246 40 L237 47 L228 40 L219 47 Z" fill="rgba(255,255,255,0.75)"/>
+  1341→        <line x1="228" y1="24" x2="228" y2="10" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+  1342→        <path d="M228 10 L242 14 L228 19 Z" fill="#fbbf24"/>
+  1343→        <circle cx="356" cy="20" r="11" fill="rgba(255,255,255,0.45)"/>
+  1344→        <ellipse cx="70" cy="26" rx="26" ry="7" fill="rgba(255,255,255,0.30)"/>
+  1345→        <ellipse cx="320" cy="52" rx="22" ry="6" fill="rgba(255,255,255,0.22)"/>
+  1346→      </svg>`;
+  1347→    }
+  1348→
+  1349→    function renderMountains() {
+  1350→      const container = document.getElementById('mountainModalBody');
+  1351→      if (!container) return;
+  1352→      const stats = mountainStats();
+  1353→      const stage = mountainStage(stats.overallPercent);
+  1354→
+  1355→      if (stats.totalMountains === 0) {
+  1356→        container.innerHTML = `
+  1357→          <div class="text-center py-10 px-4">
+  1358→            <div class="text-6xl mb-4 opacity-60">🏔️</div>
+  1359→            <h4 class="font-bold text-on-surface text-base mb-1.5">هنوز کوهی برای صعود نساخته‌ای</h4>
+  1360→            <p class="text-xs text-on-surface-variant leading-relaxed mb-5">هر عادت یک کوه است؛ با هر روز استمرار، یک قدم به قله نزدیک‌تر می‌شوی.</p>
+  1361→            <button onclick="closeAllModals(); setTimeout(() => openModal('addHabitModal'), 120);" class="agent-btn agent-btn-primary mx-auto px-8">
+  1362→              <span class="material-symbols-outlined text-[18px]">add</span>
+  1363→              ساخت اولین کوه
+  1364→            </button>
+  1365→          </div>
+  1366→        `;
+  1367→        return;
+  1368→      }
+  1369→
+  1370→      const cards = state.habits.map((habit, i) => {
+  1371→        const duration = habit.duration || 21;
+  1372→        const streak = habit.streak || 0;
+  1373→        const growth = Math.min(1, streak / duration);
+  1374→        const percent = Math.round(growth * 100);
+  1375→        const isConquered = growth >= 0.95;
+  1376→        const remaining = Math.max(0, duration - streak);
+  1377→        const cat = categories[habit.category] || categories.productivity;
+  1378→        const accent = isConquered ? '#f59e0b' : cat.color;
+  1379→        return `
+  1380→        <div class="mtn-card ${isConquered ? 'mtn-conquered' : ''}" style="animation-delay: ${i * 0.06}s" onclick="openMountainDetail('${habit.id}')">
+  1381→          <div class="mtn-icon-wrap" style="background: ${cat.color}1c; border: 1.5px solid ${cat.color}59;">
+  1382→            ${habit.icon || '🏔️'}
+  1383→            ${isConquered ? '<span class="absolute -top-1.5 -left-1.5 text-[13px]">🏆</span>' : ''}
+  1384→          </div>
+  1385→          <div class="flex-1 min-w-0">
+  1386→            <div class="flex items-center justify-between gap-2 mb-1.5">
+  1387→              <div class="flex items-center gap-1.5 min-w-0">
+  1388→                <span class="text-[13px] font-bold text-on-surface truncate">${habit.name}</span>
+  1389→                <span class="text-[8.5px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0 whitespace-nowrap" style="color: ${cat.color}; background: ${cat.color}1a;">${cat.emoji} ${cat.label}</span>
+  1390→              </div>
+  1391→              <span class="text-[13px] font-black flex-shrink-0" style="color: ${accent};">${toPersian(percent)}٪</span>
+  1392→            </div>
+  1393→            <div class="mtn-bar mb-1.5"><div class="mtn-bar-fill" style="width: ${percent}%; background: linear-gradient(90deg, ${cat.color}, ${isConquered ? '#fbbf24' : cat.color + 'b3'});"></div></div>
+  1394→            <div class="flex items-center justify-between text-[9.5px] text-on-surface-variant">
+  1395→              <span>🔥 ${toPersian(streak)} روز پیوستگی</span>
+  1396→              <span class="font-bold" style="color: ${accent};">${isConquered ? '🏆 قله فتح شد' : toPersian(remaining) + ' روز تا قله'}</span>
+  1397→            </div>
+  1398→          </div>
+  1399→        </div>`;
+  1400→      }).join('');
+  1401→
+  1402→      container.innerHTML = `
+  1403→        <div class="mtn-hero">
+  1404→          ${mountainHeroSvg()}
+  1405→          <div class="relative z-10">
+  1406→            <div class="flex items-center justify-between mb-3">
+  1407→              <span class="mtn-stage-chip">${stage.emoji} مرحله: ${stage.name}</span>
+  1408→              <span class="text-[10px] font-bold opacity-80">کوهستان اراده</span>
+  1409→            </div>
+  1410→            <div class="flex items-end gap-1.5 mb-3">
+  1411→              <span class="text-[44px] leading-none font-black">${toPersian(stats.overallPercent)}</span>
+  1412→              <span class="text-base font-bold opacity-90 mb-1.5">٪ صعود کلی</span>
+  1413→            </div>
+  1414→            <div class="mtn-hero-bar mb-3"><div class="mtn-hero-fill" style="width: ${stats.overallPercent}%"></div></div>
+  1415→            <p class="text-[11.5px] font-semibold opacity-95 leading-relaxed relative z-10">${stage.message} ✨</p>
+  1416→          </div>
+  1417→        </div>
+  1418→
+  1419→        <div class="grid grid-cols-2 gap-2">
+  1420→          <div class="mtn-stat flex items-center gap-2.5">
+  1421→            <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">🏔️</div>
+  1422→            <div>
+  1423→              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.totalMountains)}</div>
+  1424→              <div class="text-[9px] text-on-surface-variant mt-1">کوه فعال</div>
+  1425→            </div>
+  1426→          </div>
+  1427→          <div class="mtn-stat flex items-center gap-2.5">
+  1428→            <div class="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center text-lg flex-shrink-0">🔥</div>
+  1429→            <div>
+  1430→              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.totalStreakDays)}</div>
+  1431→              <div class="text-[9px] text-on-surface-variant mt-1">روزهای پیوستگی</div>
+  1432→            </div>
+  1433→          </div>
+  1434→          <div class="mtn-stat flex items-center gap-2.5">
+  1435→            <div class="w-9 h-9 rounded-xl bg-tertiary-fixed flex items-center justify-center text-lg flex-shrink-0">📈</div>
+  1436→            <div>
+  1437→              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.overallPercent)}٪</div>
+  1438→              <div class="text-[9px] text-on-surface-variant mt-1">میانگین رشد</div>
+  1439→            </div>
+  1440→          </div>
+  1441→          <div class="mtn-stat flex items-center gap-2.5">
+  1442→            <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">🏆</div>
+  1443→            <div>
+  1444→              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.conquered)}</div>
+  1445→              <div class="text-[9px] text-on-surface-variant mt-1">قله‌های فتح‌شده</div>
+  1446→            </div>
+  1447→          </div>
+  1448→        </div>
+  1449→
+  1450→        <div class="flex items-center justify-between mt-1">
+  1451→          <div class="flex items-center gap-2">
+  1452→            <span class="material-symbols-outlined text-[18px] text-primary">hiking</span>
+  1453→            <h4 class="font-bold text-on-surface text-sm">کوه‌های در حال صعود</h4>
+  1454→          </div>
+  1455→          <span class="text-[10px] text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-lg border border-surface-container-highest">برای جزئیات بزن</span>
+  1456→        </div>
+  1457→
+  1458→        <div class="flex flex-col gap-2.5">
+  1459→          ${cards}
+  1460→        </div>
+  1461→      `;
+  1462→    }
+  1463→
+  1464→    function openMountainDetail(habitId) {
+  1465→      const habit = state.habits.find(h => h.id === habitId);
+  1466→      if (!habit) return;
+  1467→      const duration = habit.duration || 21;
+  1468→      const streak = habit.streak || 0;
+  1469→      const percent = Math.round(Math.min(1, streak / duration) * 100);
+  1470→      if (percent >= 95) {
+  1471→        showToast('🏆 ' + habit.name + ': قله فتح شد! ' + toPersian(streak) + ' روز استمرار');
+  1472→      } else {
+  1473→        showToast((habit.icon || '🏔️') + ' ' + habit.name + ': ' + toPersian(percent) + '٪ صعود — ' + toPersian(duration - streak) + ' روز تا قله');
+  1474→      }
+  1475→    }
+  1476→    // ================= NOTEBOOK =================
+  1477→    let selectedNoteTags = [];
+  1478→
+  1479→    function toggleNoteTag(btn, tag) {
+  1480→      if (selectedNoteTags.includes(tag)) {
+  1481→        selectedNoteTags = selectedNoteTags.filter(t => t !== tag);
+  1482→        btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+  1483→        btn.classList.add('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+  1484→      } else {
+  1485→        selectedNoteTags.push(tag);
+  1486→        btn.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+  1487→        btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+  1488→      }
+  1489→    }
+  1490→
+  1491→    function saveNotebookEntry() {
+  1492→      const text = document.getElementById('notebookText').value.trim();
+  1493→      if (!text) { showToast('لطفاً متنی بنویس'); return; }
+  1494→      
+  1495→      state.notebookEntries.unshift({
+  1496→        id: 'n' + Date.now(),
+  1497→        date: today(),
+  1498→        timestamp: new Date().toISOString(),
+  1499→        text: text,
+  1500→        tags: [...selectedNoteTags]
+  1501→      });
+  1502→      
+  1503→      saveState();
+  1504→      document.getElementById('notebookText').value = '';
+  1505→      selectedNoteTags = [];
+  1506→      document.querySelectorAll('#notebookTags button').forEach(btn => {
+  1507→        btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+  1508→        btn.classList.add('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+  1509→      });
+  1510→      renderNotebookHistory();
+  1511→      renderNotebookPreview();
+  1512→      showToast('یادداشت ذخیره شد 📔');
+  1513→    }
+  1514→
+  1515→    function renderNotebookHistory() {
+  1516→      const container = document.getElementById('notebookHistory');
+  1517→      if (!container) return;
+  1518→      
+  1519→      if (state.notebookEntries.length === 0) {
+  1520→        container.innerHTML = '<div class="text-center text-on-surface-variant text-xs py-4">هنوز یادداشتی نداری</div>';
+  1521→        return;
+  1522→      }
+  1523→      
+  1524→      const tagEmojis = { thought: '💭', challenge: '🔥', achievement: '', gratitude: '🙏' };
+  1525→      const tagLabels = { thought: 'فکر', challenge: 'چالش', achievement: 'دستاورد', gratitude: 'سپاس' };
+  1526→      
+  1527→      container.innerHTML = state.notebookEntries.slice(0, 10).map(entry => {
+  1528→        const d = new Date(entry.timestamp);
+  1529→        const dateStr = d.toLocaleDateString('fa-IR', { day: 'numeric', month: 'short' });
+  1530→        const timeStr = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+  1531→        const tags = entry.tags.map(t => `<span class="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">${tagEmojis[t] || ''} ${tagLabels[t] || t}</span>`).join(' ');
+  1532→        
+  1533→        return `
+  1534→          <div class="notebook-entry">
+  1535→            <div class="flex items-center justify-between mb-1">
+  1536→              <span class="text-[9px] text-on-surface-variant font-mono">${dateStr} • ${timeStr}</span>
+  1537→              <button onclick="deleteNotebookEntry('${entry.id}')" class="text-on-surface-variant hover:text-error">
+  1538→                <span class="material-symbols-outlined text-[14px]">delete</span>
+  1539→              </button>
+  1540→            </div>
+  1541→            <p class="text-xs text-on-surface leading-relaxed mb-1">${escapeHtml(entry.text)}</p>
+  1542→            ${tags ? `<div class="flex gap-1 flex-wrap">${tags}</div>` : ''}
+  1543→          </div>
+  1544→        `;
+  1545→      }).join('');
+  1546→    }
+  1547→
+  1548→    function deleteNotebookEntry(id) {
+  1549→      state.notebookEntries = state.notebookEntries.filter(e => e.id !== id);
+  1550→      saveState();
+  1551→      renderNotebookHistory();
+  1552→      renderNotebookPreview();
+  1553→    }
+  1554→
+  1555→    function renderNotebookPreview() {
+  1556→      const container = document.getElementById('notebookPreview');
+  1557→      if (!container) return;
+  1558→      
+  1559→      if (state.notebookEntries.length === 0) {
+  1560→        container.innerHTML = '<div class="text-center text-on-surface-variant text-xs py-4"><span class="material-symbols-outlined text-3xl opacity-30 block mb-2">auto_stories</span>هنوز یادداشتی ننوشتی. افکار، چالش‌ها و دستاوردهایت را ثبت کن.</div>';
+  1561→        return;
+  1562→      }
+  1563→      
+  1564→      const recent = state.notebookEntries.slice(0, 2);
+  1565→      container.innerHTML = recent.map(entry => {
+  1566→        const d = new Date(entry.timestamp);
+  1567→        const dateStr = d.toLocaleDateString('fa-IR', { day: 'numeric', month: 'short' });
+  1568→        return `
+  1569→          <div class="bg-surface-container-low rounded-lg p-2 border-r-2 border-primary">
+  1570→            <div class="text-[9px] text-on-surface-variant mb-1">${dateStr}</div>
+  1571→            <p class="text-[11px] text-on-surface leading-relaxed truncate">${escapeHtml(entry.text)}</p>
+  1572→          </div>
+  1573→        `;
+  1574→      }).join('');
+  1575→    }
+  1576→
+  1577→    function escapeHtml(text) {
+  1578→      const div = document.createElement('div');
+  1579→      div.textContent = text;
+  1580→      return div.innerHTML;
+  1581→    }
+  1582→
+  1583→    // ================= BADGES =================
+  1584→    function renderBadges() {
+  1585→      const grid = document.getElementById('badgesGrid');
+  1586→      if (!grid) return;
+  1587→      grid.innerHTML = '';
+  1588→
+  1589→      const maxStreak = state.habits.length > 0 ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+  1590→      const totalCompletions = state.habits.reduce((acc, h) => acc + Object.keys(h.completions || {}).length, 0);
+  1591→      const activeHabits = state.habits.length;
+  1592→      const journalDays = Object.keys(state.journal).length;
+  1593→      const moodDays = state.moodLog.length;
+  1594→
+  1595→      const badges = [
+  1596→        { id: 'streak_7', unlocked: maxStreak >= 7, name: 'شعله‌ی هفت‌روزه', desc: '۷ روز استریک پیوسته', icon: '🔥' },
+  1597→        { id: 'streak_10', unlocked: maxStreak >= 10, name: 'استاد استقامت', desc: '۱۰ روز استریک', icon: '⚡' },
+  1598→        { id: 'master', unlocked: totalCompletions >= 50, name: 'استاد عادت', desc: '۵۰ تکمیل موفق', icon: '🏆' },
+  1599→        { id: 'morning', unlocked: activeHabits >= 3 && maxStreak >= 3, name: 'سحرخیز منظم', desc: 'نظم در ۳ عادت', icon: '☀️' },
+  1600→        { id: 'journaler', unlocked: journalDays >= 5, name: 'خودآگاه', desc: '۵ روز ژورنال', icon: '' },
+  1601→        { id: 'self-aware', unlocked: moodDays >= 7, name: 'آگاه به حال', desc: '۷ روز ثبت حال', icon: '💗' },
+  1602→        { id: 'streak_30', unlocked: maxStreak >= 30, name: 'افسانه‌ی نظم', desc: '۳۰ روز استریک', icon: '👑' },
+  1603→        { id: 'consistency', unlocked: totalCompletions >= 100, name: 'استمرار افسانه‌ای', desc: '۰۰ تکمیل', icon: '💎' }
+  1604→      ];
+  1605→
+  1606→      badges.forEach(badge => {
+  1607→        const div = document.createElement('div');
+  1608→        div.className = `rounded-2xl p-4 flex flex-col items-center text-center gap-2 transition-all ${badge.unlocked ? 'badge-unlocked' : 'badge-locked bg-white border border-surface-container-highest'}`;
+  1609→        div.innerHTML = `
+  1610→          <div class="w-14 h-14 rounded-full bg-surface-container-low flex items-center justify-center mb-1 text-3xl">${badge.icon}</div>
+  1611→          <h4 class="font-bold text-sm text-on-surface">${badge.name}</h4>
+  1612→          <p class="text-[10px] text-on-surface-variant">${badge.desc}</p>
+  1613→          ${!badge.unlocked ? '<span class="text-[9px] bg-surface-container-low px-2 py-0.5 rounded-full text-on-surface-variant mt-1">قفل 🔒</span>' : '<span class="text-[9px] bg-primary/10 px-2 py-0.5 rounded-full text-primary mt-1">✓ کسب شد</span>'}
+  1614→        `;
+  1615→        grid.appendChild(div);
+  1616→      });
+  1617→    }
+  1618→
+  1619→    function updateBadgeCount() {
+  1620→      const maxStreak = state.habits.length > 0 ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+  1621→      const totalCompletions = state.habits.reduce((acc, h) => acc + Object.keys(h.completions || {}).length, 0);
+  1622→      const activeHabits = state.habits.length;
+  1623→      const journalDays = Object.keys(state.journal).length;
+  1624→      const moodDays = state.moodLog.length;
+  1625→      
+  1626→      let count = 0;
+  1627→      if (maxStreak >= 7) count++;
+  1628→      if (maxStreak >= 10) count++;
+  1629→      if (maxStreak >= 30) count++;
+  1630→      if (totalCompletions >= 50) count++;
+  1631→      if (totalCompletions >= 100) count++;
+  1632→      if (activeHabits >= 3 && maxStreak >= 3) count++;
+  1633→      if (journalDays >= 5) count++;
+  1634→      if (moodDays >= 7) count++;
+  1635→      
+  1636→      const el = document.getElementById('badgeCount');
+  1637→      if (el) el.textContent = toPersian(count);
+  1638→    }
+  1639→
+  1640→    function renderTrophyCase() {
+  1641→      const container = document.getElementById('trophyCase');
+  1642→      if (!container) return;
+  1643→      
+  1644→      const maxStreak = state.habits.length > 0 ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+  1645→      const totalCompletions = state.habits.reduce((acc, h) => acc + Object.keys(h.completions || {}).length, 0);
+  1646→      
+  1647→      const medals = [
+  1648→        { id: 'medalDiamond', threshold: 100 },
+  1649→        { id: 'medalPlatinum', threshold: 70 },
+  1650→        { id: 'medalGold', threshold: 40 },
+  1651→        { id: 'medalSilver', threshold: 21 },
+  1652→        { id: 'medalBronze', threshold: 7 }
+  1653→      ];
+  1654→      
+  1655→      medals.forEach(medal => {
+  1656→        const el = document.getElementById(medal.id);
+  1657→        if (maxStreak >= medal.threshold) {
+  1658→          el.classList.remove('medal-locked');
+  1659→        } else {
+  1660→          el.classList.add('medal-locked');
+  1661→        }
+  1662→      });
+  1663→      
+  1664→      const challengesList = document.getElementById('challengesList');
+  1665→      const challenges = [
+  1666→        { id: 'weekly_streak', title: 'چالش هفتگی', desc: '۷ روز متوالی تمام عادت‌ها', progress: Math.min(100, (maxStreak / 7) * 100), reward: '🥉 مدال برنز', unlocked: maxStreak >= 7 },
+  1667→        { id: 'monthly_streak', title: 'چالش ماهانه', desc: '۲۱ روز پیوستگی', progress: Math.min(100, (maxStreak / 21) * 100), reward: ' مدال نقره', unlocked: maxStreak >= 21 },
+  1668→        { id: 'master_challenge', title: 'چالش استاد', desc: '۴۰ روز استریک طلایی', progress: Math.min(100, (maxStreak / 40) * 100), reward: '🥇 مدال طلا', unlocked: maxStreak >= 40 },
+  1669→        { id: 'platinum_challenge', title: 'چالش پلاتین', desc: '۷۰ روز استقامت', progress: Math.min(100, (maxStreak / 70) * 100), reward: '🏅 مدال پلاتین', unlocked: maxStreak >= 70 },
+  1670→        { id: 'diamond_challenge', title: 'چالش الماس', desc: '۱۰۰ روز افسانه‌ای', progress: Math.min(100, (maxStreak / 100) * 100), reward: '💎 مدال الماس', unlocked: maxStreak >= 100 },
+  1671→        { id: 'completion_challenge', title: 'چالش تکمیل', desc: '۰ تکمیل عادت', progress: Math.min(100, (totalCompletions / 50) * 100), reward: '🏆 نشان استاد', unlocked: totalCompletions >= 50 },
+  1672→        { id: 'mood_challenge', title: 'چالش خودآگاهی', desc: '۷ روز ثبت حال', progress: Math.min(100, (state.moodLog.length / 7) * 100), reward: '💗 نشان آگاهی', unlocked: state.moodLog.length >= 7 },
+  1673→        { id: 'journal_challenge', title: 'چالش ژورنال', desc: '۵ روز نوشتن', progress: Math.min(100, (Object.keys(state.journal).length / 5) * 100), reward: '📔 نشان خودآگاه', unlocked: Object.keys(state.journal).length >= 5 }
+  1674→      ];
+  1675→      
+  1676→      challengesList.innerHTML = challenges.map(ch => `
+  1677→        <div class="challenge-card">
+  1678→          <div class="flex items-center justify-between mb-2">
+  1679→            <div class="flex items-center gap-2">
+  1680→              <span class="text-lg">${ch.unlocked ? '✅' : '🎯'}</span>
+  1681→              <div>
+  1682→                <div class="text-xs font-bold text-on-surface">${ch.title}</div>
+  1683→                <div class="text-[9px] text-on-surface-variant">${ch.desc}</div>
+  1684→              </div>
+  1685→            </div>
+  1686→            <span class="text-[9px] font-bold ${ch.unlocked ? 'text-primary' : 'text-on-surface-variant'} bg-white px-2 py-0.5 rounded-full">${ch.reward}</span>
+  1687→          </div>
+  1688→          <div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+  1689→            <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all" style="width: ${ch.progress}%"></div>
+  1690→          </div>
+  1691→          <div class="text-[9px] text-on-surface-variant mt-1 text-left">${toPersian(Math.round(ch.progress))}٪</div>
+  1692→        </div>
+  1693→      `).join('');
+  1694→
+  1695→      let unlockedCount = 0;
+  1696→      if (maxStreak >= 7) unlockedCount++;
+  1697→      if (maxStreak >= 21) unlockedCount++;
+  1698→      if (maxStreak >= 40) unlockedCount++;
+  1699→      if (maxStreak >= 70) unlockedCount++;
+  1700→      if (maxStreak >= 100) unlockedCount++;
+  1701→      if (totalCompletions >= 50) unlockedCount++;
+  1702→      if (state.moodLog.length >= 7) unlockedCount++;
+  1703→      if (Object.keys(state.journal).length >= 5) unlockedCount++;
+  1704→      
+  1705→      document.getElementById('trophyCount').textContent = toPersian(unlockedCount) + ' کسب شده';
+  1706→    }
+  1707→
+  1708→    function renderAlarmSettings() {
+  1709→      const container = document.getElementById('alarmSettingsList');
+  1710→      if (!container) return;
+  1711→      container.innerHTML = '';
+  1712→
+  1713→      if (state.habits.length === 0) {
+  1714→        container.innerHTML = '<div class="text-center text-on-surface-variant text-xs py-2">هنوز عادتی نداری</div>';
+  1715→        return;
+  1716→      }
+  1717→
+  1718→      state.habits.forEach(habit => {
+  1719→        const div = document.createElement('div');
+  1720→        div.className = 'flex items-center justify-between gap-3 bg-surface-container-low rounded-xl p-3';
+  1721→        div.innerHTML = `
+  1722→          <div class="flex items-center gap-2 flex-1 min-w-0">
+  1723→            <span class="text-lg">${habit.icon || '🏔️'}</span>
+  1724→            <div class="flex-1 min-w-0">
+  1725→              <div class="text-xs font-bold text-on-surface truncate">${habit.name}</div>
+  1726→              <input type="time" value="${habit.alarmTime || ''}" onchange="updateAlarmTime('${habit.id}', this.value)" class="text-[10px] text-on-surface-variant bg-transparent border-none focus:outline-none mt-0.5">
+  1727→            </div>
+  1728→          </div>
+  1729→          <div class="w-11 h-6 bg-surface-container-highest rounded-full relative cursor-pointer transition-all ${habit.alarmEnabled ? 'bg-primary' : ''}" onclick="toggleAlarm('${habit.id}')">
+  1730→            <div class="absolute top-0.5 ${habit.alarmEnabled ? 'left-0.5' : 'right-0.5'} w-5 h-5 bg-white rounded-full transition-all shadow-sm"></div>
+  1731→          </div>
+  1732→        `;
+  1733→        container.appendChild(div);
+  1734→      });
+  1735→    }
+  1736→
+  1737→    // ================= BATTERY SAVER =================
+  1738→    function toggleBatterySaver() {
+  1739→      state.settings.batterySaver = !state.settings.batterySaver;
+  1740→      saveState();
+  1741→      
+  1742→      if (state.settings.batterySaver) {
+  1743→        document.body.classList.add('battery-saver');
+  1744→        showToast('🔋 حالت ذخیره باتری فعال شد');
+  1745→      } else {
+  1746→        document.body.classList.remove('battery-saver');
+  1747→        showToast('✨ حالت عادی بازیابی شد');
+  1748→      }
+  1749→      
+  1750→      updateBatterySaverToggle();
+  1751→    }
+  1752→
+  1753→    function updateBatterySaverToggle() {
+  1754→      const toggle = document.getElementById('batterySaverToggle');
+  1755→      if (!toggle) return;
+  1756→      
+  1757→      if (state.settings.batterySaver) {
+  1758→        toggle.classList.add('bg-primary');
+  1759→        toggle.classList.remove('bg-surface-container-highest');
+  1760→        toggle.querySelector('div').style.right = 'auto';
+  1761→        toggle.querySelector('div').style.left = '2px';
+  1762→      } else {
+  1763→        toggle.classList.remove('bg-primary');
+  1764→        toggle.classList.add('bg-surface-container-highest');
+  1765→        toggle.querySelector('div').style.left = 'auto';
+  1766→        toggle.querySelector('div').style.right = '2px';
+  1767→      }
+  1768→    }
+  1769→
+  1770→    // ================= MOOD CHART =================
+  1771→    function renderMoodChart() {
+  1772→      const container = document.getElementById('moodLineChartContainer');
+  1773→      const labelsContainer = document.getElementById('moodChartLabels');
+  1774→      const insightContainer = document.getElementById('moodInsight');
+  1775→      if (!container) return;
+  1776→      
+  1777→      const last7Days = [];
+  1778→      for (let i = 6; i >= 0; i--) {
+  1779→        const d = new Date();
+  1780→        d.setDate(d.getDate() - i);
+  1781→        last7Days.push(d.toISOString().split('T')[0]);
+  1782→      }
+  1783→
+  1784→      const moodData = last7Days.map(date => {
+  1785→        const log = state.moodLog.find(m => m.date === date);
+  1786→        return log ? log.score : null;
+  1787→      });
+  1788→
+  1789→      const habitsData = last7Days.map(date => {
+  1790→        const total = state.habits.length;
+  1791→        if (total === 0) return 0;
+  1792→        const completed = state.habits.filter(h => h.completions[date]).length;
+  1793→        return Math.round((completed / total) * 5);
+  1794→      });
+  1795→
+  1796→      const height = 180;
+  1797→      const paddingX = 5;
+  1798→      const paddingY = 15;
+  1799→      
+  1800→      let svgContent = `<svg width="100%" height="100%" viewBox="0 0 100 ${height}" preserveAspectRatio="none">`;
+  1801→      
+  1802→      for(let i = 1; i <= 5; i++) {
+  1803→        const y = height - paddingY - ((i - 1) / 4) * (height - paddingY * 2);
+  1804→        svgContent += `<line x1="${paddingX}" y1="${y}" x2="${100 - paddingX}" y2="${y}" stroke="rgba(24,20,69,0.05)" stroke-width="0.5" />`;
+  1805→      }
+  1806→
+  1807→      const moodPoints = [];
+  1808→      moodData.forEach((score, i) => {
+  1809→        if (score !== null) {
+  1810→          const x = paddingX + (i / 6) * (100 - paddingX * 2);
+  1811→          const y = height - paddingY - ((score - 1) / 4) * (height - paddingY * 2);
+  1812→          moodPoints.push({ x, y });
+  1813→        }
+  1814→      });
+  1815→
+  1816→      const habitPoints = [];
+  1817→      habitsData.forEach((score, i) => {
+  1818→        const x = paddingX + (i / 6) * (100 - paddingX * 2);
+  1819→        const y = height - paddingY - ((score - 1) / 4) * (height - paddingY * 2);
+  1820→        habitPoints.push({ x, y });
+  1821→      });
+  1822→
+  1823→      if (moodPoints.length > 1) {
+  1824→        svgContent += `<polyline points="${moodPoints.map(p => `${p.x},${p.y}`).join(' ')}" fill="none" stroke="#843700" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />`;
+  1825→        moodPoints.forEach(p => { svgContent += `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#fcf8ff" stroke="#843700" stroke-width="1.5" />`; });
+  1826→      }
+  1827→
+  1828→      if (habitPoints.length > 1) {
+  1829→        svgContent += `<polyline points="${habitPoints.map(p => `${p.x},${p.y}`).join(' ')}" fill="none" stroke="#630ed4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 1" />`;
+  1830→        habitPoints.forEach(p => { svgContent += `<circle cx="${p.x}" cy="${p.y}" r="2" fill="#fcf8ff" stroke="#630ed4" stroke-width="1.5" />`; });
+  1831→      }
+  1832→      
+  1833→      svgContent += `</svg>`;
+  1834→      container.innerHTML = svgContent;
+  1835→
+  1836→      const dayNames = ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'];
+  1837→      labelsContainer.innerHTML = last7Days.map((d, i) => {
+  1838→        const isToday = i === 6;
+  1839→        return `<div class="flex-1 text-center ${isToday ? 'text-primary font-bold' : 'text-on-surface-variant'}">${dayNames[new Date(d).getDay()]}</div>`;
+  1840→      }).join('');
+  1841→
+  1842→      const validMoods = moodData.filter(m => m !== null);
+  1843→      if (validMoods.length >= 3) {
+  1844→        const avg = validMoods.reduce((a, b) => a + b, 0) / validMoods.length;
+  1845→        insightContainer.innerHTML = `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-tertiary">insights</span><div><p class="text-xs font-bold text-on-surface">میانگین انرژی</p><p class="text-[10px] text-on-surface-variant mt-1">${toPersian(avg.toFixed(1))} از  در ۷ روز گذشته</p></div></div>`;
+  1846→      } else {
+  1847→        insightContainer.innerHTML = `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">info</span><div><p class="text-xs font-bold text-on-surface">داده کافی نیست</p><p class="text-[10px] text-on-surface-variant mt-1">حداقل  روز حال خود را ثبت کن.</p></div></div>`;
+  1848→      }
+  1849→    }
+  1850→
+  1851→    // ================= ACTIONS =================
+  1852→    function toggleHabit(id, event) {
+  1853→      const habit = state.habits.find(h => h.id === id);
+  1854→      if (!habit) return;
+  1855→      
+  1856→      const todayStr = today();
+  1857→      if (!habit.completions) habit.completions = {};
+  1858→      
+  1859→      if (habit.completions[todayStr]) {
+  1860→        delete habit.completions[todayStr];
+  1861→        habit.streak = Math.max(0, (habit.streak || 0) - 1);
+  1862→      } else {
+  1863→        habit.completions[todayStr] = true;
+  1864→        habit.streak = (habit.streak || 0) + 1;
+  1865→        
+  1866→        if (state.settings.sound) playCrystalChime();
+  1867→        
+  1868→        const card = event?.currentTarget?.closest('.habit-card');
+  1869→        if (card) triggerXpAnimation(card);
+  1870→        
+  1871→        if (habit.streak === 7) {
+  1872→          showToast('🥉 آفرین! مدال برنز کسب کردی!');
+  1873→          addNotification('achievement', 'مدال برنز', '۷ روز استریک پیوسته!', 'emoji_events');
+  1874→          triggerConfetti();
+  1875→        } else if (habit.streak === 21) {
+  1876→          showToast('🥈 تبریک! مدال نقره گرفتی!');
+  1877→          addNotification('achievement', 'مدال نقره', '۲۱ روز استریک پیوسته!', 'emoji_events');
+  1878→          triggerConfetti();
+  1879→        } else if (habit.streak === 40) {
+  1880→          showToast('🥇 فوق‌العاده! مدال طلا!');
+  1881→          addNotification('achievement', 'مدال طلا', '۴۰ روز استریک پیوسته!', 'emoji_events');
+  1882→          triggerConfetti();
+  1883→        } else if (habit.streak === 70) {
+  1884→          showToast('🏅 شگفت‌انگیز! مدال پلاتین!');
+  1885→          addNotification('achievement', 'مدال پلاتین', '۷۰ روز استریک پیوسته!', 'emoji_events');
+  1886→          triggerConfetti();
+  1887→        } else if (habit.streak === 100) {
+  1888→          showToast('💎 افسانه‌ای! مدال الماس!');
+  1889→          addNotification('achievement', 'مدال الماس', '۱۰۰ روز استریک پیوسته!', 'emoji_events');
+  1890→          triggerConfetti();
+  1891→        } else {
+  1892→          showToast('آفرین! یک قدم به قله نزدیک‌تر 🏔️');
+  1893→        }
+  1894→      }
+  1895→      
+  1896→      saveState();
+  1897→      renderAll();
+  1898→    }
+  1899→
+  1900→    function selectCategory(btn, category) {
+  1901→      document.querySelectorAll('.category-btn').forEach(el => {
+  1902→        el.className = 'category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95';
+  1903→        const iconWrap = el.querySelector('.cat-icon-wrap');
+  1904→        if (iconWrap) { 
+  1905→          const cat = el.onclick.toString().match(/'([^']+)'/)?.[1];
+  1906→          const catData = categories[cat];
+  1907→          iconWrap.className = 'cat-icon-wrap w-7 h-7 rounded-xl flex items-center justify-center';
+  1908→          iconWrap.style.background = catData ? catData.color + '20' : '';
+  1909→          const iconSpan = iconWrap.querySelector('.cat-icon'); 
+  1910→          if (iconSpan) { iconSpan.className = 'material-symbols-outlined cat-icon text-[18px]'; iconSpan.style.color = catData ? catData.color : ''; }
+  1911→        }
+  1912→        const check = el.querySelector('.cat-check');
+  1913→        if (check) { check.textContent = 'radio_button_unchecked'; check.className = 'material-symbols-outlined cat-check text-[18px] text-outline-variant'; }
+  1914→      });
+  1915→      btn.className = 'category-btn selected flex items-center justify-between p-3 rounded-2xl bg-primary text-on-primary shadow-sm font-bold text-[12px] border-2 border-primary transition-all active:scale-95';
+  1916→      const activeWrap = btn.querySelector('.cat-icon-wrap');
+  1917→      if (activeWrap) { activeWrap.className = 'cat-icon-wrap w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center'; const activeIcon = activeWrap.querySelector('.cat-icon'); if (activeIcon) activeIcon.className = 'material-symbols-outlined cat-icon text-[18px] text-on-primary'; }
+  1918→      const activeCheck = btn.querySelector('.cat-check');
+  1919→      if (activeCheck) { activeCheck.textContent = 'check_circle'; activeCheck.className = 'material-symbols-outlined cat-check text-[18px] text-on-primary'; }
+  1920→      window.selectedCategory = category;
+  1921→    }
+  1922→
+  1923→    function selectDuration(btn, duration) {
+  1924→      document.querySelectorAll('.duration-btn').forEach(el => {
+  1925→        el.className = 'duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all';
+  1926→        el.querySelectorAll('span').forEach(s => { s.classList.remove('text-on-primary'); s.classList.add('text-on-surface'); });
+  1927→      });
+  1928→      btn.className = 'duration-btn selected bg-primary text-on-primary rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-md border-2 border-primary active:scale-95 transition-all';
+  1929→      btn.querySelectorAll('span').forEach(s => { s.classList.remove('text-on-surface', 'text-on-surface-variant'); s.classList.add('text-on-primary'); });
+  1930→      window.selectedDuration = duration;
+  1931→      document.getElementById('progressLabel').textContent = `۰ از ${toPersian(duration)} روز`;
+  1932→      
+  1933→      const durationLabels = {
+  1934→        7: '۷ روزه (شروع سریع)',
+  1935→        21: '۲۱ روزه (تثبیت)',
+  1936→        40: '۴۰ روزه (شکوه عهد)',
+  1937→        70: '۷۰ روزه (استاد)',
+  1938→        100: '۱۰۰ روزه (ریشه‌داری)'
+  1939→      };
+  1940→      document.getElementById('timelineSubtitle').textContent = `${durationLabels[duration] || '۲۱ روزه'} • مسیر صعود به قله`;
+  1941→      
+  1942→      renderMountainPreview(duration);
+  1943→    }
+  1944→
+  1945→    function toggleTimeline() {
+  1946→      const content = document.getElementById('timelineCardContent');
+  1947→      const arrow = document.getElementById('timelineToggleArrow');
+  1948→      if (content.classList.contains('hidden')) {
+  1949→        content.classList.remove('hidden');
+  1950→        arrow.style.transform = 'rotate(180deg)';
+  1951→        if (!window.selectedDuration) window.selectedDuration = 21;
+  1952→        renderMountainPreview(window.selectedDuration);
+  1953→      } else {
+  1954→        content.classList.add('hidden');
+  1955→        arrow.style.transform = 'rotate(0deg)';
+  1956→      }
+  1957→    }
+  1958→
+  1959→    function renderMountainPreview(duration) {
+  1960→      const svg = document.getElementById('mountainPreviewSvg');
+  1961→      const labelsContainer = document.getElementById('mountainPreviewLabels');
+  1962→      if (!svg || !labelsContainer) return;
+  1963→      
+  1964→      const width = 300;
+  1965→      const height = 100;
+  1966→      const peakX = width * 0.5;
+  1967→      const peakY = height * 0.15;
+  1968→      const baseLeftX = width * 0.05;
+  1969→      const baseRightX = width * 0.95;
+  1970→      const baseY = height * 0.85;
+  1971→      
+  1972→      const numPoints = 7;
+  1973→      const pathPoints = [];
+  1974→      for (let i = 0; i < numPoints; i++) {
+  1975→        const t = i / (numPoints - 1);
+  1976→        const x = baseLeftX + t * (peakX - baseLeftX);
+  1977→        const baseY_at_t = baseY - t * (baseY - peakY);
+  1978→        const zigzag = Math.sin(t * Math.PI * 2.5) * (width * 0.05);
+  1979→        const y = baseY_at_t + zigzag;
+  1980→        pathPoints.push({ x, y, t });
+  1981→      }
+  1982→      
+  1983→      let svgContent = '';
+  1984→      svgContent += `<path d="M 0 ${height * 0.7} L ${width * 0.2} ${height * 0.5} L ${width * 0.4} ${height * 0.6} L ${width * 0.6} ${height * 0.45} L ${width * 0.8} ${height * 0.55} L ${width} ${height * 0.5} L ${width} ${height} L 0 ${height} Z" fill="#94a3b8" opacity="0.2"/>`;
+  1985→      svgContent += `<path d="M ${baseLeftX} ${baseY} L ${peakX - 10} ${peakY + 15} L ${peakX} ${peakY} L ${peakX + 10} ${peakY + 15} L ${baseRightX} ${baseY} Z" fill="#64748b" opacity="0.5"/>`;
+  1986→      svgContent += `<path d="M ${peakX - 12} ${peakY + 15} L ${peakX} ${peakY} L ${peakX + 12} ${peakY + 15} L ${peakX + 6} ${peakY + 20} L ${peakX - 6} ${peakY + 20} Z" fill="white" opacity="0.8"/>`;
+  1987→      
+  1988→      const pathD = pathPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  1989→      svgContent += `<path d="${pathD}" fill="none" stroke="#630ed4" stroke-width="2" stroke-dasharray="4 3" class="mountain-preview-path" opacity="0.7"/>`;
+  1990→      
+  1991→      pathPoints.forEach((p, i) => {
+  1992→        svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#dc2626" stroke="white" stroke-width="1.5" class="mountain-node" style="animation-delay: ${i * 0.1}s;"/>`;
+  1993→      });
+  1994→      
+  1995→      svgContent += `<g class="flag-waver" style="transform-origin: ${peakX}px ${peakY}px;">`;
+  1996→      svgContent += `<line x1="${peakX}" y1="${peakY}" x2="${peakX}" y2="${peakY - 15}" stroke="#1e293b" stroke-width="1.5"/>`;
+  1997→      svgContent += `<path d="M ${peakX} ${peakY - 15} L ${peakX + 10} ${peakY - 12} L ${peakX} ${peakY - 9} Z" fill="#dc2626"/>`;
+  1998→      svgContent += `</g>`;
+  1999→      
+  2000→      svg.innerHTML = svgContent;
+
+[showing lines 1-2000 of 2792; use offset=2001 with limit to continue reading]

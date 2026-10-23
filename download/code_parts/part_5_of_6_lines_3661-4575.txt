@@ -1,0 +1,915 @@
+      const totalStreakDays = state.habits.reduce((s, h) => s + (h.streak || 0), 0);
+      const conquered = state.habits.filter(h => Math.min(1, (h.streak || 0) / (h.duration || 21)) >= 0.95).length;
+      const avgGrowth = totalMountains > 0
+        ? state.habits.reduce((s, h) => s + Math.min(1, (h.streak || 0) / (h.duration || 21)), 0) / totalMountains
+        : 0;
+      return { totalMountains, totalStreakDays, conquered, avgGrowth, overallPercent: Math.round(avgGrowth * 100) };
+    }
+
+    function mountainStage(percent) {
+      if (percent >= 95) return { emoji: '🏆', name: 'فتح قله', message: 'قله را فتح کردی! تو یک قهرمانی 🏆' };
+      if (percent >= 75) return { emoji: '🏔️', name: 'نزدیک قله', message: 'به قله نزدیک شدی؛ آخرین تلاش را بکن' };
+      if (percent >= 50) return { emoji: '🧗', name: 'نیمه‌راه', message: 'نیمه راه را طی کردی؛ قله نزدیک است' };
+      if (percent >= 25) return { emoji: '⛺', name: 'پایگاه اول', message: 'پایگاه اول را فتح کردی؛ ادامه بده' };
+      if (percent > 0) return { emoji: '🥾', name: 'شروع مسیر', message: 'قدم‌های اول را برداشتی؛ مسیر آغاز شده' };
+      return { emoji: '🥾', name: 'آماده صعود', message: 'اولین قدم را بردار و مسیر صعود را آغاز کن' };
+    }
+
+    function mountainHeroSvg() {
+      return `<svg class="mtn-hero-svg" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 100 L60 46 L105 72 L175 20 L245 76 L310 38 L400 100 Z" fill="rgba(255,255,255,0.13)"/>
+        <path d="M140 100 L228 24 L316 100 Z" fill="rgba(255,255,255,0.20)"/>
+        <path d="M210 40 L228 24 L246 40 L237 47 L228 40 L219 47 Z" fill="rgba(255,255,255,0.75)"/>
+        <line x1="228" y1="24" x2="228" y2="10" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+        <path d="M228 10 L242 14 L228 19 Z" fill="#fbbf24"/>
+        <circle cx="356" cy="20" r="11" fill="rgba(255,255,255,0.45)"/>
+        <ellipse cx="70" cy="26" rx="26" ry="7" fill="rgba(255,255,255,0.30)"/>
+        <ellipse cx="320" cy="52" rx="22" ry="6" fill="rgba(255,255,255,0.22)"/>
+      </svg>`;
+    }
+
+    function renderMountains() {
+      const container = document.getElementById('mountainModalBody');
+      if (!container) return;
+      const stats = mountainStats();
+      const stage = mountainStage(stats.overallPercent);
+
+      if (stats.totalMountains === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 px-4">
+            <div class="text-6xl mb-4 opacity-60">🏔️</div>
+            <h4 class="font-bold text-on-surface text-base mb-1.5">هنوز کوهی برای صعود نساخته‌ای</h4>
+            <p class="text-xs text-on-surface-variant leading-relaxed mb-5">هر عادت یک کوه است؛ با هر روز استمرار، یک قدم به قله نزدیک‌تر می‌شوی.</p>
+            <button onclick="closeAllModals(); setTimeout(() => openModal('addHabitModal'), 120);" class="agent-btn agent-btn-primary mx-auto px-8">
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              ساخت اولین کوه
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const cards = state.habits.map((habit, i) => {
+        const duration = habit.duration || 21;
+        const streak = habit.streak || 0;
+        const growth = Math.min(1, streak / duration);
+        const percent = Math.round(growth * 100);
+        const isConquered = growth >= 0.95;
+        const remaining = Math.max(0, duration - streak);
+        const cat = categories[habit.category] || categories.productivity;
+        const accent = isConquered ? '#f59e0b' : cat.color;
+        return `
+        <div class="mtn-card ${isConquered ? 'mtn-conquered' : ''}" style="animation-delay: ${i * 0.06}s" onclick="openMountainDetail('${habit.id}')">
+          <div class="mtn-icon-wrap" style="background: ${cat.color}1c; border: 1.5px solid ${cat.color}59;">
+            ${habit.icon || '🏔️'}
+            ${isConquered ? '<span class="absolute -top-1.5 -left-1.5 text-[13px]">🏆</span>' : ''}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-[13px] font-bold text-on-surface truncate">${habit.name}</span>
+                <span class="text-[8.5px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0 whitespace-nowrap" style="color: ${cat.color}; background: ${cat.color}1a;">${cat.emoji} ${cat.label}</span>
+              </div>
+              <span class="text-[13px] font-black flex-shrink-0" style="color: ${accent};">${toPersian(percent)}٪</span>
+            </div>
+            <div class="mtn-bar mb-1.5"><div class="mtn-bar-fill" style="width: ${percent}%; background: linear-gradient(90deg, ${cat.color}, ${isConquered ? '#fbbf24' : cat.color + 'b3'});"></div></div>
+            <div class="flex items-center justify-between text-[9.5px] text-on-surface-variant">
+              <span>🔥 ${toPersian(streak)} روز پیوستگی</span>
+              <span class="font-bold" style="color: ${accent};">${isConquered ? '🏆 قله فتح شد' : toPersian(remaining) + ' روز تا قله'}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="mtn-hero">
+          ${mountainHeroSvg()}
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-3">
+              <span class="mtn-stage-chip">${stage.emoji} مرحله: ${stage.name}</span>
+              <span class="text-[10px] font-bold opacity-80">کوهستان اراده</span>
+            </div>
+            <div class="flex items-end gap-1.5 mb-3">
+              <span class="text-[44px] leading-none font-black">${toPersian(stats.overallPercent)}</span>
+              <span class="text-base font-bold opacity-90 mb-1.5">٪ صعود کلی</span>
+            </div>
+            <div class="mtn-hero-bar mb-3"><div class="mtn-hero-fill" style="width: ${stats.overallPercent}%"></div></div>
+            <p class="text-[11.5px] font-semibold opacity-95 leading-relaxed relative z-10">${stage.message} ✨</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div class="mtn-stat flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">🏔️</div>
+            <div>
+              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.totalMountains)}</div>
+              <div class="text-[9px] text-on-surface-variant mt-1">کوه فعال</div>
+            </div>
+          </div>
+          <div class="mtn-stat flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center text-lg flex-shrink-0">🔥</div>
+            <div>
+              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.totalStreakDays)}</div>
+              <div class="text-[9px] text-on-surface-variant mt-1">روزهای پیوستگی</div>
+            </div>
+          </div>
+          <div class="mtn-stat flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-tertiary-fixed flex items-center justify-center text-lg flex-shrink-0">📈</div>
+            <div>
+              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.overallPercent)}٪</div>
+              <div class="text-[9px] text-on-surface-variant mt-1">میانگین رشد</div>
+            </div>
+          </div>
+          <div class="mtn-stat flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">🏆</div>
+            <div>
+              <div class="text-[15px] font-black text-on-surface leading-none">${toPersian(stats.conquered)}</div>
+              <div class="text-[9px] text-on-surface-variant mt-1">قله‌های فتح‌شده</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-primary">hiking</span>
+            <h4 class="font-bold text-on-surface text-sm">کوه‌های در حال صعود</h4>
+          </div>
+          <span class="text-[10px] text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-lg border border-surface-container-highest">برای جزئیات بزن</span>
+        </div>
+
+        <div class="flex flex-col gap-2.5">
+          ${cards}
+        </div>
+      `;
+    }
+
+    function openMountainDetail(habitId) {
+      const habit = state.habits.find(h => h.id === habitId);
+      if (!habit) return;
+      const duration = habit.duration || 21;
+      const streak = habit.streak || 0;
+      const percent = Math.round(Math.min(1, streak / duration) * 100);
+      if (percent >= 95) {
+        showToast('🏆 ' + habit.name + ': قله فتح شد! ' + toPersian(streak) + ' روز استمرار');
+      } else {
+        showToast((habit.icon || '🏔️') + ' ' + habit.name + ': ' + toPersian(percent) + '٪ صعود — ' + toPersian(duration - streak) + ' روز تا قله');
+      }
+    }
+    // ================= NOTEBOOK =================
+    let selectedNoteTags = [];
+
+    function toggleNoteTag(btn, tag) {
+      if (selectedNoteTags.includes(tag)) {
+        selectedNoteTags = selectedNoteTags.filter(t => t !== tag);
+        btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+        btn.classList.add('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+      } else {
+        selectedNoteTags.push(tag);
+        btn.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+        btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+      }
+    }
+
+    function saveNotebookEntry() {
+      const text = document.getElementById('notebookText').value.trim();
+      if (!text) { showToast('لطفاً متنی بنویس'); return; }
+      
+      state.notebookEntries.unshift({
+        id: 'n' + Date.now(),
+        date: today(),
+        timestamp: new Date().toISOString(),
+        text: text,
+        tags: [...selectedNoteTags]
+      });
+      
+      saveState();
+      document.getElementById('notebookText').value = '';
+      selectedNoteTags = [];
+      document.querySelectorAll('#notebookTags button').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+        btn.classList.add('bg-surface-container-low', 'text-on-surface-variant', 'border-surface-container-highest');
+      });
+      renderNotebookHistory();
+      renderNotebookPreview();
+      showToast('یادداشت ذخیره شد 📔');
+    }
+
+    function renderNotebookHistory() {
+      const container = document.getElementById('notebookHistory');
+      if (!container) return;
+      
+      if (state.notebookEntries.length === 0) {
+        container.innerHTML = '<div class="text-center text-on-surface-variant text-xs py-4">هنوز یادداشتی نداری</div>';
+        return;
+      }
+      
+      const tagEmojis = { thought: '💭', challenge: '🔥', achievement: '', gratitude: '🙏' };
+      const tagLabels = { thought: 'فکر', challenge: 'چالش', achievement: 'دستاورد', gratitude: 'سپاس' };
+      
+      container.innerHTML = state.notebookEntries.slice(0, 10).map(entry => {
+        const d = new Date(entry.timestamp);
+        const dateStr = d.toLocaleDateString('fa-IR', { day: 'numeric', month: 'short' });
+        const timeStr = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        const tags = entry.tags.map(t => `<span class="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">${tagEmojis[t] || ''} ${tagLabels[t] || t}</span>`).join(' ');
+        
+        return `
+          <div class="notebook-entry">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[9px] text-on-surface-variant font-mono">${dateStr} • ${timeStr}</span>
+              <button onclick="deleteNotebookEntry('${entry.id}')" class="text-on-surface-variant hover:text-error">
+                <span class="material-symbols-outlined text-[14px]">delete</span>
+              </button>
+            </div>
+            <p class="text-xs text-on-surface leading-relaxed mb-1">${escapeHtml(entry.text)}</p>
+            ${tags ? `<div class="flex gap-1 flex-wrap">${tags}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteNotebookEntry(id) {
+      state.notebookEntries = state.notebookEntries.filter(e => e.id !== id);
+      saveState();
+      renderNotebookHistory();
+      renderNotebookPreview();
+    }
+
+    function renderNotebookPreview() {
+      const container = document.getElementById('notebookPreview');
+      if (!container) return;
+      
+      if (state.notebookEntries.length === 0) {
+        container.innerHTML = '<div class="text-center text-on-surface-variant text-xs py-4"><span class="material-symbols-outlined text-3xl opacity-30 block mb-2">auto_stories</span>هنوز یادداشتی ننوشتی. افکار، چالش‌ها و دستاوردهایت را ثبت کن.</div>';
+        return;
+      }
+      
+      const recent = state.notebookEntries.slice(0, 2);
+      container.innerHTML = recent.map(entry => {
+        const d = new Date(entry.timestamp);
+        const dateStr = d.toLocaleDateString('fa-IR', { day: 'numeric', month: 'short' });
+        return `
+          <div class="bg-surface-container-low rounded-lg p-2 border-r-2 border-primary">
+            <div class="text-[9px] text-on-surface-variant mb-1">${dateStr}</div>
+            <p class="text-[11px] text-on-surface leading-relaxed truncate">${escapeHtml(entry.text)}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ================= BADGES =================
+    function renderBadges() {
+      const grid = document.getElementById('badgesGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const maxStreak = state.habits.length > 0 ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+      const totalCompletions = state.habits.reduce((acc, h) => acc + Object.keys(h.completions || {}).length, 0);
+      const activeHabits = state.habits.length;
+      const journalDays = Object.keys(state.journal).length;
+      const moodDays = state.moodLog.length;
+
+      const badges = [
+        { id: 'streak_7', unlocked: maxStreak >= 7, name: 'شعله‌ی هفت‌روزه', desc: '۷ روز استریک پیوسته', icon: '🔥' },
+        { id: 'streak_10', unlocked: maxStreak >= 10, name: 'استاد استقامت', desc: '۱۰ روز استریک', icon: '⚡' },
+        { id: 'master', unlocked: totalCompletions >= 50, name: 'استاد عادت', desc: '۵۰ تکمیل موفق', icon: '🏆' },
+        { id: 'morning', unlocked: activeHabits >= 3 && maxStreak >= 3, name: 'سحرخیز منظم', desc: 'نظم در ۳ عادت', icon: '☀️' },
+        { id: 'journaler', unlocked: journalDays >= 5, name: 'خودآگاه', desc: '۵ روز ژورنال', icon: '' },
+        { id: 'self-aware', unlocked: moodDays >= 7, name: 'آگاه به حال', desc: '۷ روز ثبت حال', icon: '💗' },
+        { id: 'streak_30', unlocked: maxStreak >= 30, name: 'افسانه‌ی نظم', desc: '۳۰ روز استریک', icon: '👑' },
+        { id: 'consistency', unlocked: totalCompletions >= 100, name: 'استمرار افسانه‌ای', desc: '۰۰ تکمیل', icon: '💎' }
+      ];
+
+      badges.forEach(badge => {
+        const div = document.createElement('div');
+        div.className = `rounded-2xl p-4 flex flex-col items-center text-center gap-2 transition-all ${badge.unlocked ? 'badge-unlocked' : 'badge-locked bg-white border border-surface-container-highest'}`;
+        div.innerHTML = `
+          <div class="w-14 h-14 rounded-full bg-surface-container-low flex items-center justify-center mb-1 text-3xl">${badge.icon}</div>
+          <h4 class="font-bold text-sm text-on-surface">${badge.name}</h4>
+          <p class="text-[10px] text-on-surface-variant">${badge.desc}</p>
+          ${!badge.unlocked ? '<span class="text-[9px] bg-surface-container-low px-2 py-0.5 rounded-full text-on-surface-variant mt-1">قفل 🔒</span>' : '<span class="text-[9px] bg-primary/10 px-2 py-0.5 rounded-full text-primary mt-1">✓ کسب شد</span>'}
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function updateBadgeCount() {
+      const maxStreak = state.habits.length > 0 ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+      const totalCompletions = state.habits.reduce((acc, h) => acc + Object.keys(h.completions || {}).length, 0);
+      const activeHabits = state.habits.length;
+      const journalDays = Object.keys(state.journal).length;
+      const moodDays = state.moodLog.length;
+      
+      let count = 0;
+      if (maxStreak >= 7) count++;
+      if (maxStreak >= 10) count++;
+      if (maxStreak >= 30) count++;
+      if (totalCompletions >= 50) count++;
+      if (totalCompletions >= 100) count++;
+      if (activeHabits >= 3 && maxStreak >= 3) count++;
+      if (journalDays >= 5) count++;
+      if (moodDays >= 7) count++;
+      
+      const el = document.getElementById('badgeCount');
+      if (el) el.textContent = toPersian(count);
+    }
+
+    function renderTrophyCase() {
+      const container = document.getElementById('trophyCase');
+      if (!container) return;
+      
+      const maxStreak = state.habits.length > 0 ? Math.max(...state.habits.map(h => h.streak || 0)) : 0;
+      const totalCompletions = state.habits.reduce((acc, h) => acc + Object.keys(h.completions || {}).length, 0);
+      
+      const medals = [
+        { id: 'medalDiamond', threshold: 100 },
+        { id: 'medalPlatinum', threshold: 70 },
+        { id: 'medalGold', threshold: 40 },
+        { id: 'medalSilver', threshold: 21 },
+        { id: 'medalBronze', threshold: 7 }
+      ];
+      
+      medals.forEach(medal => {
+        const el = document.getElementById(medal.id);
+        if (maxStreak >= medal.threshold) {
+          el.classList.remove('medal-locked');
+        } else {
+          el.classList.add('medal-locked');
+        }
+      });
+      
+      const challengesList = document.getElementById('challengesList');
+      const challenges = [
+        { id: 'weekly_streak', title: 'چالش هفتگی', desc: '۷ روز متوالی تمام عادت‌ها', progress: Math.min(100, (maxStreak / 7) * 100), reward: '🥉 مدال برنز', unlocked: maxStreak >= 7 },
+        { id: 'monthly_streak', title: 'چالش ماهانه', desc: '۲۱ روز پیوستگی', progress: Math.min(100, (maxStreak / 21) * 100), reward: ' مدال نقره', unlocked: maxStreak >= 21 },
+        { id: 'master_challenge', title: 'چالش استاد', desc: '۴۰ روز استریک طلایی', progress: Math.min(100, (maxStreak / 40) * 100), reward: '🥇 مدال طلا', unlocked: maxStreak >= 40 },
+        { id: 'platinum_challenge', title: 'چالش پلاتین', desc: '۷۰ روز استقامت', progress: Math.min(100, (maxStreak / 70) * 100), reward: '🏅 مدال پلاتین', unlocked: maxStreak >= 70 },
+        { id: 'diamond_challenge', title: 'چالش الماس', desc: '۱۰۰ روز افسانه‌ای', progress: Math.min(100, (maxStreak / 100) * 100), reward: '💎 مدال الماس', unlocked: maxStreak >= 100 },
+        { id: 'completion_challenge', title: 'چالش تکمیل', desc: '۰ تکمیل عادت', progress: Math.min(100, (totalCompletions / 50) * 100), reward: '🏆 نشان استاد', unlocked: totalCompletions >= 50 },
+        { id: 'mood_challenge', title: 'چالش خودآگاهی', desc: '۷ روز ثبت حال', progress: Math.min(100, (state.moodLog.length / 7) * 100), reward: '💗 نشان آگاهی', unlocked: state.moodLog.length >= 7 },
+        { id: 'journal_challenge', title: 'چالش ژورنال', desc: '۵ روز نوشتن', progress: Math.min(100, (Object.keys(state.journal).length / 5) * 100), reward: '📔 نشان خودآگاه', unlocked: Object.keys(state.journal).length >= 5 }
+      ];
+      
+      challengesList.innerHTML = challenges.map(ch => `
+        <div class="challenge-card">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">${ch.unlocked ? '✅' : '🎯'}</span>
+              <div>
+                <div class="text-xs font-bold text-on-surface">${ch.title}</div>
+                <div class="text-[9px] text-on-surface-variant">${ch.desc}</div>
+              </div>
+            </div>
+            <span class="text-[9px] font-bold ${ch.unlocked ? 'text-primary' : 'text-on-surface-variant'} bg-white px-2 py-0.5 rounded-full">${ch.reward}</span>
+          </div>
+          <div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all" style="width: ${ch.progress}%"></div>
+          </div>
+          <div class="text-[9px] text-on-surface-variant mt-1 text-left">${toPersian(Math.round(ch.progress))}٪</div>
+        </div>
+      `).join('');
+
+      let unlockedCount = 0;
+      if (maxStreak >= 7) unlockedCount++;
+      if (maxStreak >= 21) unlockedCount++;
+      if (maxStreak >= 40) unlockedCount++;
+      if (maxStreak >= 70) unlockedCount++;
+      if (maxStreak >= 100) unlockedCount++;
+      if (totalCompletions >= 50) unlockedCount++;
+      if (state.moodLog.length >= 7) unlockedCount++;
+      if (Object.keys(state.journal).length >= 5) unlockedCount++;
+      
+      document.getElementById('trophyCount').textContent = toPersian(unlockedCount) + ' کسب شده';
+    }
+
+    function renderAlarmSettings() {
+      const container = document.getElementById('alarmSettingsList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (state.habits.length === 0) {
+        container.innerHTML = '<div class="text-center text-on-surface-variant text-xs py-2">هنوز عادتی نداری</div>';
+        return;
+      }
+
+      state.habits.forEach(habit => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between gap-3 bg-surface-container-low rounded-xl p-3';
+        div.innerHTML = `
+          <div class="flex items-center gap-2 flex-1 min-w-0">
+            <span class="text-lg">${habit.icon || '🏔️'}</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-bold text-on-surface truncate">${habit.name}</div>
+              <input type="time" value="${habit.alarmTime || ''}" onchange="updateAlarmTime('${habit.id}', this.value)" class="text-[10px] text-on-surface-variant bg-transparent border-none focus:outline-none mt-0.5">
+            </div>
+          </div>
+          <div class="w-11 h-6 bg-surface-container-highest rounded-full relative cursor-pointer transition-all ${habit.alarmEnabled ? 'bg-primary' : ''}" onclick="toggleAlarm('${habit.id}')">
+            <div class="absolute top-0.5 ${habit.alarmEnabled ? 'left-0.5' : 'right-0.5'} w-5 h-5 bg-white rounded-full transition-all shadow-sm"></div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // ================= BATTERY SAVER =================
+    function toggleBatterySaver() {
+      state.settings.batterySaver = !state.settings.batterySaver;
+      saveState();
+      
+      if (state.settings.batterySaver) {
+        document.body.classList.add('battery-saver');
+        showToast('🔋 حالت ذخیره باتری فعال شد');
+      } else {
+        document.body.classList.remove('battery-saver');
+        showToast('✨ حالت عادی بازیابی شد');
+      }
+      
+      updateBatterySaverToggle();
+    }
+
+    function updateBatterySaverToggle() {
+      const toggle = document.getElementById('batterySaverToggle');
+      if (!toggle) return;
+      
+      if (state.settings.batterySaver) {
+        toggle.classList.add('bg-primary');
+        toggle.classList.remove('bg-surface-container-highest');
+        toggle.querySelector('div').style.right = 'auto';
+        toggle.querySelector('div').style.left = '2px';
+      } else {
+        toggle.classList.remove('bg-primary');
+        toggle.classList.add('bg-surface-container-highest');
+        toggle.querySelector('div').style.left = 'auto';
+        toggle.querySelector('div').style.right = '2px';
+      }
+    }
+
+    // ================= MOOD CHART =================
+    function renderMoodChart() {
+      const container = document.getElementById('moodLineChartContainer');
+      const labelsContainer = document.getElementById('moodChartLabels');
+      const insightContainer = document.getElementById('moodInsight');
+      if (!container) return;
+      
+      const last7Days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        last7Days.push(d.toISOString().split('T')[0]);
+      }
+
+      const moodData = last7Days.map(date => {
+        const log = state.moodLog.find(m => m.date === date);
+        return log ? log.score : null;
+      });
+
+      const habitsData = last7Days.map(date => {
+        const total = state.habits.length;
+        if (total === 0) return 0;
+        const completed = state.habits.filter(h => h.completions[date]).length;
+        return Math.round((completed / total) * 5);
+      });
+
+      const height = 180;
+      const paddingX = 5;
+      const paddingY = 15;
+      
+      let svgContent = `<svg width="100%" height="100%" viewBox="0 0 100 ${height}" preserveAspectRatio="none">`;
+      
+      for(let i = 1; i <= 5; i++) {
+        const y = height - paddingY - ((i - 1) / 4) * (height - paddingY * 2);
+        svgContent += `<line x1="${paddingX}" y1="${y}" x2="${100 - paddingX}" y2="${y}" stroke="rgba(24,20,69,0.05)" stroke-width="0.5" />`;
+      }
+
+      const moodPoints = [];
+      moodData.forEach((score, i) => {
+        if (score !== null) {
+          const x = paddingX + (i / 6) * (100 - paddingX * 2);
+          const y = height - paddingY - ((score - 1) / 4) * (height - paddingY * 2);
+          moodPoints.push({ x, y });
+        }
+      });
+
+      const habitPoints = [];
+      habitsData.forEach((score, i) => {
+        const x = paddingX + (i / 6) * (100 - paddingX * 2);
+        const y = height - paddingY - ((score - 1) / 4) * (height - paddingY * 2);
+        habitPoints.push({ x, y });
+      });
+
+      if (moodPoints.length > 1) {
+        svgContent += `<polyline points="${moodPoints.map(p => `${p.x},${p.y}`).join(' ')}" fill="none" stroke="#843700" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />`;
+        moodPoints.forEach(p => { svgContent += `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#fcf8ff" stroke="#843700" stroke-width="1.5" />`; });
+      }
+
+      if (habitPoints.length > 1) {
+        svgContent += `<polyline points="${habitPoints.map(p => `${p.x},${p.y}`).join(' ')}" fill="none" stroke="#630ed4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 1" />`;
+        habitPoints.forEach(p => { svgContent += `<circle cx="${p.x}" cy="${p.y}" r="2" fill="#fcf8ff" stroke="#630ed4" stroke-width="1.5" />`; });
+      }
+      
+      svgContent += `</svg>`;
+      container.innerHTML = svgContent;
+
+      const dayNames = ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'];
+      labelsContainer.innerHTML = last7Days.map((d, i) => {
+        const isToday = i === 6;
+        return `<div class="flex-1 text-center ${isToday ? 'text-primary font-bold' : 'text-on-surface-variant'}">${dayNames[new Date(d).getDay()]}</div>`;
+      }).join('');
+
+      const validMoods = moodData.filter(m => m !== null);
+      if (validMoods.length >= 3) {
+        const avg = validMoods.reduce((a, b) => a + b, 0) / validMoods.length;
+        insightContainer.innerHTML = `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-tertiary">insights</span><div><p class="text-xs font-bold text-on-surface">میانگین انرژی</p><p class="text-[10px] text-on-surface-variant mt-1">${toPersian(avg.toFixed(1))} از  در ۷ روز گذشته</p></div></div>`;
+      } else {
+        insightContainer.innerHTML = `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">info</span><div><p class="text-xs font-bold text-on-surface">داده کافی نیست</p><p class="text-[10px] text-on-surface-variant mt-1">حداقل  روز حال خود را ثبت کن.</p></div></div>`;
+      }
+    }
+
+    // ================= ACTIONS =================
+    function toggleHabit(id, event) {
+      const habit = state.habits.find(h => h.id === id);
+      if (!habit) return;
+      
+      const todayStr = today();
+      if (!habit.completions) habit.completions = {};
+      
+      if (habit.completions[todayStr]) {
+        delete habit.completions[todayStr];
+        habit.streak = Math.max(0, (habit.streak || 0) - 1);
+      } else {
+        habit.completions[todayStr] = true;
+        habit.streak = (habit.streak || 0) + 1;
+        
+        if (state.settings.sound) playCrystalChime();
+        
+        const card = event?.currentTarget?.closest('.habit-card');
+        if (card) triggerXpAnimation(card);
+        
+        if (habit.streak === 7) {
+          showToast('🥉 آفرین! مدال برنز کسب کردی!');
+          addNotification('achievement', 'مدال برنز', '۷ روز استریک پیوسته!', 'emoji_events');
+          triggerConfetti();
+        } else if (habit.streak === 21) {
+          showToast('🥈 تبریک! مدال نقره گرفتی!');
+          addNotification('achievement', 'مدال نقره', '۲۱ روز استریک پیوسته!', 'emoji_events');
+          triggerConfetti();
+        } else if (habit.streak === 40) {
+          showToast('🥇 فوق‌العاده! مدال طلا!');
+          addNotification('achievement', 'مدال طلا', '۴۰ روز استریک پیوسته!', 'emoji_events');
+          triggerConfetti();
+        } else if (habit.streak === 70) {
+          showToast('🏅 شگفت‌انگیز! مدال پلاتین!');
+          addNotification('achievement', 'مدال پلاتین', '۷۰ روز استریک پیوسته!', 'emoji_events');
+          triggerConfetti();
+        } else if (habit.streak === 100) {
+          showToast('💎 افسانه‌ای! مدال الماس!');
+          addNotification('achievement', 'مدال الماس', '۱۰۰ روز استریک پیوسته!', 'emoji_events');
+          triggerConfetti();
+        } else {
+          showToast('آفرین! یک قدم به قله نزدیک‌تر 🏔️');
+        }
+      }
+      
+      saveState();
+      renderAll();
+    }
+
+    function selectCategory(btn, category) {
+      document.querySelectorAll('.category-btn').forEach(el => {
+        el.className = 'category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95';
+        const iconWrap = el.querySelector('.cat-icon-wrap');
+        if (iconWrap) { 
+          const cat = el.onclick.toString().match(/'([^']+)'/)?.[1];
+          const catData = categories[cat];
+          iconWrap.className = 'cat-icon-wrap w-7 h-7 rounded-xl flex items-center justify-center';
+          iconWrap.style.background = catData ? catData.color + '20' : '';
+          const iconSpan = iconWrap.querySelector('.cat-icon'); 
+          if (iconSpan) { iconSpan.className = 'material-symbols-outlined cat-icon text-[18px]'; iconSpan.style.color = catData ? catData.color : ''; }
+        }
+        const check = el.querySelector('.cat-check');
+        if (check) { check.textContent = 'radio_button_unchecked'; check.className = 'material-symbols-outlined cat-check text-[18px] text-outline-variant'; }
+      });
+      btn.className = 'category-btn selected flex items-center justify-between p-3 rounded-2xl bg-primary text-on-primary shadow-sm font-bold text-[12px] border-2 border-primary transition-all active:scale-95';
+      const activeWrap = btn.querySelector('.cat-icon-wrap');
+      if (activeWrap) { activeWrap.className = 'cat-icon-wrap w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center'; const activeIcon = activeWrap.querySelector('.cat-icon'); if (activeIcon) activeIcon.className = 'material-symbols-outlined cat-icon text-[18px] text-on-primary'; }
+      const activeCheck = btn.querySelector('.cat-check');
+      if (activeCheck) { activeCheck.textContent = 'check_circle'; activeCheck.className = 'material-symbols-outlined cat-check text-[18px] text-on-primary'; }
+      window.selectedCategory = category;
+    }
+
+    function selectDuration(btn, duration) {
+      document.querySelectorAll('.duration-btn').forEach(el => {
+        el.className = 'duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all';
+        el.querySelectorAll('span').forEach(s => { s.classList.remove('text-on-primary'); s.classList.add('text-on-surface'); });
+      });
+      btn.className = 'duration-btn selected bg-primary text-on-primary rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-md border-2 border-primary active:scale-95 transition-all';
+      btn.querySelectorAll('span').forEach(s => { s.classList.remove('text-on-surface', 'text-on-surface-variant'); s.classList.add('text-on-primary'); });
+      window.selectedDuration = duration;
+      document.getElementById('progressLabel').textContent = `۰ از ${toPersian(duration)} روز`;
+      
+      const durationLabels = {
+        7: '۷ روزه (شروع سریع)',
+        21: '۲۱ روزه (تثبیت)',
+        40: '۴۰ روزه (شکوه عهد)',
+        70: '۷۰ روزه (استاد)',
+        100: '۱۰۰ روزه (ریشه‌داری)'
+      };
+      document.getElementById('timelineSubtitle').textContent = `${durationLabels[duration] || '۲۱ روزه'} • مسیر صعود به قله`;
+      
+      renderMountainPreview(duration);
+    }
+
+    function selectHabitEmoji(btn, emoji) {
+      window.selectedHabitEmoji = emoji;
+      document.querySelectorAll('#habitEmojiPicker .habit-emoji-chip').forEach(el => el.classList.toggle('active', el === btn));
+      const badge = document.getElementById('newHabitEmojiBadge');
+      if (badge) badge.textContent = emoji;
+    }
+    function fillHabitSuggestion(name, emoji) {
+      const input = document.getElementById('newHabitName');
+      if (input) { input.value = name; input.focus(); }
+      const chip = Array.from(document.querySelectorAll('#habitEmojiPicker .habit-emoji-chip')).find(el => el.textContent.trim() === emoji);
+      if (chip) selectHabitEmoji(chip, emoji);
+      else {
+        window.selectedHabitEmoji = emoji;
+        const badge = document.getElementById('newHabitEmojiBadge');
+        if (badge) badge.textContent = emoji;
+      }
+      showToast(`«${name}» پر شد — دسته‌بندی و ساعت را تنظیم کن ✨`);
+    }
+    function toggleNewHabitAlarm() {
+      window.newHabitAlarmEnabled = !window.newHabitAlarmEnabled;
+      const wrap = document.getElementById('newHabitAlarmToggle');
+      const knob = document.getElementById('newHabitAlarmKnob');
+      if (!wrap || !knob) return;
+      const on = window.newHabitAlarmEnabled !== false;
+      wrap.style.background = on ? '#630ed4' : '#e3dfff';
+      knob.classList.toggle('left-0.5', on);
+      knob.classList.toggle('right-0.5', !on);
+    }
+
+    function renderMountainPreview(duration) {
+      const svg = document.getElementById('mountainPreviewSvg');
+      const labelsContainer = document.getElementById('mountainPreviewLabels');
+      if (!svg || !labelsContainer) return;
+      
+      const width = 300;
+      const height = 100;
+      const peakX = width * 0.5;
+      const peakY = height * 0.15;
+      const baseLeftX = width * 0.05;
+      const baseRightX = width * 0.95;
+      const baseY = height * 0.85;
+      
+      const numPoints = 7;
+      const pathPoints = [];
+      for (let i = 0; i < numPoints; i++) {
+        const t = i / (numPoints - 1);
+        const x = baseLeftX + t * (peakX - baseLeftX);
+        const baseY_at_t = baseY - t * (baseY - peakY);
+        const zigzag = Math.sin(t * Math.PI * 2.5) * (width * 0.05);
+        const y = baseY_at_t + zigzag;
+        pathPoints.push({ x, y, t });
+      }
+      
+      let svgContent = '';
+      svgContent += `<path d="M 0 ${height * 0.7} L ${width * 0.2} ${height * 0.5} L ${width * 0.4} ${height * 0.6} L ${width * 0.6} ${height * 0.45} L ${width * 0.8} ${height * 0.55} L ${width} ${height * 0.5} L ${width} ${height} L 0 ${height} Z" fill="#94a3b8" opacity="0.2"/>`;
+      svgContent += `<path d="M ${baseLeftX} ${baseY} L ${peakX - 10} ${peakY + 15} L ${peakX} ${peakY} L ${peakX + 10} ${peakY + 15} L ${baseRightX} ${baseY} Z" fill="#64748b" opacity="0.5"/>`;
+      svgContent += `<path d="M ${peakX - 12} ${peakY + 15} L ${peakX} ${peakY} L ${peakX + 12} ${peakY + 15} L ${peakX + 6} ${peakY + 20} L ${peakX - 6} ${peakY + 20} Z" fill="white" opacity="0.8"/>`;
+      
+      const pathD = pathPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      svgContent += `<path d="${pathD}" fill="none" stroke="#630ed4" stroke-width="2" stroke-dasharray="4 3" class="mountain-preview-path" opacity="0.7"/>`;
+      
+      pathPoints.forEach((p, i) => {
+        svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#dc2626" stroke="white" stroke-width="1.5" class="mountain-node" style="animation-delay: ${i * 0.1}s;"/>`;
+      });
+      
+      svgContent += `<g class="flag-waver" style="transform-origin: ${peakX}px ${peakY}px;">`;
+      svgContent += `<line x1="${peakX}" y1="${peakY}" x2="${peakX}" y2="${peakY - 15}" stroke="#1e293b" stroke-width="1.5"/>`;
+      svgContent += `<path d="M ${peakX} ${peakY - 15} L ${peakX + 10} ${peakY - 12} L ${peakX} ${peakY - 9} Z" fill="#dc2626"/>`;
+      svgContent += `</g>`;
+      
+      svg.innerHTML = svgContent;
+      
+      const durationMilestones = {
+        7: ['روز  (قله)', 'روز ۵', 'روز ۳', 'روز ۱ (شروع)'],
+        21: ['روز ۲۱ (قله)', 'روز ۱۴', 'روز ۷', 'روز ۱ (شروع)'],
+        40: ['روز ۴۰ (قله)', 'روز ۲۷', 'روز ۱۴', 'روز ۱ (شروع)'],
+        70: ['روز ۷۰ (قله)', 'روز ۴۷', 'روز ۳', 'روز ۱ (شروع)'],
+        100: ['روز ۱۰۰ (قله)', 'روز ۶۷', 'روز ۳', 'روز ۱ (شروع)']
+      };
+      
+      const milestones = durationMilestones[duration] || durationMilestones[21];
+      labelsContainer.innerHTML = milestones.map((m, i) => 
+        `<span class="${i === 0 ? 'text-primary font-extrabold' : ''}">${m}</span>`
+      ).join('');
+    }
+
+    function saveNewHabit() {
+      const name = document.getElementById('newHabitName').value.trim();
+      if (!name) { showToast('لطفاً نام عادت را وارد کن'); return; }
+
+      const catEmojis = { spiritual: '🕊️', productivity: '⚡', 'self-care': '💖', family: '👨‍👩‍👧' };
+      const category = window.selectedCategory || 'productivity';
+      const alarmInput = document.getElementById('newHabitAlarmTime');
+      const alarmTime = (alarmInput && alarmInput.value) ? alarmInput.value : '08:00';
+      const alarmEnabled = window.newHabitAlarmEnabled !== false;
+      
+      state.habits.push({
+        id: 'h' + Date.now(),
+        name,
+        icon: window.selectedHabitEmoji || catEmojis[category] || '🏔️',
+        category: category,
+        completions: {},
+        streak: 0,
+        alarmTime: alarmTime,
+        alarmEnabled: alarmEnabled,
+        notes: [],
+        duration: window.selectedDuration || 21
+      });
+
+      saveState();
+      closeAllModals();
+      document.getElementById('newHabitName').value = '';
+      window.selectedCategory = null;
+      window.selectedDuration = null;
+      window.selectedHabitEmoji = null;
+      window.newHabitAlarmEnabled = true;
+      renderAll();
+      showToast('عادت جدید با موفقیت اضافه شد 🏔️');
+      addNotification('habit', 'عادت جدید', `عادت "${name}" با موفقیت ایجاد شد!`, 'add_circle');
+    }
+
+    function updateAlarmTime(habitId, time) {
+      const habit = state.habits.find(h => h.id === habitId);
+      if (habit) { habit.alarmTime = time; habit.alarmEnabled = !!time; saveState(); renderAll(); }
+    }
+
+    function toggleAlarm(habitId) {
+      const habit = state.habits.find(h => h.id === habitId);
+      if (habit) { habit.alarmEnabled = !habit.alarmEnabled; saveState(); renderAll(); showToast(habit.alarmEnabled ? 'آلارم فعال شد' : 'آلارم غیرفعال شد'); }
+    }
+
+    function saveMonthlyGoals() {
+      closeAllModals();
+      showToast('ذخیره شد');
+    }
+
+    let selectedMoodScore = 3;
+    function renderMoodScorePicker() {
+      const container = document.getElementById('moodScorePicker');
+      if (!container) return;
+      const emojis = ['😫', '😕', '😐', '🙂', '🤩'];
+      container.innerHTML = '';
+      emojis.forEach((emoji, index) => {
+        const score = index + 1;
+        const btn = document.createElement('button');
+        btn.className = `flex-1 py-3 rounded-xl bg-surface-container-low border-2 transition-all active:scale-90 flex flex-col items-center gap-1 ${score === selectedMoodScore ? 'border-primary bg-on-primary-container scale-105' : 'border-surface-container-highest'}`;
+        btn.innerHTML = `<span class="text-2xl">${emoji}</span>`;
+        btn.onclick = () => { selectedMoodScore = score; renderMoodScorePicker(); };
+        container.appendChild(btn);
+      });
+    }
+
+    function saveMoodAndReflection() {
+      const text = document.getElementById('reflectionText').value.trim();
+      const todayStr = today();
+      
+      state.moodLog = state.moodLog.filter(m => m.date !== todayStr);
+      state.moodLog.push({ date: todayStr, score: selectedMoodScore, reflection: text });
+
+      saveState();
+      closeAllModals();
+      document.getElementById('reflectionText').value = '';
+      showToast('حال و بازتاب امروز ذخیره شد ✍️');
+      renderAll();
+    }
+
+    function saveJournal() {
+      const text = document.getElementById('journalText').value.trim();
+      if (!text) { showToast('لطفاً متنی بنویس'); return; }
+      state.journal[today()] = { text, date: new Date().toISOString() };
+      saveState();
+      closeAllModals();
+      document.getElementById('journalText').value = '';
+      showToast('ژورنال ذخیره شد 📓');
+      renderAll();
+    }
+
+    // ================= MUSIC LIBRARY =================
+    const musicCategories = {
+      calm:       { label: 'آرامش',  emoji: '🌙', grad: 'linear-gradient(135deg,#8b5cf6,#6d28d9)', stickers: ['🌙', '✨', '⭐'] },
+      energy:     { label: 'انرژی',  emoji: '⚡', grad: 'linear-gradient(135deg,#fb923c,#f43f5e)', stickers: ['⚡', '🔥', '💥'] },
+      focus:      { label: 'تمرکز',  emoji: '🎯', grad: 'linear-gradient(135deg,#38bdf8,#2563eb)', stickers: ['🎯', '💡', '📌'] },
+      motivation: { label: 'انگیزه', emoji: '🚀', grad: 'linear-gradient(135deg,#34d399,#059669)', stickers: ['🚀', '🌟', '⭐'] }
+    };
+    const musicCollEmojiPool = ['🎧', '💜', '🎸', '🎹', '🌊', '☕', '🕌', '📚', '🌅', '🧘', '💪', '🌙'];
+    const musicCollGradPool = [
+      'linear-gradient(135deg,#a78bfa,#7c3aed)',
+      'linear-gradient(135deg,#f472b6,#db2777)',
+      'linear-gradient(135deg,#38bdf8,#2563eb)',
+      'linear-gradient(135deg,#34d399,#059669)',
+      'linear-gradient(135deg,#fb923c,#ea580c)',
+      'linear-gradient(135deg,#facc15,#d97706)',
+      'linear-gradient(135deg,#f87171,#dc2626)',
+      'linear-gradient(135deg,#2dd4bf,#0d9488)'
+    ];
+    const musicStickerPool = ['✨', '🌟', '⭐', '💫', '🎶', '🎵', '🌈', '🦉', '🌸', '🍀', '🌙', '💛'];
+    function allMusicCats() {
+      const merged = {};
+      Object.keys(musicCategories).forEach(k => { merged[k] = musicCategories[k]; });
+      (state.musicCollections || []).forEach((c, i) => {
+        merged[c.id] = {
+          label: c.name,
+          emoji: c.emoji,
+          grad: c.grad,
+          custom: true,
+          stickers: [musicStickerPool[i % musicStickerPool.length], musicStickerPool[(i + 3) % musicStickerPool.length], musicStickerPool[(i + 7) % musicStickerPool.length]]
+        };
+      });
+      return merged;
+    }
+    const musicEmojiPool = ['🎵', '🎧', '🎹', '🎸', '🥁', '🎤', '🎺', '🎻'];
+    let currentMusicTab = 'all';
+    let musicDB = null;
+    let musicQueue = [];
+    let currentMusicModalId = null;
+    window.__musicModalDraft = { category: 'calm', schedule: { enabled: false, time: '07:00' } };
+    window.__musicModalId = null;
+
+    const musicAudio = new Audio();
+    musicAudio.preload = 'auto';
+    let currentPlayingId = null;
+    let currentMusicUrl = null;
+
+    // ---- Music IndexedDB (audio blobs) ----
+    function openMusicDB() {
+      return new Promise(resolve => {
+        if (musicDB) return resolve(musicDB);
+        if (!('indexedDB' in window)) return resolve(null);
+        try {
+          const req = indexedDB.open('musicLibraryDB', 1);
+          req.onupgradeneeded = e => { try { e.target.result.createObjectStore('tracks', { keyPath: 'id' }); } catch (err) {} };
+          req.onsuccess = e => { musicDB = e.target.result; resolve(musicDB); };
+          req.onerror = () => resolve(null);
+          setTimeout(() => resolve(musicDB), 2000);
+        } catch (e) { resolve(null); }
+      });
+    }
+    function idbMusicPut(rec) {
+      return openMusicDB().then(db => new Promise(resolve => {
+        if (!db) return resolve(false);
+        try {
+          const tx = db.transaction('tracks', 'readwrite');
+          tx.objectStore('tracks').put(rec);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        } catch (e) { resolve(false); }
+      }));
+    }
+    function idbMusicGet(id) {
+      return openMusicDB().then(db => new Promise(resolve => {
+        if (!db) return resolve(null);
+        try {
+          const rq = db.transaction('tracks', 'readonly').objectStore('tracks').get(id);
+          rq.onsuccess = () => resolve(rq.result || null);
+          rq.onerror = () => resolve(null);
+        } catch (e) { resolve(null); }
+      }));
+    }
+    function idbMusicDelete(id) {
+      return openMusicDB().then(db => new Promise(resolve => {
+        if (!db) return resolve(false);
+        try {
+          const tx = db.transaction('tracks', 'readwrite');
+          tx.objectStore('tracks').delete(id);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        } catch (e) { resolve(false); }
+      }));
+    }
+
+    // ---- Upload flow ----
+    function musicCleanName(fileName) {
+      return String(fileName || '').replace(/\.[^.]+$/, '').replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ').trim() || 'موزیک بدون نام';
+    }
+    function musicIsAudio(f) {
+      if (!f) return false;
+      if ((f.type || '').startsWith('audio/')) return true;
+      return /\.(mp3|wav|ogg|oga|m4a|aac|flac|opus|weba|webm|wma|aiff?)$/i.test(f.name || '');
+    }
+    function musicGetDuration(blob) {
+      return new Promise(resolve => {
+        let url;
+        try { url = URL.createObjectURL(blob); } catch (e) { return resolve(0); }
+        const a = new Audio();
+        a.preload = 'metadata';
+        let settled = false;
+        const done = d => { if (settled) return; settled = true; try { URL.revokeObjectURL(url); } catch (e) {} resolve(d); };
+        a.onloadedmetadata = () => { const d = a.duration; done(isFinite(d) && d > 0 ? Math.round(d) : 0); };
+        a.onerror = () => done(0);

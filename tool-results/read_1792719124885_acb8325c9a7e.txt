@@ -1,0 +1,702 @@
+  1290→            <span class="mr-3 text-xs text-on-surface-variant">فعال کردن صدا</span>
+  1291→          </label>
+  1292→        </div>
+  1293→      </div>
+  1294→
+  1295→      <!-- Tab Content: Daily Plan -->
+  1296→      <div id="agentTabPlan" class="agent-tab-content hidden">
+  1297→        <div class="agent-section">
+  1298→          <div class="agent-section-header">
+  1299→            <div class="agent-section-icon bg-agent-primary/20 text-agent-primary">
+  1300→              <span class="material-symbols-outlined text-[20px]">today</span>
+  1301→            </div>
+  1302→            <div>
+  1303→              <div class="agent-section-title">برنامه امروز تو</div>
+  1304→              <div class="agent-section-subtitle" id="agentPlanDate">-</div>
+  1305→            </div>
+  1306→          </div>
+  1307→          <div id="agentDailyPlan">
+  1308→            <!-- Injected by JS -->
+  1309→          </div>
+  1310→        </div>
+  1311→
+  1312→        <div class="agent-section">
+  1313→          <div class="agent-section-header">
+  1314→            <div class="agent-section-icon bg-agent-secondary/20 text-agent-secondary">
+  1315→              <span class="material-symbols-outlined text-[20px]">schedule</span>
+  1316→            </div>
+  1317→            <div>
+  1318→              <div class="agent-section-title">زمان‌بندی پیشنهادی</div>
+  1319→              <div class="agent-section-subtitle">بر اساس عادت‌های تو</div>
+  1320→            </div>
+  1321→          </div>
+  1322→          <div id="agentTimeSchedule">
+  1323→            <!-- Injected by JS -->
+  1324→          </div>
+  1325→        </div>
+  1326→
+  1327→        <button onclick="speakDailyPlan()" class="agent-btn agent-btn-primary w-full">
+  1328→          <span class="material-symbols-outlined text-[18px]">volume_up</span>
+  1329→          خواندن برنامه روزانه
+  1330→        </button>
+  1331→      </div>
+  1332→
+  1333→      <!-- Tab Content: Check-in -->
+  1334→      <div id="agentTabCheckin" class="agent-tab-content hidden">
+  1335→        <div class="agent-section">
+  1336→          <div class="agent-section-header">
+  1337→            <div class="agent-section-icon bg-agent-primary/20 text-agent-primary">
+  1338→              <span class="material-symbols-outlined text-[20px]">question_answer</span>
+  1339→            </div>
+  1340→            <div>
+  1341→              <div class="agent-section-title">گزارش کارهای امروز</div>
+  1342→              <div class="agent-section-subtitle">چه کارهایی انجام دادی؟</div>
+  1343→            </div>
+  1344→          </div>
+  1345→          <div class="agent-bubble">
+  1346→            <div class="agent-bubble-text" id="agentCheckinQuestion">
+  1347→              سلام! بیا ببینیم امروز چطور پیش رفتی. کدام عادت‌ها را انجام دادی؟
+  1348→            </div>
+  1349→          </div>
+  1350→          <div id="agentCheckinTasks">
+  1351→            <!-- Injected by JS -->
+  1352→          </div>
+  1353→        </div>
+  1354→
+  1355→        <div class="agent-section">
+  1356→          <div class="agent-section-header">
+  1357→            <div class="agent-section-icon bg-agent-accent/20 text-agent-accent">
+  1358→              <span class="material-symbols-outlined text-[20px]">mood</span>
+  1359→            </div>
+  1360→            <div>
+  1361→              <div class="agent-section-title">حال امروزت چطوره؟</div>
+  1362→              <div class="agent-section-subtitle">انرژی‌ات در چه سطحی است؟</div>
+  1363→            </div>
+  1364→          </div>
+  1365→          <div class="agent-mood-selector" id="agentMoodSelector">
+  1366→            <button class="agent-mood-btn" data-mood="1" onclick="selectAgentMood(1)">😫</button>
+  1367→            <button class="agent-mood-btn" data-mood="2" onclick="selectAgentMood(2)">😕</button>
+  1368→            <button class="agent-mood-btn" data-mood="3" onclick="selectAgentMood(3)">😐</button>
+  1369→            <button class="agent-mood-btn" data-mood="4" onclick="selectAgentMood(4)">🙂</button>
+  1370→            <button class="agent-mood-btn" data-mood="5" onclick="selectAgentMood(5)">🤩</button>
+  1371→          </div>
+  1372→        </div>
+  1373→
+  1374→        <div class="agent-section">
+  1375→          <div class="agent-section-header">
+  1376→            <div class="agent-section-icon bg-agent-secondary/20 text-agent-secondary">
+  1377→              <span class="material-symbols-outlined text-[20px]">edit_note</span>
+  1378→            </div>
+  1379→            <div>
+  1380→              <div class="agent-section-title">یادداشت اختیاری</div>
+  1381→              <div class="agent-section-subtitle">هر چیزی می‌خواهی بنویس</div>
+  1382→            </div>
+  1383→          </div>
+  1384→          <textarea id="agentCheckinNote" class="agent-input" rows="3" placeholder="امروز چه احساسی داشتی؟ چه چالشی داشتی؟"></textarea>
+  1385→        </div>
+  1386→
+  1387→        <button onclick="submitAgentCheckin()" class="agent-btn agent-btn-primary w-full">
+  1388→          <span class="material-symbols-outlined text-[18px]">send</span>
+  1389→          ارسال گزارش
+  1390→        </button>
+  1391→      </div>
+  1392→
+  1393→      <!-- Tab Content: Analysis -->
+  1394→      <div id="agentTabAnalysis" class="agent-tab-content hidden">
+  1395→        <div class="agent-section">
+  1396→          <div class="agent-section-header">
+  1397→            <div class="agent-section-icon bg-agent-primary/20 text-agent-primary">
+  1398→              <span class="material-symbols-outlined text-[20px]">analytics</span>
+  1399→            </div>
+  1400→            <div>
+  1401→              <div class="agent-section-title">آنالیز عملکرد</div>
+  1402→              <div class="agent-section-subtitle">بر اساس داده‌های تو</div>
+  1403→            </div>
+  1404→          </div>
+  1405→          
+  1406→          <div class="flex items-center justify-center mb-4">
+  1407→            <div class="agent-score-circle">
+  1408→              <svg viewBox="0 0 100 100">
+  1409→                <circle cx="50" cy="50" r="42" stroke="#e3dfff" />
+  1410→                <circle id="agentScoreCircle" cx="50" cy="50" r="42" stroke="#8b5cf6" 
+  1411→                  stroke-dasharray="264" stroke-dashoffset="264" class="agent-progress-ring" />
+  1412→              </svg>
+  1413→              <div class="agent-score-value" id="agentScoreValue">۰</div>
+  1414→              <div class="agent-score-label">امتیاز</div>
+  1415→            </div>
+  1416→          </div>
+  1417→
+  1418→          <div id="agentAnalysisStats">
+  1419→            <!-- Injected by JS -->
+  1420→          </div>
+  1421→        </div>
+  1422→
+  1423→        <div class="agent-section">
+  1424→          <div class="agent-section-header">
+  1425→            <div class="agent-section-icon bg-agent-secondary/20 text-agent-secondary">
+  1426→              <span class="material-symbols-outlined text-[20px]">trending_up</span>
+  1427→            </div>
+  1428→            <div>
+  1429→              <div class="agent-section-title">روند هفتگی</div>
+  1430→              <div class="agent-section-subtitle">مقایسه با هفته قبل</div>
+  1431→            </div>
+  1432→          </div>
+  1433→          <div id="agentWeeklyTrend">
+  1434→            <!-- Injected by JS -->
+  1435→          </div>
+  1436→        </div>
+  1437→
+  1438→        <button onclick="generateAgentAnalysis()" class="agent-btn agent-btn-primary w-full">
+  1439→          <span class="material-symbols-outlined text-[18px]">refresh</span>
+  1440→          به‌روزرسانی آنالیز
+  1441→        </button>
+  1442→      </div>
+  1443→
+  1444→      <!-- Tab Content: Insights -->
+  1445→      <div id="agentTabInsights" class="agent-tab-content hidden">
+  1446→        <div class="agent-section">
+  1447→          <div class="agent-section-header">
+  1448→            <div class="agent-section-icon bg-agent-primary/20 text-agent-primary">
+  1449→              <span class="material-symbols-outlined text-[20px]">emoji_events</span>
+  1450→            </div>
+  1451→            <div>
+  1452→              <div class="agent-section-title">نقاط قوت تو</div>
+  1453→              <div class="agent-section-subtitle">کارهایی که عالی انجام می‌دهی</div>
+  1454→            </div>
+  1455→          </div>
+  1456→          <div id="agentStrengths">
+  1457→            <!-- Injected by JS -->
+  1458→          </div>
+  1459→        </div>
+  1460→
+  1461→        <div class="agent-section">
+  1462→          <div class="agent-section-header">
+  1463→            <div class="agent-section-icon bg-agent-accent/20 text-agent-accent">
+  1464→              <span class="material-symbols-outlined text-[20px]">target</span>
+  1465→            </div>
+  1466→            <div>
+  1467→              <div class="agent-section-title">نقاط قابل بهبود</div>
+  1468→              <div class="agent-section-subtitle">جاهایی که می‌توانی بهتر شوی</div>
+  1469→            </div>
+  1470→          </div>
+  1471→          <div id="agentWeaknesses">
+  1472→            <!-- Injected by JS -->
+  1473→          </div>
+  1474→        </div>
+  1475→
+  1476→        <div class="agent-section">
+  1477→          <div class="agent-section-header">
+  1478→            <div class="agent-section-icon bg-agent-secondary/20 text-agent-secondary">
+  1479→              <span class="material-symbols-outlined text-[20px]">lightbulb</span>
+  1480→            </div>
+  1481→            <div>
+  1482→              <div class="agent-section-title">پیشنهاد دستیار</div>
+  1483→              <div class="agent-section-subtitle">برای پیشرفت بیشتر</div>
+  1484→            </div>
+  1485→          </div>
+  1486→          <div class="agent-insight-card">
+  1487→            <div class="agent-bubble-text" id="agentSuggestion">
+  1488→              بر اساس داده‌های تو، پیشنهاد می‌کنم...
+  1489→            </div>
+  1490→          </div>
+  1491→        </div>
+  1492→
+  1493→        <button onclick="generateAgentInsights()" class="agent-btn agent-btn-primary w-full">
+  1494→          <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+  1495→          تولید بینش جدید
+  1496→        </button>
+  1497→      </div>
+  1498→
+  1499→    </div>
+  1500→  </div>
+  1501→
+  1502→  <!-- Profile Modal -->
+  1503→  <div id="profileModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[92vh] overflow-y-auto">
+  1504→    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+  1505→      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+  1506→        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+  1507→      </button>
+  1508→      <h3 class="font-bold text-on-surface text-base">پروفایل</h3>
+  1509→      <div class="w-8"></div>
+  1510→    </div>
+  1511→    <div class="p-5 flex flex-col gap-5">
+  1512→      
+  1513→      <!-- Daily Notebook -->
+  1514→      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+  1515→        <div class="flex items-center justify-between mb-3">
+  1516→          <div class="flex items-center gap-2">
+  1517→            <span class="material-symbols-outlined text-[18px] text-primary">auto_stories</span>
+  1518→            <h4 class="font-bold text-on-surface text-sm">دفترچه یادداشت روزانه</h4>
+  1519→          </div>
+  1520→          <button onclick="openModal('notebookModal')" class="text-[10px] text-primary font-bold bg-on-primary-container px-2 py-1 rounded-full flex items-center gap-1">
+  1521→            <span class="material-symbols-outlined text-[12px]">edit</span>
+  1522→            نوشتن
+  1523→          </button>
+  1524→        </div>
+  1525→        <div id="notebookPreview" class="space-y-2">
+  1526→          <div class="text-center text-on-surface-variant text-xs py-4">
+  1527→            <span class="material-symbols-outlined text-3xl opacity-30 block mb-2">auto_stories</span>
+  1528→            هنوز یادداشتی ننوشتی. افکار، چالش‌ها و دستاوردهایت را ثبت کن.
+  1529→          </div>
+  1530→        </div>
+  1531→      </div>
+  1532→
+  1533→      <!-- 30-Day Mood Chart -->
+  1534→      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+  1535→        <div class="flex items-center justify-between mb-3">
+  1536→          <div class="flex items-center gap-2">
+  1537→            <span class="material-symbols-outlined text-[18px] text-primary">show_chart</span>
+  1538→            <h4 class="font-bold text-on-surface text-sm">مسیر احساسی ۳۰ روزه</h4>
+  1539→          </div>
+  1540→          <span class="text-[10px] text-primary font-bold bg-on-primary-container px-2 py-0.5 rounded-full" id="moodTrendLabel">-</span>
+  1541→        </div>
+  1542→        <div class="relative" style="height: 160px;">
+  1543→          <svg id="profileMoodChart" width="100%" height="100%" viewBox="0 0 300 160" preserveAspectRatio="none"></svg>
+  1544→        </div>
+  1545→        <div class="flex justify-between mt-2 text-[9px] text-on-surface-variant font-medium">
+  1546→          <span>۳۰ روز پیش</span>
+  1547→          <span>۱۵ روز پیش</span>
+  1548→          <span>امروز</span>
+  1549→        </div>
+  1550→      </div>
+  1551→
+  1552→      <!-- Alarm Settings -->
+  1553→      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+  1554→        <div class="flex items-start gap-3 mb-4">
+  1555→          <div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary flex-shrink-0">
+  1556→            <span class="material-symbols-outlined text-[20px]">alarm</span>
+  1557→          </div>
+  1558→          <div class="flex-1">
+  1559→            <h4 class="font-bold text-on-surface text-sm mb-1">تنظیمات آلارم</h4>
+  1560→            <p class="text-xs text-on-surface-variant">یادآوری روزانه برای هر عادت</p>
+  1561→          </div>
+  1562→        </div>
+  1563→        <div class="flex flex-col gap-2" id="alarmSettingsList"></div>
+  1564→      </div>
+  1565→
+  1566→      <!-- Battery Saver -->
+  1567→      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+  1568→        <div class="flex items-center justify-between">
+  1569→          <div class="flex items-center gap-3">
+  1570→            <div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-tertiary flex-shrink-0">
+  1571→              <span class="material-symbols-outlined text-[20px]">battery_saver</span>
+  1572→            </div>
+  1573→            <div>
+  1574→              <h4 class="font-bold text-on-surface text-sm">حالت ذخیره باتری</h4>
+  1575→              <p class="text-[10px] text-on-surface-variant">غیرفعال کردن انیمیشن‌ها برای صرفه‌جویی</p>
+  1576→            </div>
+  1577→          </div>
+  1578→          <div class="w-11 h-6 bg-surface-container-highest rounded-full relative cursor-pointer transition-all" id="batterySaverToggle" onclick="toggleBatterySaver()">
+  1579→            <div class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full transition-all shadow-sm"></div>
+  1580→          </div>
+  1581→        </div>
+  1582→      </div>
+  1583→
+  1584→      <!-- Trophy Case -->
+  1585→      <div class="trophy-shelf rounded-2xl p-4">
+  1586→        <div class="flex items-center justify-between mb-4">
+  1587→          <div class="flex items-center gap-2">
+  1588→            <span class="material-symbols-outlined text-[20px] text-tertiary">military_tech</span>
+  1589→            <h4 class="font-bold text-on-surface text-sm">ویترین افتخارات</h4>
+  1590→          </div>
+  1591→          <span class="text-[10px] text-tertiary font-bold bg-tertiary-fixed px-2 py-0.5 rounded-full" id="trophyCount">۰ کسب شده</span>
+  1592→        </div>
+  1593→        
+  1594→        <div class="grid grid-cols-5 gap-1.5 mb-3">
+  1595→          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-diamond" id="medalDiamond">
+  1596→            <div class="medal-shine"></div>
+  1597→            <span class="text-2xl">💎</span>
+  1598→            <span class="text-[7px] font-bold text-cyan-900">الماس</span>
+  1599→            <span class="text-[7px] text-cyan-800">۱۰</span>
+  1600→          </div>
+  1601→          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-platinum" id="medalPlatinum">
+  1602→            <div class="medal-shine"></div>
+  1603→            <span class="text-2xl"></span>
+  1604→            <span class="text-[7px] font-bold text-indigo-900">پلاتین</span>
+  1605→            <span class="text-[7px] text-indigo-800">۷۰</span>
+  1606→          </div>
+  1607→          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-gold" id="medalGold">
+  1608→            <div class="medal-shine"></div>
+  1609→            <span class="text-2xl">🥇</span>
+  1610→            <span class="text-[7px] font-bold text-amber-900">طلا</span>
+  1611→            <span class="text-[7px] text-amber-800">۴۰</span>
+  1612→          </div>
+  1613→          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-silver" id="medalSilver">
+  1614→            <div class="medal-shine"></div>
+  1615→            <span class="text-2xl">🥈</span>
+  1616→            <span class="text-[7px] font-bold text-slate-700">نقره</span>
+  1617→            <span class="text-[7px] text-slate-600">۲۱</span>
+  1618→          </div>
+  1619→          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-bronze" id="medalBronze">
+  1620→            <div class="medal-shine"></div>
+  1621→            <span class="text-2xl"></span>
+  1622→            <span class="text-[7px] font-bold text-amber-900">برنز</span>
+  1623→            <span class="text-[7px] text-amber-800">۷</span>
+  1624→          </div>
+  1625→        </div>
+  1626→
+  1627→        <div class="border-t border-surface-container-highest pt-3 mt-3">
+  1628→          <h5 class="text-xs font-bold text-on-surface mb-2 flex items-center gap-1">
+  1629→            <span class="material-symbols-outlined text-[14px] text-primary">local_fire_department</span>
+  1630→            چالش‌های فعال
+  1631→          </h5>
+  1632→          <div class="space-y-2" id="challengesList"></div>
+  1633→        </div>
+  1634→      </div>
+  1635→
+  1636→      <!-- Stats -->
+  1637→      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+  1638→        <h4 class="font-bold text-on-surface text-sm mb-3">آمار کلی</h4>
+  1639→        <div class="grid grid-cols-2 gap-3">
+  1640→          <div class="bg-surface-container-low rounded-xl p-3 text-center">
+  1641→            <div class="text-2xl font-bold text-primary" id="profileTotalCompletions"></div>
+  1642→            <div class="text-[10px] text-on-surface-variant mt-1">کل تکمیل‌ها</div>
+  1643→          </div>
+  1644→          <div class="bg-surface-container-low rounded-xl p-3 text-center">
+  1645→            <div class="text-2xl font-bold text-tertiary" id="profileBestStreak">۰</div>
+  1646→            <div class="text-[10px] text-on-surface-variant mt-1">بهترین استریک</div>
+  1647→          </div>
+  1648→        </div>
+  1649→      </div>
+  1650→    </div>
+  1651→  </div>
+  1652→
+  1653→  <!-- Notebook Modal -->
+  1654→  <div id="notebookModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[62] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[92vh] overflow-y-auto">
+  1655→    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+  1656→      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+  1657→        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+  1658→      </button>
+  1659→      <h3 class="font-bold text-on-surface text-base">دفترچه یادداشت روزانه</h3>
+  1660→      <div class="w-8"></div>
+  1661→    </div>
+  1662→    <div class="p-5 flex flex-col gap-4">
+  1663→      <div class="notebook-page">
+  1664→        <div class="flex items-center gap-2 mb-3">
+  1665→          <span class="material-symbols-outlined text-[20px] text-primary">edit_note</span>
+  1666→          <span class="text-xs font-bold text-on-surface">یادداشت جدید</span>
+  1667→        </div>
+  1668→        <textarea id="notebookText" rows="6" placeholder="افکار، چالش‌ها، دستاوردها، یا هر چیزی که می‌خواهی به یاد بسپاری..." class="w-full bg-transparent text-on-surface text-sm focus:outline-none placeholder:text-on-surface-variant resize-none leading-7" style="background-image: linear-gradient(rgba(124, 58, 237, 0.08) 1px, transparent 1px); background-size: 100% 28px; line-height: 28px;"></textarea>
+  1669→        <div class="flex items-center gap-2 mt-3 pt-3 border-t border-primary/10">
+  1670→          <span class="text-[10px] text-on-surface-variant">برچسب (اختیاری):</span>
+  1671→          <div class="flex gap-1 flex-wrap" id="notebookTags">
+  1672→            <button onclick="toggleNoteTag(this, 'thought')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">💭 فکر</button>
+  1673→            <button onclick="toggleNoteTag(this, 'challenge')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">🔥 چالش</button>
+  1674→            <button onclick="toggleNoteTag(this, 'achievement')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">🏆 دستاورد</button>
+  1675→            <button onclick="toggleNoteTag(this, 'gratitude')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">🙏 سپاس</button>
+  1676→          </div>
+  1677→        </div>
+  1678→      </div>
+  1679→      <button onclick="saveNotebookEntry()" class="w-full py-3.5 rounded-xl bg-primary text-on-primary font-bold text-sm active:scale-95 transition-transform shadow-md flex items-center justify-center gap-2">
+  1680→        <span class="material-symbols-outlined text-[18px]">save</span>
+  1681→        ذخیره یادداشت
+  1682→      </button>
+  1683→      
+  1684→      <div class="border-t border-surface-container-highest pt-4">
+  1685→        <h4 class="font-bold text-on-surface text-sm mb-3 flex items-center gap-2">
+  1686→          <span class="material-symbols-outlined text-[18px] text-primary">history</span>
+  1687→          یادداشت‌های قبلی
+  1688→        </h4>
+  1689→        <div id="notebookHistory" class="space-y-2"></div>
+  1690→      </div>
+  1691→    </div>
+  1692→  </div>
+  1693→
+  1694→  <!-- Mountain Modal -->
+  1695→  <div id="mountainModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[92vh] overflow-y-auto">
+  1696→    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+  1697→      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+  1698→        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+  1699→      </button>
+  1700→      <h3 class="font-bold text-on-surface text-base">کوه‌های من</h3>
+  1701→      <div class="w-8"></div>
+  1702→    </div>
+  1703→    <div class="p-5 flex flex-col gap-5">
+  1704→      
+  1705→      <!-- Growth Summary Stats -->
+  1706→      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+  1707→        <div class="flex items-center gap-2 mb-3">
+  1708→          <span class="material-symbols-outlined text-[18px] text-primary">summarize</span>
+  1709→          <h4 class="font-bold text-on-surface text-sm">خلاصه وضعیت رشد</h4>
+  1710→        </div>
+  1711→        <div class="grid grid-cols-3 gap-2">
+  1712→          <div class="stat-card rounded-xl p-3 text-center">
+  1713→            <div class="text-2xl font-bold text-primary" id="statTotalMountains">۰</div>
+  1714→            <div class="text-[9px] text-on-surface-variant mt-1">تعداد کوه‌ها</div>
+  1715→          </div>
+  1716→          <div class="stat-card rounded-xl p-3 text-center">
+  1717→            <div class="text-2xl font-bold text-tertiary" id="statTotalStreakDays">۰</div>
+  1718→            <div class="text-[9px] text-on-surface-variant mt-1">مجموع روزهای پیوستگی</div>
+  1719→          </div>
+  1720→          <div class="stat-card rounded-xl p-3 text-center">
+  1721→            <div class="text-2xl font-bold text-secondary" id="statAvgGrowth">۰٪</div>
+  1722→            <div class="text-[9px] text-on-surface-variant mt-1">میانگین درصد رشد</div>
+  1723→          </div>
+  1724→        </div>
+  1725→      </div>
+  1726→
+  1727→      <!-- Weather Widget -->
+  1728→      <div class="weather-widget bg-white rounded-2xl p-3 shadow-sm border border-surface-container-highest">
+  1729→        <div class="flex items-center justify-between">
+  1730→          <div class="flex items-center gap-3">
+  1731→            <div class="text-3xl weather-icon-animated" id="weatherIcon">☀️</div>
+  1732→            <div>
+  1733→              <div class="text-xs font-bold text-on-surface" id="weatherStatus">آفتابی</div>
+  1734→              <div class="text-[10px] text-on-surface-variant" id="weatherDesc">هوای کوهستان دلپذیر است</div>
+  1735→            </div>
+  1736→          </div>
+  1737→          <div class="flex gap-1">
+  1738→            <button onclick="setWeather('sunny')" class="w-8 h-8 rounded-lg bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-sm active:scale-90">☀️</button>
+  1739→            <button onclick="setWeather('cloudy')" class="w-8 h-8 rounded-lg bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-sm active:scale-90">️</button>
+  1740→            <button onclick="setWeather('rainy')" class="w-8 h-8 rounded-lg bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-sm active:scale-90">🌧️</button>
+  1741→          </div>
+  1742→        </div>
+  1743→      </div>
+  1744→
+  1745→      <!-- Lifecycle -->
+  1746→      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+  1747→        <div class="flex items-center justify-between mb-3">
+  1748→          <div class="flex items-center gap-2">
+  1749→            <span class="material-symbols-outlined text-[18px] text-primary">hiking</span>
+  1750→            <h4 class="font-bold text-on-surface text-sm">چرخه‌ی صعود</h4>
+  1751→          </div>
+  1752→          <span class="text-[10px] text-primary font-bold" id="lifecyclePercent">%</span>
+  1753→        </div>
+  1754→        <div class="flex items-stretch gap-0" id="lifecycleTimeline"></div>
+  1755→        <div class="mt-3 pt-3 border-t border-surface-container-highest">
+  1756→          <div class="text-[10px] text-on-surface-variant text-center" id="lifecycleMessage">اولین قدم را بردار و مسیر صعود را آغاز کن</div>
+  1757→        </div>
+  1758→      </div>
+  1759→
+  1760→      <!-- Mountain Scenes -->
+  1761→      <div>
+  1762→        <div class="flex items-center justify-between mb-3">
+  1763→          <div class="flex items-center gap-2">
+  1764→            <span class="material-symbols-outlined text-[18px] text-primary">mountain_flag</span>
+  1765→            <h4 class="font-bold text-on-surface text-sm">کوه‌های در حال صعود</h4>
+  1766→          </div>
+  1767→          <span class="text-[10px] text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-lg border border-surface-container-highest">برای جزئیات کلیک کن</span>
+  1768→        </div>
+  1769→        <div class="mountain-scroll" id="mountainScroll"></div>
+  1770→      </div>
+  1771→    </div>
+  1772→  </div>
+  1773→
+  1774→  <!-- Add Habit Modal -->
+  1775→  <div id="addHabitModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[95vh] overflow-y-auto">
+  1776→    <div class="sticky top-0 bg-surface/95 backdrop-blur-md px-5 py-3 border-b border-surface-container-highest flex items-center justify-between z-10">
+  1777→      <div class="flex items-center gap-2">
+  1778→        <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-container transition-all active:scale-95">
+  1779→          <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+  1780→        </button>
+  1781→        <div class="flex flex-col text-right">
+  1782→          <span class="font-bold text-[15px] text-on-surface">Habits Tracker</span>
+  1783→          <div class="flex items-center gap-1 text-[11px] text-on-surface-variant">
+  1784→            <span class="material-symbols-outlined text-[13px] text-tertiary">calendar_today</span>
+  1785→            <span id="modalDate">امروز</span>
+  1786→          </div>
+  1787→        </div>
+  1788→      </div>
+  1789→      <div class="w-9 h-9 rounded-2xl bg-on-primary-container flex items-center justify-center text-primary shadow-sm">
+  1790→        <span class="material-symbols-outlined text-[22px]">diversity_1</span>
+  1791→      </div>
+  1792→    </div>
+  1793→    
+  1794→    <div class="p-5 flex flex-col gap-4 text-right">
+  1795→      
+  1796→      <!-- Habit Details Card -->
+  1797→      <div class="bg-white rounded-3xl p-4 shadow-sm border border-surface-container-highest flex flex-col gap-3.5">
+  1798→        <div class="flex items-center justify-between">
+  1799→          <div class="flex items-center gap-2">
+  1800→            <span class="material-symbols-outlined text-[22px] text-primary">psychology</span>
+  1801→            <h3 class="font-bold text-[16px] text-on-surface">مشخصات و عنوان عادت</h3>
+  1802→          </div>
+  1803→        </div>
+  1804→        <div class="flex flex-col gap-1.5">
+  1805→          <label class="text-[12px] font-bold text-on-surface">نام یا هدف عادت <span class="text-error">*</span></label>
+  1806→          <div class="relative flex items-center w-full">
+  1807→            <span class="absolute right-3 text-[18px]">️</span>
+  1808→            <input type="text" id="newHabitName" class="w-full bg-surface-container-low text-on-surface text-[13px] font-semibold rounded-2xl pr-10 pl-3 py-3 border border-surface-container-highest focus:outline-none focus:border-primary transition-colors" placeholder="عنوان عادت را بنویسید...">
+  1809→          </div>
+  1810→        </div>
+  1811→        
+  1812→        <!-- Category Selector -->
+  1813→        <div class="flex flex-col gap-2">
+  1814→          <span class="text-[11px] font-semibold text-on-surface-variant">دسته‌بندی عادت:</span>
+  1815→          <div class="grid grid-cols-2 gap-2" id="categoryPicker">
+  1816→            <button type="button" onclick="selectCategory(this, 'spiritual')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+  1817→              <div class="flex items-center gap-2">
+  1818→                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-spiritual/20 flex items-center justify-center">
+  1819→                  <span class="material-symbols-outlined cat-icon text-[18px] text-spiritual">self_improvement</span>
+  1820→                </div>
+  1821→                <span class="">معنوی و پاکی</span>
+  1822→              </div>
+  1823→              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+  1824→            </button>
+  1825→            <button type="button" onclick="selectCategory(this, 'productivity')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+  1826→              <div class="flex items-center gap-2">
+  1827→                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-productivity/20 flex items-center justify-center">
+  1828→                  <span class="material-symbols-outlined cat-icon text-[18px] text-productivity">bolt</span>
+  1829→                </div>
+  1830→                <span class="">بهره‌وری و کار</span>
+  1831→              </div>
+  1832→              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+  1833→            </button>
+  1834→            <button type="button" onclick="selectCategory(this, 'self-care')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+  1835→              <div class="flex items-center gap-2">
+  1836→                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-self-care/20 flex items-center justify-center">
+  1837→                  <span class="material-symbols-outlined cat-icon text-[18px] text-self-care">favorite</span>
+  1838→                </div>
+  1839→                <span class="">مراقبت از خود</span>
+  1840→              </div>
+  1841→              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+  1842→            </button>
+  1843→            <button type="button" onclick="selectCategory(this, 'family')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+  1844→              <div class="flex items-center gap-2">
+  1845→                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-tertiary-fixed flex items-center justify-center">
+  1846→                  <span class="material-symbols-outlined cat-icon text-[18px] text-tertiary">family_restroom</span>
+  1847→                </div>
+  1848→                <span class="">خانواده و مهر</span>
+  1849→              </div>
+  1850→              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+  1851→            </button>
+  1852→          </div>
+  1853→        </div>
+  1854→      </div>
+  1855→
+  1856→      <!-- Mountain Symbol Card -->
+  1857→      <div class="bg-white rounded-3xl p-4 shadow-sm border border-surface-container-highest flex flex-col gap-2">
+  1858→        <div class="flex items-center gap-2 text-primary">
+  1859→          <span class="material-symbols-outlined text-[20px]">mountain_flag</span>
+  1860→          <h4 class="font-bold text-[15px] text-on-surface">کوه نمادین اراده و پیشرفت</h4>
+  1861→        </div>
+  1862→        <p class="text-[12px] leading-relaxed text-on-surface-variant">با هر روز پایبندی به عهد، یک قدم به قله نزدیک‌تر می‌شوی. نقاط قرمز مسیر، روزهای پیروزی تو هستند.</p>
+  1863→      </div>
+  1864→
+  1865→      <!-- Timeline Card -->
+  1866→      <div class="bg-white rounded-3xl p-4 shadow-sm border border-surface-container-highest flex flex-col gap-3.5">
+  1867→        <div class="flex items-center justify-between cursor-pointer" onclick="toggleTimeline()">
+  1868→          <div class="flex items-center gap-2">
+  1869→            <div class="w-9 h-9 rounded-2xl bg-on-primary-container text-primary flex items-center justify-center shadow-sm">
+  1870→              <span class="material-symbols-outlined text-[20px]">flag</span>
+  1871→            </div>
+  1872→            <div class="flex flex-col text-right">
+  1873→              <div class="flex items-center gap-1.5">
+  1874→                <h4 class="font-bold text-[15px] text-on-surface">هدف‌گذاری گام‌ها و تایم‌لاین</h4>
+  1875→                <span class="text-[10px] font-bold text-tertiary bg-tertiary-fixed px-2 py-0.5 rounded-full">چالش ویژه</span>
+  1876→              </div>
+  1877→              <span class="text-[11px] text-on-surface-variant" id="timelineSubtitle">۲۱ روزه (تثبیت) • مسیر صعود به قله</span>
+  1878→            </div>
+  1879→          </div>
+  1880→          <div class="flex items-center gap-1">
+  1881→            <span class="text-[11px] font-bold text-primary">مشاهده تنظیمات</span>
+  1882→            <span class="material-symbols-outlined text-[18px] text-primary transition-transform duration-200" id="timelineToggleArrow">expand_more</span>
+  1883→          </div>
+  1884→        </div>
+  1885→        <div class="flex flex-col gap-3.5 pt-1 border-t border-surface-container-highest hidden" id="timelineCardContent">
+  1886→          <div class="flex items-center justify-center">
+  1887→            <div class="w-10 h-1 rounded-full bg-outline-variant/60"></div>
+  1888→          </div>
+  1889→          <div class="grid grid-cols-5 gap-1.5">
+  1890→            <button type="button" onclick="selectDuration(this, 7)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+  1891→              <span class="text-[14px] font-extrabold text-on-surface">۷</span>
+  1892→              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">روزه</span>
+  1893→            </button>
+  1894→            <button type="button" onclick="selectDuration(this, 21)" class="duration-btn bg-primary text-on-primary rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-md border-2 border-primary active:scale-95 transition-all">
+  1895→              <span class="text-[14px] font-extrabold text-on-primary">۲۱</span>
+  1896→              <span class="text-[8px] font-bold text-on-primary/90 mt-0.5">تثبیت</span>
+  1897→            </button>
+  1898→            <button type="button" onclick="selectDuration(this, 40)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+  1899→              <span class="text-[14px] font-extrabold text-on-surface">۴۰</span>
+  1900→              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">شکوه</span>
+  1901→            </button>
+  1902→            <button type="button" onclick="selectDuration(this, 70)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+  1903→              <span class="text-[14px] font-extrabold text-on-surface">۷۰</span>
+  1904→              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">استاد</span>
+  1905→            </button>
+  1906→            <button type="button" onclick="selectDuration(this, 100)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+  1907→              <span class="text-[14px] font-extrabold text-on-surface">۱۰۰</span>
+  1908→              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">ریشه</span>
+  1909→            </button>
+  1910→          </div>
+  1911→          
+  1912→          <!-- Mountain Preview -->
+  1913→          <div class="bg-surface rounded-2xl p-3 border border-surface-container-highest flex flex-col gap-2.5 shadow-inner">
+  1914→            <div class="flex items-center justify-between text-right px-0.5">
+  1915→              <span class="text-[11px] font-bold text-primary" id="progressLabel">۰ از ۲۱ روز</span>
+  1916→              <div class="flex items-center gap-1.5 text-[12px] font-bold text-on-surface">
+  1917→                <span class="material-symbols-outlined text-[17px] text-primary">linear_scale</span>
+  1918→                <span class="">پیش‌نمایش مسیر صعود:</span>
+  1919→              </div>
+  1920→            </div>
+  1921→            <div class="relative w-full h-24 bg-gradient-to-b from-sky-100/50 to-surface-container-low rounded-xl overflow-hidden border border-surface-container-highest">
+  1922→              <svg id="mountainPreviewSvg" viewBox="0 0 300 100" class="w-full h-full" preserveAspectRatio="none"></svg>
+  1923→            </div>
+  1924→            <div class="flex items-center justify-between text-[9px] font-bold text-on-surface-variant px-0.5" id="mountainPreviewLabels"></div>
+  1925→          </div>
+  1926→          
+  1927→          <div class="pt-1">
+  1928→            <button type="button" onclick="toggleTimeline()" class="w-full py-3 px-4 rounded-2xl bg-primary hover:bg-primary-container text-on-primary font-bold text-[13px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(99,14,212,0.3)] active:scale-95 transition-all">
+  1929→              <span class="material-symbols-outlined text-[18px] font-bold">check</span>
+  1930→              <span class="">تایید و ذخیره تنظیمات تایم‌لاین</span>
+  1931→            </button>
+  1932→          </div>
+  1933→        </div>
+  1934→      </div>
+  1935→
+  1936→      <!-- Shield Card -->
+  1937→      <div class="bg-white rounded-3xl p-4 shadow-sm border border-surface-container-highest flex flex-col gap-3">
+  1938→        <div class="flex items-center justify-between">
+  1939→          <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-tertiary text-[10px] font-bold">محرمانه</span>
+  1940→          <div class="flex items-center gap-1.5">
+  1941→            <h4 class="font-bold text-[14px] text-on-surface">سپر اراده و یادداشت قلبی</h4>
+  1942→            <span class="material-symbols-outlined text-[20px] text-primary">shield</span>
+  1943→          </div>
+  1944→        </div>
+  1945→        <div class="flex flex-col gap-1">
+  1946→          <span class="text-[11px] font-bold text-on-surface">چرا می‌خواهم این پاکی را حفظ کنم؟ (هنگام وسوسه نمایش داده می‌شود):</span>
+  1947→          <div class="bg-surface-container-low p-3 rounded-2xl border border-surface-container-highest text-[11px] text-on-surface-variant leading-relaxed">برای عزت نفس خودم، آرامش عمیق و رسیدن به پتانسیل واقعی روحی و جسمی‌ام هرگز به عقب بازنمی‌گردم.</div>
+  1948→        </div>
+  1949→        <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest">
+  1950→          <label class="relative inline-flex items-center cursor-pointer">
+  1951→            <input type="checkbox" checked class="sr-only peer">
+  1952→            <div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+  1953→          </label>
+  1954→          <div class="flex items-center gap-2">
+  1955→            <div class="flex flex-col text-right">
+  1956→              <span class="text-[12px] font-bold text-on-surface">یادآور خودکار روزانه</span>
+  1957→              <span class="text-[10px] text-on-surface-variant">ارسال پیام امید و ثبت وضعیت در ساعت ۲۲:۳۰</span>
+  1958→            </div>
+  1959→            <div class="w-8 h-8 rounded-xl bg-on-primary-container text-primary flex items-center justify-center">
+  1960→              <span class="material-symbols-outlined text-[18px]">alarm</span>
+  1961→            </div>
+  1962→          </div>
+  1963→        </div>
+  1964→      </div>
+  1965→
+  1966→      <!-- Action Buttons -->
+  1967→      <div class="flex flex-col gap-2 pt-2 pb-6">
+  1968→        <button type="button" onclick="saveNewHabit()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-primary via-primary-container to-secondary text-on-primary font-bold text-[14px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(99,14,212,0.35)] active:scale-95 transition-all">
+  1969→          <span class="text-[16px]">🏔️</span>
+  1970→          <span class="">کاشت بذر و آغاز مسیر صعود</span>
+  1971→          <span class="material-symbols-outlined text-[18px]">verified</span>
+  1972→        </button>
+  1973→        <button type="button" onclick="closeAllModals()" class="text-center text-[12px] font-semibold text-on-surface-variant hover:text-on-surface py-1 transition-colors">انصراف و بازگشت</button>
+  1974→      </div>
+  1975→    </div>
+  1976→  </div>
+  1977→
+  1978→  <!-- Mood Modal -->
+  1979→  <div id="moodModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+  1980→    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+  1981→      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+  1982→        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+  1983→      </button>
+  1984→      <h3 class="font-bold text-on-surface text-base">حال و بازتاب امروز</h3>
+  1985→      <div class="w-8"></div>
+  1986→    </div>
+  1987→    <div class="p-5 flex flex-col gap-5">
+  1988→      <div>
+  1989→        <label class="text-xs font-bold text-on-surface mb-3 block">سطح انرژی عاطفی (۱ تا ۵)</label>
+
+[showing lines 1290-1989 of 4899; use offset=1990 with limit to continue reading]

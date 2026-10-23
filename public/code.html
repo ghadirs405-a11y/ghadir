@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<meta content="#0d1117" name="theme-color">
+<title>کد کامل اپلیکیشن | ردیاب عادت‌ها</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:'Vazirmatn','Segoe UI',Tahoma,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex;flex-direction:column}
+  .hdr{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#161b22,#0d1117);border-bottom:1px solid #30363d;padding:14px 16px 12px}
+  .hdr h1{font-size:17px;font-weight:800;color:#58a6ff;display:flex;align-items:center;gap:8px}
+  .hdr .sub{font-size:12px;color:#8b949e;margin-top:4px}
+  .hdr .sub b{color:#7ee787;font-weight:700}
+  .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3fb950;box-shadow:0 0 8px #3fb950;animation:pl 1.6s infinite}
+  @keyframes pl{50%{opacity:.35}}
+  .panel{padding:12px 16px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid #21262d;background:#0d1117}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  button,.btn{font-family:inherit;font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;border:1px solid #30363d;background:#21262d;color:#e6edf3;cursor:pointer;transition:.18s;white-space:nowrap}
+  button:hover{background:#30363d;border-color:#58a6ff}
+  button:active{transform:scale(.96)}
+  button.acc{background:linear-gradient(135deg,#1f6feb,#8957e5);border:none;color:#fff}
+  button.ok{background:#12351f;border-color:#2ea043;color:#7ee787}
+  button:disabled{opacity:.4;cursor:default}
+  input,select{font-family:inherit;font-size:13px;padding:9px 12px;border-radius:10px;border:1px solid #30363d;background:#161b22;color:#e6edf3;outline:none}
+  input:focus{border-color:#58a6ff}
+  input.grow{flex:1;min-width:120px;direction:ltr;text-align:left}
+  .navrow{display:flex;gap:8px;align-items:center;justify-content:space-between}
+  .pinfo{font-size:13px;font-weight:800;color:#ffa657}
+  input[type=range]{width:100%;height:26px;accent-color:#8957e5;background:transparent;border:none;padding:0}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;max-height:96px;overflow:auto}
+  .chip{font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:99px;background:#1c2a3a;border:1px solid #1f6feb;color:#79c0ff;cursor:pointer}
+  .chip:hover{background:#1f6feb;color:#fff}
+  .srchsum{font-size:12px;color:#8b949e}
+  mark{background:#bb8009;color:#0d1117;border-radius:3px;padding:0 1px}
+  .wrap{flex:1;padding:10px 0 26px}
+  .codebox{direction:ltr;text-align:left;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;font-size:11.5px;line-height:1.75;background:#0d1117;border:1px solid #21262d;border-radius:12px;margin:0 12px;overflow:auto;max-height:66vh;-webkit-overflow-scrolling:touch}
+  .cl{display:flex;white-space:pre}
+  .cl:nth-child(even){background:#10161d}
+  .cl:hover{background:#161d26}
+  .no{flex:0 0 auto;min-width:52px;padding:0 10px;text-align:right;color:#484f58;user-select:none;border-right:1px solid #21262d}
+  .tx{flex:1;padding:0 12px;color:#c9d1d9;tab-size:2}
+  .c-cmt{color:#8b949e;font-style:italic}
+  .c-str{color:#a5d6ff}
+  .c-kw{color:#ff7b72}
+  .c-num{color:#79c0ff}
+  .c-tag{color:#7ee787}
+  .foot{text-align:center;font-size:11.5px;color:#484f58;padding:10px 16px 20px;line-height:2}
+  .foot a{color:#58a6ff;text-decoration:none}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#238636;color:#fff;font-size:13px;font-weight:700;padding:11px 20px;border-radius:12px;transition:.3s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .err{margin:40px 20px;text-align:center;color:#f85149;font-size:14px;line-height:2.2}
+  @media(min-width:700px){.codebox{font-size:13px}.no{min-width:64px}}
+</style>
+</head>
+<body>
+  <header class="hdr">
+    <h1><span class="live"></span> کد کامل اپلیکیشن — ردیاب عادت‌ها</h1>
+    <div class="sub" id="stats">در حال بارگذاری کد زنده از سرور…</div>
+  </header>
+
+  <section class="panel">
+    <div class="navrow">
+      <button id="prevBtn">→ قبلی</button>
+      <span class="pinfo" id="pinfo">—</span>
+      <button id="nextBtn">بعدی ←</button>
+    </div>
+    <input type="range" id="slider" min="1" max="1" value="1" aria-label="پیمایش بخش‌ها">
+    <div class="row">
+      <input id="q" class="grow" type="text" placeholder="جستجو در کل کد… مثلا: boot" dir="rtl">
+      <button class="acc" id="searchBtn">جستجو</button>
+      <button id="clearBtn" title="پاک کردن جستجو">✕</button>
+    </div>
+    <div id="searchOut"></div>
+    <div class="row">
+      <select id="size" title="خطوط در هر بخش">
+        <option value="150">۱۵۰ خط در هر بخش</option>
+        <option value="300" selected>۳۰۰ خط در هر بخش</option>
+        <option value="600">۶۰۰ خط در هر بخش</option>
+      </select>
+      <button id="copyBtn">📋 کپی این بخش</button>
+      <button id="copyAllBtn">کپی کل کد</button>
+      <button class="ok" id="dlBtn">⬇ دانلود فایل کامل</button>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="codebox" id="codebox"><div class="err">در حال دریافت کد…</div></div>
+  </main>
+
+  <footer class="foot">
+    این صفحه کد را <b style="color:#7ee787">مستقیم و زنده</b> از فایل اصلی اپ می‌خواند — هیچ بخشی حذف نمی‌شود.<br>
+    با نوار لغزنده یا دکمه‌ها بین بخش‌ها حرکت کن، یا با جستجو مستقیم به خط موردنظر بپر. <a href="/" style="color:#58a6ff">بازگشت به خود اپ ←</a>
+  </footer>
+
+  <div class="toast" id="toast">کپی شد ✓</div>
+
+<script>
+(function(){
+  'use strict';
+  var D0='۰۱۲۳۴۵۶۷۸۹';
+  function fa(n){return String(n).replace(/\d/g,function(d){return D0[+d];});}
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  var KW=/\b(function|const|let|var|if|else|for|while|return|class|new|try|catch|finally|switch|case|break|continue|typeof|instanceof|this|async|await|yield|import|export|default|throw|do|in|of|delete|void|static|get|set|extends|super|null|undefined|true|false)\b/;
+
+  function tint(line){
+    var e=esc(line);
+    try{
+      e=e.replace(/(&lt;!--.*?--&gt;)|(\/\*.*?\*\/)|((?:^|\s)\/\/[^\n]*)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)/g,
+        function(m,hc,bc,lc,str,num,word){
+          if(hc||bc||lc) return '<span class="c-cmt">'+m+'</span>';
+          if(str) return '<span class="c-str">'+m+'</span>';
+          if(num) return '<span class="c-num">'+m+'</span>';
+          if(word&&KW.test(word)&&!/^[\d]/.test(word)) return '<span class="c-kw">'+m+'</span>';
+          return m;
+        });
+      e=e.replace(/(&lt;\/?)([a-zA-Z][\w-]*)/g,'$1<span class="c-tag">$2</span>');
+    }catch(err){/* fallback = plain escaped */}
+    return e;
+  }
+
+  var lines=[], total=0, pageSize=300, page=1, pages=1, hits=[], codeText='';
+  var $=function(id){return document.getElementById(id);};
+  var box=$('codebox'), toast=$('toast');
+
+  function ping(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},1600);}
+
+  function render(){
+    pages=Math.max(1,Math.ceil(total/pageSize));
+    if(page>pages)page=pages; if(page<1)page=1;
+    var s=(page-1)*pageSize, e=Math.min(total,s+pageSize);
+    var html='';
+    for(var i=s;i<e;i++){
+      var tx=lines[i];
+      if(hits.length&&hits.indexOf(i)>-1&&$('q').value){
+        var qv=$('q').value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        tx=tx.replace(new RegExp('('+qv+')','gi'),'\u0001$1\u0002');
+        tx=tint(tx).replace(/\u0001/g,'<mark>').replace(/\u0002/g,'</mark>');
+      } else { tx=tint(tx); }
+      if(tx==='')tx='&nbsp;';
+      html+='<div class="cl"><span class="no">'+fa(i+1)+'</span><span class="tx">'+tx+'</span></div>';
+    }
+    box.innerHTML=html||'<div class="err">خطی یافت نشد</div>';
+    box.scrollTop=0;
+    $('pinfo').textContent='بخش '+fa(page)+' از '+fa(pages);
+    $('slider').max=pages; $('slider').value=page;
+    $('prevBtn').disabled=(page<=1); $('nextBtn').disabled=(page>=pages);
+  }
+
+  function doSearch(){
+    var qv=$('q').value.trim().toLowerCase();
+    hits=[];
+    if(!qv){$('searchOut').innerHTML='';render();return;}
+    for(var i=0;i<total&&hits.length<200;i++){
+      if(lines[i].toLowerCase().indexOf(qv)>-1)hits.push(i);
+    }
+    var out='';
+    if(!hits.length){out='<div class="srchsum">نتیجه‌ای برای «'+esc($('q').value)+'» پیدا نشد</div>';}
+    else{
+      out='<div class="srchsum">'+fa(hits.length)+(hits.length>=200?'+':'')+' نتیجه — روی خط دلخواه بزن:</div><div class="chips">';
+      hits.slice(0,60).forEach(function(li){
+        out+='<span class="chip" data-l="'+li+'">خط '+fa(li+1)+'</span>';
+      });
+      out+='</div>';
+    }
+    $('searchOut').innerHTML=out;
+    var chips=$('searchOut').querySelectorAll('.chip');
+    for(var c=0;c<chips.length;c++){
+      chips[c].addEventListener('click',function(){
+        page=Math.floor(+this.getAttribute('data-l')/pageSize)+1;render();
+      });
+    }
+    if(hits.length){page=Math.floor(hits[0]/pageSize)+1;}
+    render();
+  }
+
+  fetch('/app.html?nocache='+Date.now()).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.text();
+  }).then(function(t){
+    codeText=t; lines=t.split('\n'); total=lines.length;
+    var kb=(t.length/1024).toFixed(0).replace(/\d/g,function(d){return D0[+d];});
+    $('stats').innerHTML='<b>'+fa(total)+'</b> خط &nbsp;•&nbsp; <b>'+kb+'</b> کیلوبایت &nbsp;•&nbsp; کد زنده و کامل — آخرین نسخه سرو شد ✓';
+    render();
+  }).catch(function(err){
+    box.innerHTML='<div class="err">دریافت کد ناموفق بود: '+esc(String(err))+'<br>این صفحه باید از همان آدرس اپ باز شود.</div>';
+  });
+
+  $('prevBtn').addEventListener('click',function(){page--;render();});
+  $('nextBtn').addEventListener('click',function(){page++;render();});
+  $('slider').addEventListener('input',function(){page=+this.value;render();});
+  $('size').addEventListener('change',function(){pageSize=+this.value;page=1;render();});
+  $('searchBtn').addEventListener('click',doSearch);
+  $('q').addEventListener('keydown',function(e){if(e.key==='Enter')doSearch();});
+  $('clearBtn').addEventListener('click',function(){$('q').value='';hits=[];$('searchOut').innerHTML='';render();});
+
+  function copyText(t,msg){
+    var done=function(){ping(msg);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(done,function(){legacy();});
+    }else legacy();
+    function legacy(){
+      var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');done();}catch(e){ping('کپی ناموفق — دستی انتخاب کن');}
+      document.body.removeChild(ta);
+    }
+  }
+  $('copyBtn').addEventListener('click',function(){
+    var s=(page-1)*pageSize,e=Math.min(total,s+pageSize);
+    copyText(lines.slice(s,e).join('\n'),'بخش '+fa(page)+' کپی شد ✓');
+  });
+  $('copyAllBtn').addEventListener('click',function(){copyText(codeText,'کل کد ('+fa(total)+' خط) کپی شد ✓');});
+  $('dlBtn').addEventListener('click',function(){
+    try{
+      var url=URL.createObjectURL(new Blob([codeText],{type:'text/html;charset=utf-8'}));
+      var a=document.createElement('a');a.href=url;a.download='app.html';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url);},3000);
+      ping('دانلود شروع شد ✓');
+    }catch(e){ping('دانلود ناموفق بود');}
+  });
+})();
+</script>
+</body>
+</html>

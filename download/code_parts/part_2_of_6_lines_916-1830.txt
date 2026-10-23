@@ -1,0 +1,915 @@
+      border-right: 3px solid #8b5cf6;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+    }
+    .agent-msg-avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-left: 7px;
+      margin-top: 2px;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+    }
+
+    .agent-typing-row { display: none; padding: 2px 4px 10px; }
+    .agent-typing-row.visible { display: flex; }
+    .agent-typing-bubble {
+      background: white;
+      border-radius: 16px;
+      border-bottom-right-radius: 6px;
+      border-right: 3px solid #8b5cf6;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+    }
+
+    .agent-plan-card {
+      margin-top: 10px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      background: linear-gradient(150deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.9) 45%, rgba(6, 182, 212, 0.1) 100%);
+    }
+    .agent-plan-head {
+      background: linear-gradient(135deg, #8b5cf6 0%, #630ed4 100%);
+      color: white;
+      padding: 12px 14px;
+      position: relative;
+    }
+    .agent-plan-head::after {
+      content: '🤖';
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 18px;
+      opacity: 0.85;
+    }
+    .agent-plan-name { font-size: 13px; font-weight: 800; }
+    .agent-plan-summary { font-size: 10px; opacity: 0.92; margin-top: 3px; line-height: 1.6; }
+    .agent-plan-meta {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .agent-plan-pill {
+      font-size: 9px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 9px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .agent-plan-habits { padding: 10px 10px 4px; }
+    .agent-plan-habit {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: white;
+      border: 1px solid rgba(227, 223, 255, 0.9);
+      border-radius: 12px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+    }
+    .agent-plan-habit-icon {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      background: rgba(139, 92, 246, 0.1);
+    }
+    .agent-plan-habit-name { font-size: 11px; font-weight: 700; color: #181445; }
+    .agent-plan-habit-meta { font-size: 9px; color: #4a4455; margin-top: 1px; }
+    .agent-plan-habit-tip {
+      font-size: 9px;
+      color: #630ed4;
+      margin-top: 3px;
+      background: rgba(139, 92, 246, 0.08);
+      border-radius: 8px;
+      padding: 4px 7px;
+      line-height: 1.5;
+    }
+    .agent-plan-foot { padding: 4px 10px 12px; display: flex; gap: 8px; }
+    .agent-plan-applied {
+      margin: 4px 10px 12px;
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(52, 211, 153, 0.06));
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: #059669;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .agent-chat-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background: rgba(252, 248, 255, 0.95);
+      border-top: 1px solid rgba(139, 92, 246, 0.15);
+    }
+    .agent-chat-input-row .agent-input { flex: 1; border-radius: 100px; padding: 10px 15px; }
+    .agent-send-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: none;
+      background: linear-gradient(135deg, #8b5cf6 0%, #630ed4 100%);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 14, 212, 0.35);
+      transition: all 0.2s ease;
+    }
+    .agent-send-btn:active { transform: scale(0.88); }
+    .agent-send-btn:disabled { opacity: 0.5; box-shadow: none; }
+    .agent-chat-clear {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600;
+      color: #4a4455;
+      background: white;
+      border: 1px solid rgba(227, 223, 255, 0.9);
+      border-radius: 100px;
+      padding: 5px 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .agent-chat-clear:active { transform: scale(0.93); }
+
+    /* NEW: agent weekly report + social media control */
+    .agent-week-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .agent-week-stat { background: rgba(255,255,255,0.75); border: 1px solid rgba(227,223,255,0.9); border-radius: 14px; padding: 10px 6px; text-align: center; }
+    .agent-week-stat-val { font-size: 14px; font-weight: 800; color: #181445; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .agent-week-stat-label { font-size: 9px; color: #6b647f; margin-top: 3px; font-weight: 600; }
+    .agent-report-card { background: linear-gradient(135deg, rgba(99,14,212,0.06), rgba(167,139,250,0.08)); border: 1px solid rgba(99,14,212,0.18); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .agent-report-headline { font-size: 14px; font-weight: 800; color: #630ed4; }
+    .agent-report-summary { font-size: 12px; line-height: 1.9; color: #3d3852; white-space: pre-line; }
+    .agent-report-item { font-size: 11px; line-height: 1.8; color: #4a4455; background: rgba(255,255,255,0.7); border-radius: 10px; padding: 7px 10px; }
+    .agent-report-focus { font-size: 11px; font-weight: 700; color: #630ed4; background: rgba(99,14,212,0.08); border: 1px dashed rgba(99,14,212,0.35); border-radius: 12px; padding: 8px 10px; }
+    .agent-report-motivation { font-size: 11px; font-weight: 600; color: #a16207; background: rgba(251,191,36,0.12); border-radius: 12px; padding: 8px 10px; }
+    .agent-report-date { font-size: 9px; color: #8b8497; }
+    .agent-toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; font-size: 11px; font-weight: 600; color: #4a4455; }
+    .agent-platform-chip { font-size: 11px; font-weight: 700; padding: 7px 14px; border-radius: 100px; border: 1px solid rgba(227,223,255,0.9); background: white; color: #6b647f; cursor: pointer; transition: all 0.2s; }
+    .agent-platform-chip.active { background: linear-gradient(135deg, #630ed4, #a78bfa); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(99,14,212,0.25); }
+    .agent-platform-chip:active { transform: scale(0.95); }
+    .agent-social-card { background: white; border: 1px solid rgba(227,223,255,0.9); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 14px rgba(24,20,69,0.05); }
+    .agent-social-week { font-size: 12px; font-weight: 800; color: #630ed4; background: rgba(99,14,212,0.07); border-radius: 12px; padding: 8px 10px; }
+    .agent-social-platform { border: 1px solid rgba(227,223,255,0.9); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: #faf9ff; }
+    .agent-social-platform-title { font-size: 11px; font-weight: 800; color: #181445; }
+    .agent-social-meta { font-size: 11px; color: #4a4455; line-height: 1.8; }
+    .agent-prompt-box { position: relative; background: #181445; color: #ede9fe; border-radius: 12px; padding: 10px 36px 10px 10px; font-size: 10.5px; line-height: 1.9; }
+    .agent-copy-btn { position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; border-radius: 8px; background: rgba(167,139,250,0.25); color: #ede9fe; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+    .agent-copy-btn:active { transform: scale(0.9); }
+
+    /* ================= MUSIC LIBRARY PAGE ================= */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .music-tab { flex-shrink: 0; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 100px; background: white; color: #4a4455; border: 1px solid #e3dfff; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .music-tab.active { background: #181445; color: white; border-color: #181445; box-shadow: 0 4px 12px rgba(24,20,69,0.25); }
+    .music-tab:active { transform: scale(0.94); }
+    .music-tab-new { border: 1.5px dashed #b7a4f5; background: rgba(99,14,212,0.05); color: #630ed4; }
+    .music-tab-new:active { transform: scale(0.94); }
+    .music-collection-card { box-shadow: 0 10px 26px rgba(24,20,69,0.16); }
+    .music-shelf-row { display: flex; align-items: flex-end; gap: 6px; height: 88px; padding: 0 2px; }
+    .music-book-spine { width: 37px; border-radius: 8px 8px 5px 5px; border: 1px solid rgba(255,255,255,0.55); display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: 0 4px 9px rgba(0,0,0,0.16), inset -4px 0 7px rgba(0,0,0,0.08), inset 2px 0 4px rgba(255,255,255,0.25); flex-shrink: 0; position: relative; overflow: hidden; }
+    .music-book-spine::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 9px; background: rgba(255,255,255,0.35); border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .music-shelf-line { height: 7px; border-radius: 999px; background: rgba(255,255,255,0.42); box-shadow: 0 3px 7px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.5); margin: 0 2px; }
+    .music-mascot { animation: mascotFloat 3.4s ease-in-out infinite; filter: drop-shadow(0 6px 12px rgba(109,77,240,0.35)); }
+    @keyframes mascotFloat { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2.5deg); } }
+    .music-emoji-pick { width: 38px; height: 38px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 19px; background: white; border: 2px solid #e3dfff; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+    .music-emoji-pick.active { border-color: #630ed4; background: #f3eefe; transform: scale(1.1); box-shadow: 0 3px 10px rgba(99,14,212,0.2); }
+    .music-grad-pick { width: 46px; height: 32px; border-radius: 11px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.15s; flex-shrink: 0; outline: 2px solid transparent; outline-offset: 2px; }
+    .music-grad-pick.active { outline-color: #2d2a45; transform: scale(1.08); }
+    .music-track-row { transition: all 0.2s; }
+    .music-track-row:active { transform: scale(0.985); }
+    .music-play-btn { width: 38px; height: 38px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; box-shadow: 0 4px 12px rgba(99,14,212,0.3); transition: transform 0.15s; border: none; cursor: pointer; }
+    .music-play-btn:active { transform: scale(0.88); }
+    .music-eq { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+    .music-eq span { width: 3px; border-radius: 2px; background: currentColor; animation: musicEq 0.9s ease-in-out infinite; }
+    .music-eq span:nth-child(2) { animation-delay: 0.25s; }
+    .music-eq span:nth-child(3) { animation-delay: 0.5s; }
+    @keyframes musicEq { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+    .music-mic-listening { background: #ef4444 !important; color: white !important; border-color: #ef4444 !important; animation: micPulse 1.3s ease-out infinite; }
+    @keyframes micPulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 100% { box-shadow: 0 0 0 16px rgba(239,68,68,0); } }
+    .music-modal-cat { font-size: 11px; font-weight: 700; padding: 7px 14px; border-radius: 100px; border: 1px solid #e3dfff; background: white; color: #6b647f; cursor: pointer; transition: all 0.2s; }
+    .music-modal-cat.active { color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+    .music-modal-cat:active { transform: scale(0.95); }
+    .music-empty-card { border: 2px dashed #d6cffa; background: rgba(237,233,254,0.4); border-radius: 24px; }
+    .music-fab { border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: transform 0.15s; box-shadow: 0 8px 20px rgba(24,20,69,0.22); }
+    .music-fab:active { transform: scale(0.88); }
+    .music-mini-bar { animation: musicBarUp 0.45s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes musicBarUp { from { transform: translateY(120%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .music-sched-dot { width: 7px; height: 7px; border-radius: 999px; background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.18); }
+  /* ===== FLOATING ICONS (global) ===== */
+    @keyframes iconFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3.5px; } }
+    .material-symbols-outlined { animation: iconFloat 3.6s ease-in-out infinite; }
+    .float-icon { animation: iconFloat 3.6s ease-in-out infinite; }
+    .streak-day-icon { animation: iconFloat 3.6s ease-in-out infinite; }
+    .habit-emoji-chip, .music-emoji-pick { animation: iconFloat 4.4s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .material-symbols-outlined, .float-icon, .streak-day-icon, .habit-emoji-chip, .music-emoji-pick { animation: none !important; }
+    }
+  /* ===== AGENT BOOT SCREEN (cinematic robot) ===== */
+  #agentBootScreen { position: fixed; inset: 0; z-index: 65; background: radial-gradient(ellipse at 50% 42%, #1b1147 0%, #0d0722 52%, #050310 100%); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; cursor: pointer; }
+  #agentBootScreen.active { opacity: 1; pointer-events: auto; }
+  .boot-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(139,92,246,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.08) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: radial-gradient(ellipse at center, black 28%, transparent 74%); mask-image: radial-gradient(ellipse at center, black 28%, transparent 74%); animation: bootGridMove 8s linear infinite; }
+  @keyframes bootGridMove { from { background-position: 0 0; } to { background-position: 0 44px; } }
+  .boot-corner { position: absolute; width: 44px; height: 44px; border: 2px solid rgba(34,211,238,0.45); }
+  .boot-c-tl { top: 22px; left: 22px; border-right: none; border-bottom: none; border-radius: 14px 0 0 0; }
+  .boot-c-tr { top: 22px; right: 22px; border-left: none; border-bottom: none; border-radius: 0 14px 0 0; }
+  .boot-c-bl { bottom: 22px; left: 22px; border-right: none; border-top: none; border-radius: 0 0 0 14px; }
+  .boot-c-br { bottom: 22px; right: 22px; border-left: none; border-top: none; border-radius: 0 0 14px 0; }
+  .boot-center { position: relative; display: flex; flex-direction: column; align-items: center; gap: 16px; width: min(320px, 84vw); }
+  .boot-orbiter { position: relative; width: 186px; height: 186px; display: flex; align-items: center; justify-content: center; }
+  .boot-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .boot-ring-a { animation: bootSpin 7s linear infinite; }
+  .boot-ring-b { animation: bootSpinRev 4.2s linear infinite; }
+  @keyframes bootSpin { to { transform: rotate(360deg); } }
+  @keyframes bootSpinRev { to { transform: rotate(-360deg); } }
+  .boot-head-wrap { position: relative; width: 116px; height: 116px; }
+  .boot-head { width: 100%; height: 100%; animation: bootHeadIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  @keyframes bootHeadIn { from { opacity: 0; transform: scale(0.55); filter: blur(6px); } to { opacity: 1; transform: scale(1); filter: blur(0) drop-shadow(0 0 16px rgba(34,211,238,0.35)); } }
+  .boot-eye { opacity: 0; animation: bootEyeOn 0.5s steps(2, jump-none) 0.85s forwards, bootEyeGlow 2.2s ease-in-out 1.45s infinite; }
+  @keyframes bootEyeOn { 0% { opacity: 0; } 40% { opacity: 1; } 55% { opacity: 0.15; } 100% { opacity: 1; } }
+  @keyframes bootEyeGlow { 0%, 100% { filter: drop-shadow(0 0 3px rgba(34,211,238,0.75)); } 50% { filter: drop-shadow(0 0 9px rgba(34,211,238,1)); } }
+  .boot-antenna { animation: bootAntBlink 1s ease-in-out 1s infinite; }
+  @keyframes bootAntBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  .boot-scanline { position: absolute; left: 6px; right: 6px; top: 8%; height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, rgba(34,211,238,0.85), transparent); opacity: 0; animation: bootScan 1.6s ease-in-out 1s infinite; }
+  @keyframes bootScan { 0% { top: 8%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: 88%; opacity: 0; } }
+  .boot-terminal { direction: rtl; text-align: right; width: 100%; min-height: 100px; font-size: 11.5px; font-weight: 600; color: #7fe7f4; display: flex; flex-direction: column; gap: 4px; }
+  .boot-line { opacity: 0; animation: bootLineIn 0.25s ease forwards; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .boot-line.ok { color: #6ee7b7; font-weight: 800; }
+  .boot-line .cur { display: inline-block; width: 7px; height: 12px; background: #22d3ee; margin-right: 4px; vertical-align: -1px; animation: bootCursor 0.7s steps(1) infinite; }
+  @keyframes bootCursor { 50% { opacity: 0; } }
+  @keyframes bootLineIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .boot-progress-track { width: 100%; height: 6px; border-radius: 999px; background: rgba(139,92,246,0.18); overflow: hidden; border: 1px solid rgba(139,92,246,0.35); }
+  .boot-progress-fill { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, #8b5cf6, #22d3ee); box-shadow: 0 0 12px rgba(34,211,238,0.6); }
+  .boot-percent { font-size: 13px; font-weight: 800; color: #a5f3fc; letter-spacing: 1px; }
+  .boot-skip-hint { position: absolute; bottom: 32px; left: 0; right: 0; text-align: center; font-size: 11px; color: rgba(226,232,240,0.45); font-weight: 600; }
+  .boot-flash { position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(34,211,238,0.5), rgba(139,92,246,0.22) 45%, transparent 70%); opacity: 0; pointer-events: none; }
+  .boot-flash.fire { animation: bootFlashFire 0.5s ease forwards; }
+  @keyframes bootFlashFire { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* ==== TASK 10: LONGER CINEMATIC BOOT (phases / equalizer / HUD) ==== */
+  .boot-hud-title { position: absolute; top: 28px; left: 0; right: 0; text-align: center; font-size: 11px; font-weight: 800; letter-spacing: 3px; color: rgba(165,243,252,0.85); animation: bootTitleIn 0.9s ease both; }
+  .boot-hud-title .boot-hud-ver { font-size: 9px; color: rgba(196,181,253,0.75); letter-spacing: 0.5px; margin-right: 6px; }
+  .boot-hud-title::after { content: ''; display: block; width: 130px; height: 1px; margin: 6px auto 0; background: linear-gradient(90deg, transparent, rgba(34,211,238,0.6), transparent); }
+  @keyframes bootTitleIn { 0% { opacity: 0; letter-spacing: 9px; filter: blur(5px); } 100% { opacity: 1; letter-spacing: 3px; filter: blur(0); } }
+  .boot-tag { position: absolute; font-size: 9px; font-weight: 700; color: rgba(125,211,252,0.55); letter-spacing: 1px; animation: bootTitleIn 1.2s ease both; }
+  .boot-tag-tl { top: 78px; left: 24px; }
+  .boot-tag-br { bottom: 78px; right: 24px; }
+  .boot-eq { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 22px; opacity: 0; transition: opacity 0.5s ease; }
+  .boot-eq.on { opacity: 1; }
+  .boot-eq span { width: 3px; height: 30%; border-radius: 2px; background: linear-gradient(180deg, #22d3ee, #8b5cf6); box-shadow: 0 0 6px rgba(34,211,238,0.5); animation: bootEqBar 0.9s ease-in-out infinite; }
+  @keyframes bootEqBar { 0%, 100% { height: 22%; } 50% { height: 100%; } }
+  .boot-status { font-size: 10px; font-weight: 700; color: #7fe7f4; letter-spacing: 1px; opacity: 0.92; text-shadow: 0 0 10px rgba(34,211,238,0.4); transition: color 0.4s ease; }
+  #agentBootScreen.boot-final .boot-ring-a { animation-duration: 1.7s; }
+  #agentBootScreen.boot-final .boot-ring-b { animation-duration: 0.9s; }
+  #agentBootScreen.boot-final .boot-eye { animation: bootEyeOn 0.5s steps(2, jump-none) 0.85s forwards, bootEyeGlowFast 0.55s ease-in-out infinite; }
+  #agentBootScreen.boot-final .boot-head { animation: bootHeadIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both, bootHeadGlow 0.9s ease-in-out infinite; }
+  #agentBootScreen.boot-final .boot-scanline { animation-duration: 0.65s; }
+  #agentBootScreen.boot-final .boot-eq span { animation-duration: 0.45s; }
+  #agentBootScreen.boot-final .boot-status { color: #6ee7b7; text-shadow: 0 0 10px rgba(52,211,153,0.55); }
+  @keyframes bootEyeGlowFast { 0%, 100% { filter: drop-shadow(0 0 5px rgba(34,211,238,0.9)); } 50% { filter: drop-shadow(0 0 14px rgba(34,211,238,1)); } }
+  @keyframes bootHeadGlow { 0%, 100% { filter: drop-shadow(0 0 14px rgba(34,211,238,0.4)); } 50% { filter: drop-shadow(0 0 26px rgba(34,211,238,0.75)); } }
+
+  /* ==== TASK 10: CINEMATIC AGENT MODAL (mission-control dark HUD) ==== */
+  #agentModal { background: radial-gradient(ellipse at 50% -10%, #2b1663 0%, #170d3d 42%, #0c0722 100%); box-shadow: 0 -12px 70px rgba(34,211,238,0.16), 0 -1px 0 rgba(139,92,246,0.55); }
+  #agentModal > .sticky { background: rgba(15,9,38,0.94); border-bottom: 1px solid rgba(139,92,246,0.3); overflow: hidden; }
+  #agentModal > .sticky::after { content: ''; position: absolute; bottom: 0; right: -30%; width: 30%; height: 2px; background: linear-gradient(90deg, transparent, rgba(34,211,238,0.9), transparent); animation: agentHeaderScan 3.4s linear infinite; }
+  @keyframes agentHeaderScan { 0% { right: -30%; } 100% { right: 100%; } }
+  #agentModal > .sticky > div:first-child button, #agentModal > .sticky > button { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.4); color: #cbd5e1; }
+  .agent-online-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 800; color: #6ee7b7; background: rgba(16,185,129,0.1); border: 1px solid rgba(52,211,153,0.3); border-radius: 100px; padding: 2px 8px; margin-top: 3px; }
+  .agent-online-dot { width: 5px; height: 5px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.9); animation: agentOnlinePulse 1.6s ease-in-out infinite; }
+  @keyframes agentOnlinePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  #agentModal .agent-header-greeting { background: linear-gradient(150deg, rgba(34,211,238,0.07), rgba(139,92,246,0.12)); border: 1px solid rgba(34,211,238,0.22); box-shadow: inset 0 0 34px rgba(34,211,238,0.05); position: relative; }
+  #agentModal .agent-header-greeting::before, #agentModal .agent-header-greeting::after { content: ''; position: absolute; width: 16px; height: 16px; border-color: rgba(34,211,238,0.65); border-style: solid; }
+  #agentModal .agent-header-greeting::before { top: 7px; right: 7px; border-width: 2px 2px 0 0; border-radius: 0 6px 0 0; }
+  #agentModal .agent-header-greeting::after { bottom: 7px; left: 7px; border-width: 0 0 2px 2px; border-radius: 0 0 0 6px; }
+  #agentGreeting { color: #f1f5f9; }
+  #agentSubGreeting { color: #7dd3fc; }
+  #agentModal .agent-header-greeting span { background: rgba(34,211,238,0.09); color: #67e8f9; border: 1px solid rgba(34,211,238,0.3); }
+  #agentModal .agent-avatar { background: linear-gradient(135deg, #0891b2 0%, #7c3aed 100%); box-shadow: 0 0 30px rgba(34,211,238,0.35); }
+  #agentModal .agent-avatar svg { animation: agentPulse 2s ease-in-out infinite; }
+  #agentModal .text-on-surface { color: #f1f5f9; }
+  #agentModal .text-on-surface-variant { color: #8b93a7; }
+  #agentModal .agent-tab { background: rgba(139,92,246,0.09); border-color: rgba(139,92,246,0.32); color: #c4b5fd; }
+  #agentModal .agent-tab.active { background: linear-gradient(135deg, #0e7490, #7c3aed); border-color: rgba(34,211,238,0.55); box-shadow: 0 0 18px rgba(34,211,238,0.28); color: #ffffff; }
+  #agentModal .agent-section { background: rgba(139,92,246,0.06); border-color: rgba(139,92,246,0.3); box-shadow: inset 0 0 26px rgba(139,92,246,0.05); }
+  #agentModal .agent-section-title { color: #e2e8f0; }
+  #agentModal .agent-section-subtitle { color: #94a3b8; }
+  #agentModal .agent-cap-card { background: rgba(255,255,255,0.045); border-color: rgba(34,211,238,0.2); }
+  #agentModal .agent-cap-title { color: #e2e8f0; }
+  #agentModal .agent-cap-sub { color: #8b93a7; }
+  #agentModal .agent-quick-chip { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.38); color: #c4b5fd; }
+  #agentModal .agent-quick-chip:active { background: rgba(139,92,246,0.22); }
+  #agentModal .agent-chat-wrap { background: rgba(9,5,24,0.6); border-color: rgba(34,211,238,0.22); box-shadow: inset 0 0 44px rgba(0,0,0,0.4); }
+  #agentModal .agent-chat-msgs::-webkit-scrollbar-thumb { background: rgba(34,211,238,0.35); }
+  #agentModal .agent-msg.bot { background: rgba(139,92,246,0.13); color: #e2e8f0; border-right-color: #22d3ee; box-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+  #agentModal .agent-msg.me { background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%); box-shadow: 0 3px 12px rgba(124,58,237,0.35); }
+  #agentModal .agent-msg-avatar { background: linear-gradient(135deg, #0891b2, #7c3aed); }
+  #agentModal .agent-typing-bubble { background: rgba(139,92,246,0.13); border-right-color: #22d3ee; }
+  #agentModal .agent-typing-dot { background: #22d3ee; }
+  #agentModal .agent-chat-input-row { background: rgba(9,5,24,0.85); border-top: 1px solid rgba(34,211,238,0.14); }
+  #agentModal .agent-input { background: rgba(255,255,255,0.06); border-color: rgba(139,92,246,0.35); color: #e2e8f0; }
+  #agentModal .agent-input::placeholder { color: #64748b; }
+  #agentModal .agent-input:focus { border-color: #22d3ee; box-shadow: 0 0 0 3px rgba(34,211,238,0.12); }
+  #agentModal .agent-send-btn { background: linear-gradient(135deg, #0891b2, #7c3aed); box-shadow: 0 0 16px rgba(34,211,238,0.3); }
+  #agentModal .agent-chat-clear { background: rgba(255,255,255,0.05); border-color: rgba(139,92,246,0.3); color: #94a3b8; }
+  #agentModal .agent-plan-card { background: linear-gradient(150deg, rgba(34,211,238,0.09) 0%, rgba(13,7,34,0.7) 45%, rgba(139,92,246,0.14) 100%); border-color: rgba(34,211,238,0.35); }
+  #agentModal .agent-plan-head { background: linear-gradient(135deg, #0e7490 0%, #6d28d9 100%); }
+  #agentModal .agent-plan-habit { background: rgba(255,255,255,0.05); border-color: rgba(139,92,246,0.3); }
+  #agentModal .agent-plan-habit-name { color: #e2e8f0; }
+  #agentModal .agent-plan-habit-meta { color: #94a3b8; }
+  #agentModal .agent-plan-habit-tip { color: #67e8f9; background: rgba(34,211,238,0.08); }
+  #agentModal .agent-plan-applied { background: rgba(16,185,129,0.12); border-color: rgba(52,211,153,0.45); color: #6ee7b7; }
+  #agentModal .agent-btn-primary { background: linear-gradient(135deg, #0891b2, #7c3aed); box-shadow: 0 0 20px rgba(34,211,238,0.25); }
+  #agentModal .agent-week-stat { background: rgba(255,255,255,0.05); border-color: rgba(34,211,238,0.2); }
+  #agentModal .agent-week-stat-val { color: #a5f3fc; }
+  #agentModal .agent-week-stat-label { color: #94a3b8; }
+  #agentModal .agent-report-card { background: linear-gradient(135deg, rgba(139,92,246,0.13), rgba(34,211,238,0.07)); border-color: rgba(139,92,246,0.35); }
+  #agentModal .agent-report-headline { color: #c4b5fd; }
+  #agentModal .agent-report-summary { color: #cbd5e1; }
+  #agentModal .agent-report-item { color: #cbd5e1; background: rgba(255,255,255,0.05); }
+  #agentModal .agent-report-focus { color: #67e8f9; background: rgba(34,211,238,0.07); border-color: rgba(34,211,238,0.4); }
+  #agentModal .agent-report-motivation { color: #fbbf24; background: rgba(251,191,36,0.08); }
+  #agentModal .agent-report-date { color: #64748b; }
+  #agentModal .agent-toggle-row { color: #cbd5e1; }
+  #agentModal .agent-platform-chip { background: rgba(255,255,255,0.05); border-color: rgba(139,92,246,0.3); color: #94a3b8; }
+  #agentModal .agent-platform-chip.active { background: linear-gradient(135deg, #0e7490, #7c3aed); box-shadow: 0 0 14px rgba(34,211,238,0.25); }
+  #agentModal .agent-social-card { background: rgba(255,255,255,0.04); border-color: rgba(139,92,246,0.28); box-shadow: 0 4px 18px rgba(0,0,0,0.3); }
+  #agentModal .agent-social-week { color: #67e8f9; background: rgba(34,211,238,0.08); }
+  #agentModal .agent-social-platform { border-color: rgba(139,92,246,0.28); background: rgba(255,255,255,0.03); }
+  #agentModal .agent-social-platform-title { color: #e2e8f0; }
+  #agentModal .agent-social-meta { color: #cbd5e1; }
+  #agentModal .agent-prompt-box { border: 1px solid rgba(34,211,238,0.28); }
+  #agentModal.agent-materialize { animation: agentMaterialize 0.9s cubic-bezier(0.23, 1, 0.32, 1); }
+  @keyframes agentMaterialize { 0% { opacity: 0; transform: translateY(34px) scale(0.96); filter: blur(16px) brightness(2.4); } 55% { filter: blur(0) brightness(1.2); } 100% { opacity: 1; transform: none; filter: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    #agentModal.agent-materialize { animation: none; }
+    #agentModal > .sticky::after { animation: none; }
+    .boot-eq span { animation: none; }
+  }
+
+  </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+
+  <!-- Header -->
+  <header class="fixed top-0 w-full z-40 pt-safe glass-strong">
+    <div class="h-16 px-4 flex items-center justify-between gap-3 max-w-lg mx-auto">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-primary font-bold text-lg">
+          <span class="material-symbols-outlined text-[20px]">mountain_flag</span>
+        </div>
+        <div class="flex flex-col">
+          <h1 class="font-bold text-on-surface text-base tracking-tight">Habits Tracker</h1>
+          <span class="text-[11px] text-on-surface-variant font-medium" id="headerDate"></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- NEW: Agent Button -->
+        <button onclick="openAgentWithBoot()" aria-label="دستیار هوشمند" class="relative w-10 h-10 rounded-full bg-gradient-to-br from-agent-primary/20 to-agent-secondary/20 border border-agent-primary/30 flex items-center justify-center text-agent-primary active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[21px]">smart_toy</span>
+          <span class="agent-notification-badge" id="agentBadge" style="display: none;">۱</span>
+        </button>
+        <!-- NEW: Notifications Button (swapped with music library) -->
+        <button onclick="openModal('notificationsModal')" aria-label="اعلان‌ها و یادآورها" class="relative w-10 h-10 rounded-full bg-gradient-to-br from-amber-400/25 to-orange-500/25 border border-amber-500/30 flex items-center justify-center text-amber-600 active:scale-90 transition-transform" title="اعلان‌ها و یادآورها">
+          <span class="material-symbols-outlined text-[20px]">notifications</span>
+          <span class="absolute -top-1 -left-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-extrabold flex items-center justify-center shadow-sm border border-white" id="headerNotifBadge" style="display: none;">۰</span>
+        </button>
+        <button onclick="openModal('profileModal')" aria-label="پروفایل" class="w-10 h-10 rounded-full bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[21px]">person</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full max-w-lg mx-auto pt-20 pb-32 px-4 relative z-10">
+    
+    <!-- Hero -->
+    <div class="mb-6">
+      <p class="text-primary text-sm font-semibold mb-1">سلام، امروز چطور پیش میری؟ 👋</p>
+      <h2 class="text-2xl font-bold text-on-surface leading-tight mb-3">مسیر صعود به قله موفقیت</h2>
+      <p class="text-sm text-on-surface-variant leading-relaxed">هر عادت یک کوه است. با استمرار، قله را فتح کن.</p>
+    </div>
+
+    <!-- Daily Quote Card -->
+    <div class="quote-card rounded-3xl p-5 mb-6 relative overflow-hidden">
+      <div class="quote-mark">"</div>
+      <div class="flex items-start gap-3 relative z-10">
+        <div class="w-10 h-10 rounded-2xl bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-primary flex-shrink-0">
+          <span class="material-symbols-outlined text-[22px]">spa</span>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm text-on-surface leading-relaxed font-medium" id="dailyQuote">ریشه‌های اراده در سکوت رشد می‌کنند و شاخه‌های آرامش، سایه‌بان کانون گرم خانواده می‌شوند.</p>
+          <span class="text-[10px] text-primary font-semibold mt-2 block">حکمت روزانه تمرکز و آرامش</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Streak Calendar -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-on-surface text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-primary">calendar_month</span>
+          تقویم استریک
+        </h3>
+        <span class="text-[10px] text-on-surface-variant bg-surface-container-low px-2.5 py-1 rounded-lg border border-surface-container-highest" id="streakTotalLabel">۰ روز</span>
+      </div>
+      <div class="streak-calendar-wrapper" id="streakCalendarWrapper"></div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-on-surface text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-primary">filter_list</span>
+          فیلتر دسته‌بندی
+        </h3>
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-2" id="categoryFilter">
+        <button onclick="filterByCategory('all')" class="category-filter-chip active" data-cat="all">همه</button>
+        <button onclick="filterByCategory('spiritual')" class="category-filter-chip" data-cat="spiritual">️ معنوی</button>
+        <button onclick="filterByCategory('productivity')" class="category-filter-chip" data-cat="productivity"> بهره‌وری</button>
+        <button onclick="filterByCategory('self-care')" class="category-filter-chip" data-cat="self-care">💖 مراقبت از خود</button>
+        <button onclick="filterByCategory('family')" class="category-filter-chip" data-cat="family">👨‍👩‍👧 خانواده</button>
+      </div>
+    </div>
+
+    <!-- Today's Habits -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-on-surface text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-primary">checklist</span>
+          عادت‌ها و برنامه‌های امروز
+        </h3>
+        <button onclick="openModal('addHabitModal')" class="text-[11px] font-bold text-primary bg-primary/10 px-3 py-2 rounded-full flex items-center gap-0.5 active:scale-95 transition-transform">
+          <span>مدیریت همه</span>
+          <span class="material-symbols-outlined text-[14px]">chevron_left</span>
+        </button>
+      </div>
+      <div class="flex flex-col gap-2.5" id="habitsList"></div>
+    </div>
+
+    <!-- Quick Mood Entry -->
+    <div class="bg-white rounded-3xl p-5 mb-6 relative overflow-hidden shadow-sm border border-surface-container-highest">
+      <div class="flex items-start gap-3 relative z-10">
+        <div class="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary flex-shrink-0">
+          <span class="material-symbols-outlined text-[20px]">mood</span>
+        </div>
+        <div class="flex-1">
+          <h4 class="font-bold text-on-surface text-sm mb-1">حال و هوای امروزت چطوره؟</h4>
+          <p class="text-xs text-on-surface-variant leading-relaxed mb-3">ثبت احساسات به درک بهتر رابطه‌ی عادت‌ها و انرژی‌ات کمک می‌کنه.</p>
+          <div class="flex gap-2">
+            <button onclick="openModal('moodModal')" class="flex-1 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold active:scale-95 transition-transform flex items-center justify-center gap-1.5 shadow-md">
+              ثبت حال و بازتاب
+              <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+            </button>
+            <button onclick="openModal('moodChartModal')" class="w-11 h-10 rounded-xl bg-surface-container-low border border-surface-container-highest text-on-surface-variant active:scale-95 transition-transform flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">show_chart</span>
+            </button>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-container-highest flex items-center justify-between" id="todayMoodPreview">
+            <span class="text-[10px] text-on-surface-variant">وضعیت امروز:</span>
+            <span class="text-[10px] text-on-surface-variant">هنوز ثبت نشده</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 pb-safe px-4">
+    <div class="max-w-lg mx-auto relative">
+      <svg class="w-full h-[68px] block drop-shadow-lg" fill="none" preserveAspectRatio="none" viewBox="0 0 380 72">
+        <path d="M 36 12 C 16 12 0 24 0 42 C 0 60 16 72 36 72 L 344 72 C 364 72 380 60 380 42 C 380 24 364 12 344 12 L 235 12 C 218 12 208 0 190 0 C 172 0 162 12 145 12 Z" fill="#ffffff" />
+        <path d="M 36 12.5 C 16.5 12.5 1 24.2 1 42 C 1 59.8 16.5 71 36 71 L 344 71 C 363.5 71 379 59.8 379 42 C 379 24.2 363.5 12.5 344 12.5 L 235 12.5 C 218.2 12.5 208.2 0.8 190 0.8 C 171.8 0.8 161.8 12.5 145 12.5 Z" stroke="rgba(227,223,255,0.7)" stroke-width="1" />
+      </svg>
+      <div class="absolute inset-0 flex items-center justify-between px-5 pt-2">
+        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn active" data-target="dashboard">
+          <span class="material-symbols-outlined text-[24px] text-primary">home</span>
+          <span class="text-[10px] font-bold text-primary">خانه</span>
+        </button>
+        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openModal('mountainModal')">
+          <span class="material-symbols-outlined text-[24px] text-on-surface-variant">mountain_flag</span>
+          <span class="text-[10px] font-medium text-on-surface-variant">کوه‌ها</span>
+        </button>
+        
+        <div class="flex-1 flex items-center justify-center relative -top-4">
+          <button onclick="openModal('addHabitModal')" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-container to-primary text-on-primary flex items-center justify-center shadow-[0_6px_16px_rgba(99,14,212,0.4)] active:scale-90 transition-all border-2 border-white">
+            <span class="material-symbols-outlined text-[28px]">add</span>
+            <div class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-tertiary-fixed text-tertiary flex items-center justify-center text-[11px] font-extrabold shadow-sm border border-white">+</div>
+          </button>
+        </div>
+
+        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openMusicPage()">
+          <span class="material-symbols-outlined text-[24px] text-emerald-600">library_music</span>
+          <span class="text-[10px] font-medium text-on-surface-variant">موزیک</span>
+        </button>
+        <button class="flex-1 flex flex-col items-center gap-1 active:scale-90 transition-transform nav-btn" onclick="openModal('profileModal')">
+          <span class="material-symbols-outlined text-[24px] text-on-surface-variant">person</span>
+          <span class="text-[10px] font-medium text-on-surface-variant">پروفایل</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= AGENT BOOT SCREEN (CINEMATIC ROBOT) ================= -->
+  <div id="agentBootScreen" aria-hidden="true">
+    <div class="boot-grid-bg"></div>
+    <div class="boot-hud-title">هسته دستیار هوشمند<span class="boot-hud-ver">نسخه ۲.۰</span></div>
+    <div class="boot-tag boot-tag-tl">اتصال: پایدار</div>
+    <div class="boot-tag boot-tag-br">رمزگذاری: فعال</div>
+    <div class="boot-corner boot-c-tl"></div><div class="boot-corner boot-c-tr"></div>
+    <div class="boot-corner boot-c-bl"></div><div class="boot-corner boot-c-br"></div>
+    <div class="boot-center">
+      <div class="boot-orbiter">
+        <svg class="boot-ring boot-ring-a" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="92" fill="none" stroke="rgba(34,211,238,0.35)" stroke-width="1.5" stroke-dasharray="10 14"/>
+          <circle cx="100" cy="100" r="78" fill="none" stroke="rgba(139,92,246,0.45)" stroke-width="1" stroke-dasharray="3 9"/>
+        </svg>
+        <svg class="boot-ring boot-ring-b" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(34,211,238,0.3)" stroke-width="2.5" stroke-dasharray="46 260" stroke-linecap="round"/>
+          <circle cx="100" cy="8" r="3.5" fill="#22d3ee"/>
+        </svg>
+        <div class="boot-head-wrap">
+          <svg class="boot-head" viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="bootGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#22d3ee"/>
+                <stop offset="1" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+            <line x1="60" y1="13" x2="60" y2="24" stroke="url(#bootGrad)" stroke-width="3" stroke-linecap="round"/>
+            <circle class="boot-antenna" cx="60" cy="9" r="4" fill="#22d3ee"/>
+            <rect x="26" y="24" width="68" height="60" rx="18" fill="rgba(34,211,238,0.07)" stroke="url(#bootGrad)" stroke-width="2.5"/>
+            <rect x="16" y="44" width="8" height="20" rx="4" fill="rgba(34,211,238,0.22)" stroke="rgba(34,211,238,0.5)" stroke-width="1.5"/>
+            <rect x="96" y="44" width="8" height="20" rx="4" fill="rgba(34,211,238,0.22)" stroke="rgba(34,211,238,0.5)" stroke-width="1.5"/>
+            <rect class="boot-eye" x="39" y="46" width="13" height="9" rx="4.5" fill="#22d3ee"/>
+            <rect class="boot-eye" x="68" y="46" width="13" height="9" rx="4.5" fill="#22d3ee"/>
+            <rect x="46" y="64" width="28" height="7" rx="3.5" fill="none" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
+            <line x1="53" y1="65.5" x2="53" y2="69.5" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
+            <line x1="60" y1="65.5" x2="60" y2="69.5" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
+            <line x1="67" y1="65.5" x2="67" y2="69.5" stroke="rgba(34,211,238,0.55)" stroke-width="1.5"/>
+          </svg>
+          <div class="boot-scanline"></div>
+        </div>
+      </div>
+      <div class="boot-eq" id="bootEq"></div>
+      <div class="boot-terminal" id="bootTerminal"></div>
+      <div class="boot-progress-track"><div class="boot-progress-fill" id="bootProgressFill"></div></div>
+      <div class="boot-percent" id="bootPercent">۰٪</div>
+      <div class="boot-status" id="bootStatus">فاز ۱ — انرژی‌رسانی هسته</div>
+    </div>
+    <div class="boot-skip-hint">برای رد کردن، لمس کن</div>
+    <div class="boot-flash" id="bootFlash"></div>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+  <!-- ================= MUSIC LIBRARY PAGE ================= -->
+  <div id="musicPage" class="hidden fixed inset-0 z-[55] bg-surface overflow-y-auto">
+    <div class="min-h-full pb-44">
+      <!-- Music page header -->
+      <div class="sticky top-0 z-10 pt-safe glass-strong">
+        <div class="h-16 px-4 flex items-center justify-between gap-3 max-w-lg mx-auto">
+          <div class="flex items-center gap-2.5">
+            <button onclick="closeMusicPage()" aria-label="بازگشت" class="w-10 h-10 rounded-full bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+              <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </button>
+            <h2 class="font-bold text-on-surface text-base tracking-tight">کتابخانه من</h2>
+          </div>
+          <button id="musicVoiceBtnHeader" onclick="startMusicVoice()" aria-label="پخش با صدا" class="w-10 h-10 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary active:scale-90 transition-transform" title="پخش با صدا">
+            <span class="material-symbols-outlined text-[20px]">mic</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="max-w-lg mx-auto px-4 pt-4">
+        <!-- Library hero: title + owl mascot (StoryGraph style) -->
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <div class="flex-1 min-w-0">
+            <p class="text-primary text-sm font-semibold mb-0.5">کلکسیون موزیک‌هایت را بچین 🎧</p>
+            <h3 class="text-2xl font-extrabold text-on-surface leading-tight mb-1">کتابخانه من</h3>
+            <p class="text-sm text-on-surface-variant font-medium" id="musicCountLabel">۰ موزیک در قفسه</p>
+          </div>
+          <svg viewBox="0 0 72 76" class="w-[68px] h-[72px] music-mascot flex-shrink-0" aria-hidden="true">
+            <path d="M14 36 C14 16 58 16 58 36" fill="none" stroke="#3b2f63" stroke-width="5" stroke-linecap="round"/>
+            <rect x="9" y="33" width="11" height="16" rx="5.5" fill="#3b2f63"/>
+            <rect x="52" y="33" width="11" height="16" rx="5.5" fill="#3b2f63"/>
+            <ellipse cx="36" cy="46" rx="21" ry="20" fill="#7c5cff"/>
+            <ellipse cx="36" cy="51" rx="12.5" ry="12.5" fill="#c4b5fd"/>
+            <path d="M17 45 C13 51 15 58 21 61 C20 55 20 50 22 46 Z" fill="#6d4df0"/>
+            <path d="M55 45 C59 51 57 58 51 61 C52 55 52 50 50 46 Z" fill="#6d4df0"/>
+            <circle cx="27.5" cy="42" r="8.5" fill="white"/>
+            <circle cx="44.5" cy="42" r="8.5" fill="white"/>
+            <circle cx="27.5" cy="42" r="3.6" fill="#2d2a45"/>
+            <circle cx="44.5" cy="42" r="3.6" fill="#2d2a45"/>
+            <circle cx="29" cy="40" r="1.2" fill="white"/>
+            <circle cx="46" cy="40" r="1.2" fill="white"/>
+            <path d="M36 46 L39.5 50 L36 54 L32.5 50 Z" fill="#fb923c"/>
+            <path d="M29 65 l-3.5 3.5 M29 65 l3.5 3.5" stroke="#fb923c" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <path d="M43 65 l-3.5 3.5 M43 65 l3.5 3.5" stroke="#fb923c" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <g>
+              <path d="M64 8 v11" stroke="#fb7185" stroke-width="2.6" stroke-linecap="round"/>
+              <circle cx="61.3" cy="20.2" r="3" fill="#fb7185"/>
+              <path d="M64 8 l5.5 2 v3.4 l-5.5 -2 Z" fill="#fb7185"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-4 no-scrollbar" id="musicTabs"></div>
+
+        <!-- Collections (StoryGraph-style cards) -->
+        <div id="musicCollections" class="flex flex-col gap-3.5 mb-6"></div>
+
+        <!-- Track list -->
+        <div id="musicTrackList" class="flex flex-col gap-2.5"></div>
+      </div>
+    </div>
+
+    <!-- FABs: voice + upload -->
+    <div class="fixed bottom-6 left-4 z-[58] flex flex-col gap-3 items-center transition-all duration-300" id="musicFabWrap">
+      <button id="musicMicFab" onclick="startMusicVoice()" class="music-fab w-12 h-12 bg-white border border-primary/30 text-primary" title="پخش با صدا">
+        <span class="material-symbols-outlined text-[22px]">mic</span>
+      </button>
+      <button onclick="document.getElementById('musicFileInput').click()" class="music-fab w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-600 text-white" title="آپلود موزیک">
+        <span class="material-symbols-outlined text-[28px]">add</span>
+      </button>
+    </div>
+
+    <!-- Hidden upload input -->
+    <input type="file" id="musicFileInput" accept="audio/*" multiple class="hidden" onchange="handleMusicUpload(this.files)">
+  </div>
+
+  <!-- Music Mini Player (global - remains visible after closing library page) -->
+  <div id="musicMiniPlayer" class="hidden fixed bottom-0 left-0 right-0 z-[57] max-w-lg mx-auto">
+    <div class="music-mini-bar m-3 rounded-3xl bg-[#181445]/95 backdrop-blur-md text-white p-3 shadow-2xl border border-white/10">
+      <div class="flex items-center gap-3">
+        <div id="musicMiniCover" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-xl flex-shrink-0">🎵</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-[13px] font-bold truncate" id="musicMiniName">—</div>
+          <div class="text-[10px] text-white/60 mt-0.5" id="musicMiniTime">۰:۰۰ / ۰:۰۰</div>
+        </div>
+        <button onclick="toggleMusicPlay()" class="w-10 h-10 rounded-full bg-white text-on-surface flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
+          <span class="material-symbols-outlined text-[22px]" id="musicMiniPlayIcon">pause</span>
+        </button>
+        <button onclick="stopMusic()" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+      <div class="mt-2.5 h-1.5 bg-white/15 rounded-full overflow-hidden cursor-pointer" onclick="seekMusic(event)">
+        <div id="musicMiniProgress" class="h-full w-0 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Music Track Modal (edit / schedule / delete) -->
+  <div id="musicTrackModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="p-5">
+      <div class="w-10 h-1.5 bg-surface-container-highest rounded-full mx-auto mb-4"></div>
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-2xl flex-shrink-0 bg-gradient-to-br from-violet-500 to-purple-700" id="musicModalCover">🎵</div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-bold text-on-surface text-base truncate" id="musicModalName">—</h3>
+          <span class="text-[11px] text-on-surface-variant" id="musicModalMeta">—</span>
+        </div>
+      </div>
+
+      <p class="text-xs font-bold text-on-surface mb-2">📂 کالکشن موزیک</p>
+      <div class="flex gap-2 flex-wrap mb-5" id="musicModalCategories"></div>
+
+      <div class="bg-surface-container-low border border-surface-container-highest rounded-2xl p-4 mb-5">
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px] text-primary">alarm</span>
+            <h4 class="font-bold text-on-surface text-sm">پخش خودکار روزانه</h4>
+          </div>
+          <div id="musicModalScheduleToggle"></div>
+        </div>
+        <p class="text-[10px] text-on-surface-variant leading-relaxed mb-3">هر روز سر ساعت مشخص، این موزیک به‌صورت خودکار برایت پخش می‌شود.</p>
+        <input type="time" id="musicModalTime" value="07:00" class="w-full bg-white border border-surface-container-highest rounded-xl px-3 py-2.5 text-sm font-bold text-on-surface focus:outline-none focus:border-primary transition-colors" onchange="window.__musicModalDraft.schedule.time = this.value">
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="saveMusicTrackModal()" class="flex-1 py-3 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/25 active:scale-95 transition-transform">ذخیره</button>
+        <button onclick="toggleMusicFavorite(window.__musicModalId); closeAllModals();" class="w-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center active:scale-95 transition-transform" title="محبوب">
+          <span class="material-symbols-outlined text-[20px]">star</span>
+        </button>
+        <button onclick="deleteMusicTrack(window.__musicModalId)" class="w-12 rounded-2xl bg-red-50 border border-red-200 text-red-500 flex items-center justify-center active:scale-95 transition-transform" title="حذف">
+          <span class="material-symbols-outlined text-[20px]">delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Music Collection Modal (StoryGraph "+ New Collection") -->
+  <div id="musicNewCollectionModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[62] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="p-5">
+      <div class="w-10 h-1.5 bg-surface-container-highest rounded-full mx-auto mb-4"></div>
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white shadow-md">
+          <span class="material-symbols-outlined text-[20px]">add_circle</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-on-surface text-base">کالکشن جدید بساز</h3>
+          <p class="text-[11px] text-on-surface-variant">یک قفسه تازه برای موزیک‌هایت</p>
+        </div>
+      </div>
+
+      <label class="text-[12px] font-bold text-on-surface mb-1.5 block">نام کالکشن</label>
+      <input type="text" id="musicCollName" maxlength="24" placeholder="مثلاً: شب‌های مطالعه..." class="w-full bg-surface-container-low text-on-surface text-[13px] font-semibold rounded-2xl px-4 py-3 border border-surface-container-highest focus:outline-none focus:border-primary transition-colors mb-4">
+
+      <label class="text-[12px] font-bold text-on-surface mb-2 block">آیکون کالکشن</label>
+      <div class="flex gap-2 flex-wrap mb-4" id="musicCollEmojiRow"></div>
+
+      <label class="text-[12px] font-bold text-on-surface mb-2 block">رنگ قفسه</label>
+      <div class="flex gap-2.5 flex-wrap mb-5" id="musicCollGradRow"></div>
+
+      <div class="flex gap-2">
+        <button onclick="createMusicCollection()" class="flex-1 py-3 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/25 active:scale-95 transition-transform flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-[18px]">check</span>
+          ساخت کالکشن
+        </button>
+        <button onclick="closeAllModals()" class="px-5 py-3 rounded-2xl bg-surface-container-low border border-surface-container-highest text-on-surface-variant font-bold text-sm active:scale-95 transition-transform">انصراف</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop hidden fixed inset-0 z-[60] bg-on-surface/40 backdrop-blur-sm" onclick="closeAllModals()"></div>
+
+  <!-- NEW: AGENT MODAL -->
+  <div id="agentModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-agent-primary/30 max-w-lg mx-auto max-h-[95vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-violet-600 flex items-center justify-center shadow-[0_0_16px_rgba(34,211,238,0.45)]">
+          <svg viewBox="0 0 120 120" class="w-6 h-6" aria-hidden="true">
+            <rect x="26" y="26" width="68" height="58" rx="17" fill="rgba(255,255,255,0.16)" stroke="#f8fafc" stroke-width="6"/>
+            <rect x="39" y="47" width="13" height="9" rx="4.5" fill="#a5f3fc"/>
+            <rect x="68" y="47" width="13" height="9" rx="4.5" fill="#a5f3fc"/>
+            <line x1="60" y1="12" x2="60" y2="26" stroke="#f8fafc" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="60" cy="9" r="5" fill="#a5f3fc"/>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <h3 class="font-bold text-on-surface text-base leading-tight">دستیار هوشمند</h3>
+          <div class="agent-online-pill"><span class="agent-online-dot"></span> آنلاین و آماده</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-5 flex flex-col gap-4">
+      
+      <!-- Agent Avatar & Greeting -->
+      <div class="agent-header-greeting text-center">
+        <div class="agent-avatar mx-auto mb-3">
+          <svg viewBox="0 0 120 120" class="w-11 h-11" aria-hidden="true">
+            <defs>
+              <linearGradient id="agentHeadGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#67e8f9"/>
+                <stop offset="1" stop-color="#c4b5fd"/>
+              </linearGradient>
+            </defs>
+            <line x1="60" y1="13" x2="60" y2="24" stroke="url(#agentHeadGrad)" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="60" cy="9" r="4" fill="#67e8f9"/>
+            <rect x="26" y="24" width="68" height="60" rx="18" fill="rgba(255,255,255,0.1)" stroke="url(#agentHeadGrad)" stroke-width="3.5"/>
+            <rect x="39" y="46" width="13" height="9" rx="4.5" fill="#e0f2fe"/>
+            <rect x="68" y="46" width="13" height="9" rx="4.5" fill="#e0f2fe"/>
+            <rect x="46" y="64" width="28" height="7" rx="3.5" fill="none" stroke="rgba(224,242,254,0.6)" stroke-width="2"/>
+          </svg>
+        </div>
+        <h4 class="font-bold text-on-surface text-lg mb-1" id="agentGreeting">سلام! من دستیار تو هستم</h4>
+        <p class="text-xs text-on-surface-variant" id="agentSubGreeting">امروز چه برنامه‌ای داری؟</p>
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <span class="text-[10px] bg-agent-primary/10 text-agent-primary px-2 py-1 rounded-full font-bold"> هوش مصنوعی</span>
+          <span class="text-[10px] bg-agent-secondary/10 text-agent-secondary px-2 py-1 rounded-full font-bold">✨ فعال</span>
+        </div>
+      </div>
+
+      <!-- Agent Tabs -->
+      <div class="flex gap-2 overflow-x-auto pb-2" id="agentTabs">
+        <button onclick="switchAgentTab('chat')" class="agent-tab active" data-tab="chat">🤖 اتوماسیون AI</button>
+        <button onclick="switchAgentTab('report')" class="agent-tab" data-tab="report">📈 گزارش هفتگی</button>
+        <button onclick="switchAgentTab('social')" class="agent-tab" data-tab="social">📱 فضای مجازی</button>
+      </div>
+
+      <!-- Tab Content: AI Chat & Automation (NEW) -->
+      <div id="agentTabChat" class="agent-tab-content">
+        <div class="agent-cap-grid">
+          <div class="agent-cap-card">
+            <div class="agent-cap-icon bg-agent-primary/15">🎯</div>
+            <div class="agent-cap-title">برنامه تخصصی</div>
+            <div class="agent-cap-sub">توضیح بده، می‌سازمش</div>
+          </div>
+          <div class="agent-cap-card">
+            <div class="agent-cap-icon bg-agent-secondary/15">⚡</div>
+            <div class="agent-cap-title">اعمال خودکار</div>
+            <div class="agent-cap-sub">یک کلیک، همه عادت‌ها</div>
+          </div>
+          <div class="agent-cap-card">
+            <div class="agent-cap-icon bg-agent-accent/15">💬</div>
+            <div class="agent-cap-title">مشاور لحظه‌ای</div>
+            <div class="agent-cap-sub">هر سوالی داری بپرس</div>
+          </div>
+        </div>
+
+        <div class="agent-quick-chips mt-3" id="agentQuickChips">
+          <button class="agent-quick-chip" onclick="sendAgentMessage('برای موفقیت در کنکور یک برنامه مطالعه تخصصی بده')">📚 برنامه کنکور</button>
+          <button class="agent-quick-chip" onclick="sendAgentMessage('می‌خوام صبح‌ها زودتر بیدار بشم، یک برنامه بیدارباش بده')">🌅 بیدارباش صبح</button>
+          <button class="agent-quick-chip" onclick="sendAgentMessage('یک برنامه ورزشی و سلامتی برای من بساز')">🏃 برنامه ورزشی</button>
+          <button class="agent-quick-chip" onclick="sendAgentMessage('می‌خوام استفاده‌ام از گوشی رو کم کنم، برنامه بده')">📱 کاهش گوشی</button>
+          <button class="agent-quick-chip" onclick="sendAgentMessage('یک برنامه معنوی برای تقویت ارتباطم با خدا بساز')">🕊️ برنامه معنوی</button>
+          <button class="agent-quick-chip" onclick="sendAgentMessage('برای بهبود کیفیت خوابم یک برنامه بده')">😴 بهبود خواب</button>
+          <button class="agent-quick-chip" onclick="sendAgentMessage('برای تقویت رابطه با خانواده برنامه بده')">👨‍👩‍👧 خانواده</button>
+          <button class="agent-quick-chip" onclick="switchAgentTab('report')">📈 گزارش هفتگی</button>
+          <button class="agent-quick-chip" onclick="switchAgentTab('social')">📱 برنامه محتوا</button>
+        </div>
+
+        <div class="agent-chat-wrap mt-3">
+          <div class="agent-chat-msgs" id="agentChatMessages"></div>
+          <div class="agent-typing-row" id="agentTypingRow">
+            <div class="agent-msg-avatar">🤖</div>
+            <div class="agent-typing-bubble">
+              <div class="agent-typing-indicator">
+                <div class="agent-typing-dot"></div>
+                <div class="agent-typing-dot"></div>
+                <div class="agent-typing-dot"></div>
+              </div>
+            </div>
+          </div>
+          <div class="agent-chat-input-row">
+            <input type="text" id="agentChatInput" class="agent-input" placeholder="هدف یا برنامه‌ات رو توضیح بده..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendAgentMessage();}">
+            <button class="agent-send-btn" id="agentSendBtn" onclick="sendAgentMessage()" aria-label="ارسال پیام">
+              <span class="material-symbols-outlined text-[20px]">send</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-3">
+          <span class="text-[10px] text-on-surface-variant">برنامه‌های اعمال‌شده در تب «برنامه» قابل پیگیری‌اند</span>
+          <button class="agent-chat-clear" onclick="clearAgentChat()">
+            <span class="material-symbols-outlined text-[13px]">delete_sweep</span>
+            پاک کردن گفتگو
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Weekly Auto Report (NEW) -->
+      <div id="agentTabReport" class="agent-tab-content hidden">
+        <div class="agent-section">
+          <div class="agent-section-header">
+            <div class="agent-section-icon bg-agent-primary/20 text-agent-primary">
+              <span class="material-symbols-outlined text-[20px]">monitoring</span>
+            </div>
+            <div>
+              <div class="agent-section-title">آمار هفته تو</div>
+              <div class="agent-section-subtitle">۷ روز گذشته در یک نگاه</div>
+            </div>
+          </div>
+          <div class="agent-week-stats" id="agentWeekStats"></div>
+          <div class="agent-toggle-row">
+            <span>تولید خودکار گزارش در هر هفته جدید</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="agentAutoReportToggle" class="sr-only peer" onchange="toggleAutoWeeklyReport(this)" checked>
+              <div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-agent-primary"></div>
+            </label>
+          </div>
+        </div>
+
+        <div id="agentWeeklyReportBody" class="flex flex-col gap-3"></div>
+
+        <button onclick="generateWeeklyReport(false)" id="agentReportBtn" class="agent-btn agent-btn-primary w-full">
+          <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+          ساخت گزارش تازه این هفته
+        </button>
+      </div>
+
+      <!-- Tab Content: Social Media Control (NEW) -->
+      <div id="agentTabSocial" class="agent-tab-content hidden">
+        <div class="agent-section">
+          <div class="agent-section-header">
+            <div class="agent-section-icon bg-agent-secondary/20 text-agent-secondary">
+              <span class="material-symbols-outlined text-[20px]">smartphone</span>
+            </div>
+            <div>
+              <div class="agent-section-title">کنترل فضای مجازی</div>
+              <div class="agent-section-subtitle">هر هفته یک پست با پرامت آماده کپی</div>
+            </div>
+          </div>
+          <input type="text" id="agentSocialField" class="agent-input w-full mt-3" placeholder="شغل یا حوزه‌ات را بنویس... مثلا: در حوزه هوش مصنوعی کار می‌کنم">
+          <div class="agent-quick-chips mt-2" id="agentSocialChips"></div>
+          <div class="flex items-center gap-2 mt-3 flex-wrap">
+            <span class="text-[10px] font-bold text-on-surface-variant">پلتفرم‌ها:</span>
+            <button class="agent-platform-chip active" data-platform="instagram" onclick="toggleSocialPlatform(this)">📸 اینستاگرام</button>
+            <button class="agent-platform-chip active" data-platform="linkedin" onclick="toggleSocialPlatform(this)">💼 لینکدین</button>

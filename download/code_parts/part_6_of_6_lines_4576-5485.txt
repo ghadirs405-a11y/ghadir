@@ -1,0 +1,910 @@
+        setTimeout(() => done(0), 5000);
+        a.src = url;
+      });
+    }
+    async function handleMusicUpload(fileList) {
+      const files = Array.from(fileList || []).filter(musicIsAudio);
+      if (!files.length) { showToast('فایل صوتی معتبری انتخاب نشد 🎵'); return; }
+      const input = document.getElementById('musicFileInput');
+      if (input) input.value = '';
+      let added = 0;
+      for (const f of files) {
+        if (f.size > 80 * 1024 * 1024) { showToast(`«${musicCleanName(f.name)}» بزرگ‌تر از ۸۰ مگابایت است`); continue; }
+        const id = 'mu' + Date.now() + Math.floor(Math.random() * 1000);
+        const ok = await idbMusicPut({ id: id, blob: f, addedAt: new Date().toISOString() });
+        if (!ok) { showToast('حافظه مرورگر اجازه ذخیره نداد 😕'); continue; }
+        const duration = await musicGetDuration(f);
+        state.musicTracks.push({
+          id: id,
+          name: musicCleanName(f.name),
+          category: 'calm',
+          emoji: musicEmojiPool[state.musicTracks.length % musicEmojiPool.length],
+          favorite: false,
+          schedule: { enabled: false, time: '07:00', lastPlayedOn: null },
+          playCount: 0,
+          durationSec: duration,
+          sizeBytes: f.size,
+          addedAt: today()
+        });
+        added++;
+      }
+      if (added > 0) {
+        saveState();
+        renderMusicLibrary();
+        triggerConfetti();
+        showToast(`${toPersian(added)} موزیک به کتابخانه اضافه شد 🎉`);
+      }
+    }
+
+    // ---- Music page open/close / tabs ----
+    function openMusicPage() {
+      document.getElementById('musicPage').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      renderMusicLibrary();
+    }
+    function closeMusicPage() {
+      document.getElementById('musicPage').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    function setMusicTab(tabId) { currentMusicTab = tabId; renderMusicLibrary(); }
+    function musicFilteredTracks() {
+      if (currentMusicTab === 'fav') return state.musicTracks.filter(t => t.favorite);
+      if (currentMusicTab === 'sched') return state.musicTracks.filter(t => t.schedule && t.schedule.enabled);
+      if (allMusicCats()[currentMusicTab]) return state.musicTracks.filter(t => t.category === currentMusicTab);
+      return state.musicTracks.slice();
+    }
+    function updateMusicCountLabel() {
+      const el = document.getElementById('musicCountLabel');
+      if (el) el.textContent = `${toPersian(state.musicTracks.length)} موزیک در قفسه`;
+    }
+
+    // ---- Rendering ----
+    function renderMusicTabs() {
+      const wrap = document.getElementById('musicTabs');
+      if (!wrap) return;
+      const cats = allMusicCats();
+      const countIn = k => state.musicTracks.filter(t => t.category === k).length;
+      const tabs = [
+        { id: 'all', label: `همه (${toPersian(state.musicTracks.length)})` },
+        ...Object.keys(cats).map(k => ({ id: k, label: `${cats[k].emoji} ${cats[k].label} (${toPersian(countIn(k))})` })),
+        { id: 'fav', label: `⭐ محبوب‌ها (${toPersian(state.musicTracks.filter(t => t.favorite).length)})` },
+        { id: 'sched', label: `⏰ زمان‌بندی (${toPersian(state.musicTracks.filter(t => t.schedule && t.schedule.enabled).length)})` }
+      ];
+      wrap.innerHTML = tabs.map(t => `<button class="music-tab ${currentMusicTab === t.id ? 'active' : ''}" onclick="setMusicTab('${t.id}')">${t.label}</button>`).join('') +
+        `<button class="music-tab music-tab-new" onclick="openNewMusicCollectionModal()"><span class="font-extrabold">+</span> کالکشن جدید</button>`;
+    }
+    function playMusicCollection(k) {
+      const ids = state.musicTracks.filter(t => t.category === k).map(t => t.id);
+      if (!ids.length) { showToast('این کالکشن خالی است — اول موزیک اضافه کن 🎵'); return; }
+      musicQueue = ids;
+      playMusicTrack(ids[0]);
+    }
+    function renderMusicCollections() {
+      const wrap = document.getElementById('musicCollections');
+      if (!wrap) return;
+      const cats = allMusicCats();
+      const keys = Object.keys(cats).filter(k => state.musicTracks.some(t => t.category === k) || (cats[k].custom && currentMusicTab === 'all'));
+      if (currentMusicTab !== 'all' || keys.length === 0) { wrap.innerHTML = ''; wrap.classList.add('hidden'); return; }
+      wrap.classList.remove('hidden');
+      const heights = [84, 66, 76, 58, 80, 70];
+      const tilts = [-2.5, 1.6, -1, 2.4, -1.8, 1.2];
+      wrap.innerHTML = keys.map(k => {
+        const c = cats[k];
+        const tracks = state.musicTracks.filter(t => t.category === k);
+        const shown = tracks.slice(0, 6);
+        const extra = tracks.length - shown.length;
+        const spines = shown.map((t, i) =>
+          `<div class="music-book-spine" style="height:${heights[i % heights.length]}px; transform:rotate(${tilts[i % tilts.length]}deg); background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.04) 55%), ${c.grad}; z-index:${10 - i};">${t.emoji}</div>`
+        ).join('');
+        const moreSpine = extra > 0 ? `<div class="music-book-spine" style="height:${heights[(shown.length) % heights.length]}px; transform:rotate(1.5deg); background: rgba(255,255,255,0.3); backdrop-filter: blur(3px);"><span class="text-[11px] font-extrabold text-white">+${toPersian(extra)}</span></div>` : '';
+        const shelfInner = tracks.length ? spines + moreSpine :
+          `<div class="music-book-spine" style="height:64px; border:1.5px dashed rgba(255,255,255,0.65); background:rgba(255,255,255,0.14); font-size:14px;">🎶</div><div class="music-book-spine" style="height:52px; border:1.5px dashed rgba(255,255,255,0.5); background:rgba(255,255,255,0.1); font-size:13px;">➕</div>`;
+        const deleteBtn = c.custom ? `<button onclick="event.stopPropagation(); deleteMusicCollection('${k}')" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all active:scale-90" title="حذف کالکشن"><span class="material-symbols-outlined text-[15px]">delete</span></button>` : '';
+        return `
+          <div class="music-collection-card relative overflow-hidden rounded-[28px] p-4 pt-4 cursor-pointer active:scale-[0.98] transition-transform" style="background: ${c.grad};" onclick="setMusicTab('${k}')">
+            <span class="absolute top-3 left-3 text-xl opacity-85 select-none">${c.stickers[0]}</span>
+            <span class="absolute top-9 left-14 text-sm opacity-60 select-none">${c.stickers[1]}</span>
+            <span class="absolute bottom-16 left-4 text-base opacity-70 select-none">${c.stickers[2]}</span>
+            <div class="flex items-start justify-between mb-3 relative z-10">
+              <div>
+                <h4 class="text-white font-extrabold text-[16px] drop-shadow-sm">${c.emoji} ${c.label}</h4>
+                <span class="text-white/80 text-[10.5px] font-bold">${toPersian(tracks.length)} موزیک ${c.custom ? '· کالکشن من' : ''}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                ${deleteBtn}
+                <button onclick="event.stopPropagation(); playMusicCollection('${k}')" class="w-9 h-9 rounded-full bg-white/25 hover:bg-white/40 text-white flex items-center justify-center transition-all active:scale-90 shadow-md" title="پخش کالکشن">
+                  <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                </button>
+              </div>
+            </div>
+            <div class="music-shelf-row relative z-10">${shelfInner}</div>
+            <div class="music-shelf-line relative z-10"></div>
+          </div>`;
+      }).join('');
+    }
+    function musicFmtDur(sec) {
+      const s = Math.max(0, Math.round(sec || 0));
+      return toPersian(Math.floor(s / 60)) + ':' + toPersian(String(s % 60).padStart(2, '0'));
+    }
+    function renderMusicList() {
+      const list = document.getElementById('musicTrackList');
+      if (!list) return;
+      const tracks = musicFilteredTracks();
+      if (state.musicTracks.length === 0) {
+        list.innerHTML = `
+          <div class="music-empty-card p-8 text-center">
+            <div class="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white text-3xl shadow-lg shadow-emerald-500/25 mb-3">🎵</div>
+            <p class="text-sm font-bold text-on-surface mb-1">هنوز موزیکی آپلود نکردی!</p>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed mb-4">با دکمه سبز پایین صفحه اولین موزیکت را آپلود کن،<br>بعد ساعت پخش خودکارش را تنظیم کن یا با میکروفون اسمش را بگو.</p>
+            <button onclick="document.getElementById('musicFileInput').click()" class="px-5 py-2.5 rounded-2xl bg-primary text-white text-xs font-bold shadow-lg shadow-primary/25 active:scale-95 transition-transform">آپلود اولین موزیک</button>
+          </div>`;
+        return;
+      }
+      if (tracks.length === 0) {
+        const msgs = { fav: 'هنوز موزیکی را محبوب نکردی ⭐', sched: 'هنوز پخش خودکاری تنظیم نشده ⏰' };
+        list.innerHTML = `<div class="text-center py-8 text-on-surface-variant text-xs font-medium">${msgs[currentMusicTab] || 'موزیکی در این کالکشن نیست 🎵'}</div>`;
+        return;
+      }
+      list.innerHTML = tracks.map(t => {
+        const cat = allMusicCats()[t.category] || musicCategories.calm;
+        const isPlaying = currentPlayingId === t.id && !musicAudio.paused;
+        const sched = t.schedule && t.schedule.enabled;
+        return `
+          <div class="music-track-row bg-white rounded-2xl p-3 border border-surface-container-highest shadow-sm flex items-center gap-3" data-mid="${t.id}">
+            <button onclick="playMusicTrackFromList('${t.id}')" class="w-[52px] h-[52px] rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 relative active:scale-90 transition-transform text-white shadow-md" style="background: ${cat.grad};">
+              ${t.emoji}
+              ${isPlaying ? '<span class="absolute inset-0 rounded-2xl bg-black/30 flex items-end justify-center pb-1.5 text-white"><span class="music-eq"><span></span><span></span><span></span></span></span>' : ''}
+            </button>
+            <div class="flex-1 min-w-0 cursor-pointer" onclick="openMusicTrackModal('${t.id}')">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[13px] font-bold text-on-surface truncate">${t.name}</span>
+                ${t.favorite ? '<span class="text-[11px]">⭐</span>' : ''}
+              </div>
+              <div class="flex items-center gap-2 mt-1 flex-wrap">
+                <span class="text-[10px] text-on-surface-variant">${musicFmtDur(t.durationSec)}</span>
+                <span class="px-1.5 py-0.5 text-[9px] font-bold rounded-md text-white" style="background: ${cat.grad};">${cat.label}</span>
+                ${sched ? `<span class="text-[10px] font-bold text-emerald-600 flex items-center gap-1"><span class="music-sched-dot"></span>${toPersian(t.schedule.time)}</span>` : ''}
+              </div>
+            </div>
+            <button onclick="${isPlaying ? 'toggleMusicPlay()' : `playMusicTrackFromList('${t.id}')`}" class="music-play-btn" style="background: ${isPlaying ? '#181445' : 'linear-gradient(135deg,#630ed4,#8b5cf6)'};">
+              <span class="material-symbols-outlined text-[20px]">${isPlaying ? 'pause' : 'play_arrow'}</span>
+            </button>
+          </div>`;
+      }).join('');
+    }
+    function renderMusicLibrary() {
+      if (!document.getElementById('musicPage')) return;
+      renderMusicTabs();
+      renderMusicCollections();
+      renderMusicList();
+      updateMusicCountLabel();
+    }
+
+    // ---- Play engine & mini player ----
+    function playMusicTrackFromList(id) {
+      musicQueue = musicFilteredTracks().map(t => t.id);
+      playMusicTrack(id);
+    }
+    async function playMusicTrack(id) {
+      const meta = state.musicTracks.find(t => t.id === id);
+      if (!meta) return;
+      const rec = await idbMusicGet(id);
+      if (!rec || !rec.blob) { showToast('فایل این موزیک پیدا نشد — دوباره آپلودش کن 🎵'); return; }
+      try { if (currentMusicUrl) URL.revokeObjectURL(currentMusicUrl); } catch (e) {}
+      currentMusicUrl = URL.createObjectURL(rec.blob);
+      musicAudio.src = currentMusicUrl;
+      try {
+        await musicAudio.play();
+      } catch (e) {
+        currentPlayingId = id;
+        renderMusicList();
+        updateMusicMiniPlayer();
+        showToast('پخش خودکار مرورگر اجازه نداد — دکمه پخش را بزن ▶️');
+        return;
+      }
+      currentPlayingId = id;
+      if (!musicQueue.includes(id)) musicQueue = [id];
+      meta.playCount = (meta.playCount || 0) + 1;
+      saveState();
+      renderMusicList();
+      updateMusicMiniPlayer();
+    }
+    function toggleMusicPlay() {
+      if (!currentPlayingId) {
+        const first = musicFilteredTracks()[0] || state.musicTracks[0];
+        if (first) playMusicTrackFromList(first.id);
+        return;
+      }
+      if (musicAudio.paused) { musicAudio.play().catch(() => {}); } else { musicAudio.pause(); }
+    }
+    function stopMusic() {
+      musicAudio.pause();
+      try { musicAudio.currentTime = 0; } catch (e) {}
+      currentPlayingId = null;
+      musicQueue = [];
+      try { if (currentMusicUrl) URL.revokeObjectURL(currentMusicUrl); } catch (e) {}
+      currentMusicUrl = null;
+      const player = document.getElementById('musicMiniPlayer');
+      if (player) player.classList.add('hidden');
+      const fw = document.getElementById('musicFabWrap');
+      if (fw) fw.style.bottom = '';
+      renderMusicList();
+    }
+    function seekMusic(ev) {
+      if (!musicAudio.duration || !isFinite(musicAudio.duration)) return;
+      const bar = ev.currentTarget;
+      if (!bar) return;
+      const rect = bar.getBoundingClientRect();
+      let ratio = (rect.right - ev.clientX) / rect.width;
+      ratio = Math.min(1, Math.max(0, ratio));
+      musicAudio.currentTime = ratio * musicAudio.duration;
+    }
+    musicAudio.addEventListener('play', () => { updateMusicMiniPlayer(); renderMusicList(); });
+    musicAudio.addEventListener('pause', () => { updateMusicMiniPlayer(); renderMusicList(); });
+    musicAudio.addEventListener('timeupdate', () => {
+      if (!musicAudio.duration || !isFinite(musicAudio.duration)) return;
+      const bar = document.getElementById('musicMiniProgress');
+      const lbl = document.getElementById('musicMiniTime');
+      if (bar) bar.style.width = Math.min(100, (musicAudio.currentTime / musicAudio.duration) * 100) + '%';
+      if (lbl) lbl.textContent = `${musicFmtDur(musicAudio.currentTime)} / ${musicFmtDur(musicAudio.duration)}`;
+    });
+    musicAudio.addEventListener('ended', () => {
+      const idx = musicQueue.indexOf(currentPlayingId);
+      const next = musicQueue[idx + 1];
+      if (next) { playMusicTrack(next); }
+      else {
+        currentPlayingId = null;
+        renderMusicList();
+        const player = document.getElementById('musicMiniPlayer');
+        if (player) player.classList.add('hidden');
+        const fw = document.getElementById('musicFabWrap');
+        if (fw) fw.style.bottom = '';
+      }
+    });
+    function updateMusicMiniPlayer() {
+      const meta = state.musicTracks.find(t => t.id === currentPlayingId);
+      const player = document.getElementById('musicMiniPlayer');
+      if (!meta || !player) return;
+      player.classList.remove('hidden');
+      const fw = document.getElementById('musicFabWrap');
+      if (fw) fw.style.bottom = '128px';
+      const cat = allMusicCats()[meta.category] || musicCategories.calm;
+      const cover = document.getElementById('musicMiniCover');
+      if (cover) { cover.textContent = meta.emoji; cover.style.background = cat.grad; }
+      const name = document.getElementById('musicMiniName');
+      if (name) name.textContent = meta.name;
+      const icon = document.getElementById('musicMiniPlayIcon');
+      if (icon) icon.textContent = musicAudio.paused ? 'play_arrow' : 'pause';
+      const lbl = document.getElementById('musicMiniTime');
+      if (lbl) lbl.textContent = `${musicFmtDur(musicAudio.currentTime || 0)} / ${musicFmtDur(meta.durationSec || musicAudio.duration || 0)}`;
+    }
+    // Unlock audio on first user gesture (helps scheduled autoplay)
+    (function musicUnlockAudio() {
+      const unlock = () => {
+        document.removeEventListener('pointerdown', unlock);
+        if (musicAudio.src) return;
+        try {
+          musicAudio.muted = true;
+          const p = musicAudio.play();
+          if (p && p.then) p.then(() => { musicAudio.pause(); musicAudio.currentTime = 0; musicAudio.muted = false; }).catch(() => { musicAudio.muted = false; });
+        } catch (e) { musicAudio.muted = false; }
+      };
+      document.addEventListener('pointerdown', unlock);
+    })();
+
+    // ---- Auto-play scheduler (پخش خودکار روزانه) ----
+    function startMusicScheduler() {
+      setInterval(() => {
+        const now = new Date();
+        const ct = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const d = today();
+        let changed = false;
+        state.musicTracks.forEach(t => {
+          if (t.schedule && t.schedule.enabled && t.schedule.time === ct && t.schedule.lastPlayedOn !== d) {
+            t.schedule.lastPlayedOn = d;
+            changed = true;
+            addNotification('music', `🎵 پخش خودکار: ${t.name}`, `ساعت ${t.schedule.time} فرا رسید و موزیک شروع شد!`, 'music_note');
+            sendNotification('پخش خودکار موزیک', `«${t.name}» سر ساعت ${t.schedule.time} شروع شد`);
+            showToast(`🎵 پخش خودکار: ${t.name}`);
+            playMusicTrack(t.id);
+          }
+        });
+        if (changed) saveState();
+      }, 15000);
+    }
+
+    // ---- Track modal (edit / schedule / favorite / delete) ----
+    function renderMusicScheduleToggle(on) {
+      return `<div class="w-11 h-6 rounded-full relative cursor-pointer transition-all ${on ? 'bg-primary' : 'bg-surface-container-highest'}" onclick="toggleMusicModalSchedule()"><div class="absolute top-0.5 ${on ? 'left-0.5' : 'right-0.5'} w-5 h-5 bg-white rounded-full transition-all shadow-sm"></div></div>`;
+    }
+    function toggleMusicModalSchedule() {
+      window.__musicModalDraft.schedule.enabled = !window.__musicModalDraft.schedule.enabled;
+      const wrap = document.getElementById('musicModalScheduleToggle');
+      if (wrap) wrap.innerHTML = renderMusicScheduleToggle(window.__musicModalDraft.schedule.enabled);
+    }
+    function openMusicTrackModal(id) {
+      const t = state.musicTracks.find(x => x.id === id);
+      if (!t) return;
+      currentMusicModalId = id;
+      window.__musicModalId = id;
+      window.__musicModalDraft = { category: t.category, schedule: { enabled: t.schedule.enabled, time: t.schedule.time } };
+      const cat = allMusicCats()[t.category] || musicCategories.calm;
+      document.getElementById('musicModalName').textContent = t.name;
+      const cover = document.getElementById('musicModalCover');
+      cover.textContent = t.emoji;
+      cover.style.background = cat.grad;
+      document.getElementById('musicModalMeta').textContent = `${musicFmtDur(t.durationSec)} · ${toPersian(t.playCount || 0)} بار پخش شده`;
+      document.getElementById('musicModalTime').value = t.schedule.time || '07:00';
+      document.getElementById('musicModalCategories').innerHTML = Object.keys(allMusicCats()).map(k => {
+        const cc = allMusicCats()[k];
+        return `<button class="music-modal-cat ${k === t.category ? 'active' : ''}" style="${k === t.category ? 'background:' + cc.grad + ';' : ''}" onclick="selectMusicModalCategory('${k}')">${cc.emoji} ${cc.label}</button>`;
+      }).join('');
+      document.getElementById('musicModalScheduleToggle').innerHTML = renderMusicScheduleToggle(t.schedule.enabled);
+      openModal('musicTrackModal');
+    }
+    function selectMusicModalCategory(k) {
+      window.__musicModalDraft.category = k;
+      const cats = allMusicCats();
+      document.querySelectorAll('#musicModalCategories .music-modal-cat').forEach(el => {
+        const key = el.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const active = key === k;
+        el.classList.toggle('active', active);
+        el.style.background = active ? cats[key].grad : '';
+      });
+    }
+    function saveMusicTrackModal() {
+      const t = state.musicTracks.find(x => x.id === currentMusicModalId);
+      if (!t) { closeAllModals(); return; }
+      t.category = window.__musicModalDraft.category || t.category;
+      t.schedule.enabled = !!window.__musicModalDraft.schedule.enabled;
+      t.schedule.time = document.getElementById('musicModalTime').value || t.schedule.time || '07:00';
+      if (t.schedule.enabled) t.schedule.lastPlayedOn = null;
+      saveState();
+      closeAllModals();
+      renderMusicLibrary();
+      showToast(t.schedule.enabled ? `⏰ «${t.name}» هر روز ساعت ${toPersian(t.schedule.time)} پخش می‌شود` : 'تغییرات ذخیره شد ✅');
+    }
+    function deleteMusicTrack(id) {
+      const t = state.musicTracks.find(x => x.id === id);
+      if (!t) return;
+      if (!confirm(`«${t.name}» از کتابخانه حذف شود؟`)) return;
+      if (currentPlayingId === id) stopMusic();
+      idbMusicDelete(id);
+      state.musicTracks = state.musicTracks.filter(x => x.id !== id);
+      saveState();
+      closeAllModals();
+      renderMusicLibrary();
+      showToast('موزیک از کتابخانه حذف شد 🗑️');
+    }
+    function toggleMusicFavorite(id) {
+      const t = state.musicTracks.find(x => x.id === id);
+      if (!t) return;
+      t.favorite = !t.favorite;
+      saveState();
+      renderMusicLibrary();
+      showToast(t.favorite ? `«${t.name}» به محبوب‌ها اضافه شد ⭐` : 'از محبوب‌ها حذف شد');
+    }
+
+    // ---- Custom collections (+ کالکشن جدید) ----
+    window.__musicCollDraft = { emoji: '🎧', grad: musicCollGradPool[0] };
+    function openNewMusicCollectionModal() {
+      window.__musicCollDraft = { emoji: musicCollEmojiPool[(state.musicCollections || []).length % musicCollEmojiPool.length], grad: musicCollGradPool[(state.musicCollections || []).length % musicCollGradPool.length] };
+      const nameInput = document.getElementById('musicCollName');
+      if (nameInput) nameInput.value = '';
+      renderMusicCollPickers();
+      openModal('musicNewCollectionModal');
+      setTimeout(() => { if (nameInput) nameInput.focus(); }, 250);
+    }
+    function renderMusicCollPickers() {
+      const emojiRow = document.getElementById('musicCollEmojiRow');
+      if (emojiRow) emojiRow.innerHTML = musicCollEmojiPool.map(e =>
+        `<button class="music-emoji-pick ${e === window.__musicCollDraft.emoji ? 'active' : ''}" onclick="pickMusicCollEmoji(this, '${e}')">${e}</button>`).join('');
+      const gradRow = document.getElementById('musicCollGradRow');
+      if (gradRow) gradRow.innerHTML = musicCollGradPool.map(g =>
+        `<button class="music-grad-pick ${g === window.__musicCollDraft.grad ? 'active' : ''}" style="background:${g};" onclick="pickMusicCollGrad(this, '${g}')"></button>`).join('');
+    }
+    function pickMusicCollEmoji(btn, e) {
+      window.__musicCollDraft.emoji = e;
+      document.querySelectorAll('#musicCollEmojiRow .music-emoji-pick').forEach(el => el.classList.toggle('active', el === btn));
+    }
+    function pickMusicCollGrad(btn, g) {
+      window.__musicCollDraft.grad = g;
+      document.querySelectorAll('#musicCollGradRow .music-grad-pick').forEach(el => el.classList.toggle('active', el === btn));
+    }
+    function createMusicCollection() {
+      const name = (document.getElementById('musicCollName') || {}).value?.trim();
+      if (!name) { showToast('یک نام برای کالکشن بنویس ✍️'); return; }
+      if ((state.musicCollections || []).length >= 10) { showToast('حداکثر ۱۰ کالکشن سفارشی می‌توانی بسازی 😅'); return; }
+      const id = 'mc' + Date.now();
+      state.musicCollections.push({ id, name, emoji: window.__musicCollDraft.emoji, grad: window.__musicCollDraft.grad });
+      saveState();
+      closeAllModals();
+      currentMusicTab = id;
+      renderMusicLibrary();
+      triggerConfetti();
+      showToast(`قفسه «${name}» ساخته شد 🎉 موزیک‌ها را با مودال تری‌نقطه به آن منتقل کن`);
+      addNotification('music', '📚 کالکشن جدید', `کالکشن «${name}» به کتابخانه موزیک اضافه شد.`, 'library_music');
+    }
+    function deleteMusicCollection(id) {
+      const c = (state.musicCollections || []).find(x => x.id === id);
+      if (!c) return;
+      const count = state.musicTracks.filter(t => t.category === id).length;
+      if (count > 0) { showToast(`اول ${toPersian(count)} موزیک داخلش را جابه‌جا یا حذف کن 🙏`); return; }
+      if (!confirm(`کالکشن «${c.name}» حذف شود؟`)) return;
+      state.musicCollections = state.musicCollections.filter(x => x.id !== id);
+      if (currentMusicTab === id) currentMusicTab = 'all';
+      saveState();
+      renderMusicLibrary();
+      showToast('کالکشن حذف شد 🗑️');
+    }
+
+    // ---- Voice command (اسم موزیک را بگو تا پخش شود) ----
+    let musicRecognition = null;
+    let isMusicListening = false;
+    const musicVoiceFillers = ['پخش', 'پخشش', 'کن', 'بزن', 'بذار', 'بزار', 'اجرا', 'بگو', 'شروع', 'موزیک', 'موسیقی', 'اهنگ', 'ترانه', 'لطفا', 'خواهش', 'برام', 'برای', 'من', 'رو', 'را', 'یه', 'یک', 'از', 'ده'];
+    function musicNormalize(s) {
+      return String(s || '')
+        .toLowerCase()
+        .replace(/[\u200c\u200f\u200e\u064b-\u0652]/g, '')
+        .replace(/[يى]/g, 'ی')
+        .replace(/ك/g, 'ک')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ؤ/g, 'و')
+        .replace(/ئ/g, 'ی')
+        .replace(/[^0-9a-z\u0600-\u06FF\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+    function musicExtractQuery(text) {
+      let q = musicNormalize(text);
+      musicVoiceFillers.forEach(w => { q = q.replace(new RegExp('(^|\\s)' + w + '(?=\\s|$)', 'g'), ' '); });
+      return q.replace(/\s+/g, ' ').trim();
+    }
+    function musicFindTrack(query) {
+      const q = musicNormalize(query);
+      if (!q) return null;
+      let best = null, bestScore = 0;
+      state.musicTracks.forEach(t => {
+        const n = musicNormalize(t.name);
+        if (!n) return;
+        let score = 0;
+        if (n === q) score = 100;
+        else if (n.includes(q) || q.includes(n)) score = 80 - Math.abs(n.length - q.length);
+        else {
+          const qt = q.split(' ').filter(w => w.length > 1);
+          const nt = n.split(' ');
+          let hits = 0;
+          qt.forEach(w => { if (nt.some(x => x.includes(w) || w.includes(x))) hits++; });
+          if (qt.length > 0 && hits / qt.length >= 0.5) score = 40 + hits * 5;
+        }
+        if (score > bestScore) { bestScore = score; best = t; }
+      });
+      return bestScore >= 25 ? best : null;
+    }
+    function setMusicListeningUI(on) {
+      isMusicListening = on;
+      ['musicMicFab', 'musicVoiceBtnHeader'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('music-mic-listening', on);
+      });
+    }
+    function startMusicVoice() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { showToast('مرورگر شما از دستیار صوتی پشتیبانی نمی‌کند 😕'); return; }
+      if (isMusicListening) { try { musicRecognition.stop(); } catch (e) {} return; }
+      try {
+        musicRecognition = new SR();
+        musicRecognition.lang = 'fa-IR';
+        musicRecognition.interimResults = false;
+        musicRecognition.maxAlternatives = 3;
+        musicRecognition.onstart = () => { setMusicListeningUI(true); showToast('در حال گوش دادن... اسم موزیک را بگو 🎤'); };
+        musicRecognition.onend = () => setMusicListeningUI(false);
+        musicRecognition.onerror = ev => { setMusicListeningUI(false); if (ev.error === 'not-allowed') showToast('دسترسی میکروفون داده نشد 🎙️'); };
+        musicRecognition.onresult = e => {
+          const alts = e.results[0];
+          let handled = false;
+          for (let i = 0; i < Math.min(alts.length, 3); i++) {
+            const text = alts[i].transcript;
+            const n = musicNormalize(text);
+            if (n === 'بعدی' || n.includes('بعدی')) {
+              const idx = musicQueue.indexOf(currentPlayingId);
+              const nextId = musicQueue[idx + 1] || musicQueue[0];
+              if (nextId) { showToast('⏭️ موزیک بعدی'); playMusicTrack(nextId); handled = true; break; }
+            }
+            const track = musicFindTrack(musicExtractQuery(text));
+            if (track) { showToast(`🎵 در حال پخش: ${track.name}`); playMusicTrack(track.id); handled = true; break; }
+          }
+          if (!handled) showToast('موزیکی با این اسم در کتابخانه نبود 🤔');
+        };
+        musicRecognition.start();
+      } catch (e) { setMusicListeningUI(false); showToast('دستیار صوتی در دسترس نیست 😕'); }
+    }
+
+    // ---- Music init ----
+    async function initMusicLibrary() {
+      await openMusicDB();
+      renderMusicLibrary();
+    }
+
+    // ================= MODAL HELPERS =================
+    function openModal(id) {
+      document.getElementById('modalBackdrop').classList.remove('hidden');
+      document.getElementById('modalBackdrop').classList.add('visible');
+      document.getElementById(id).classList.remove('hidden');
+      document.getElementById(id).classList.add('visible');
+      document.body.style.overflow = 'hidden';
+      
+      if (id === 'moodChartModal') renderMoodChart();
+      if (id === 'badgesModal') renderBadges();
+      if (id === 'profileModal') {
+        renderAlarmSettings();
+        renderTrophyCase();
+        updateBatterySaverToggle();
+        renderNotebookPreview();
+      }
+      if (id === 'notebookModal') {
+        renderNotebookHistory();
+      }
+      if (id === 'moodModal') {
+        const todayLog = state.moodLog.find(m => m.date === today());
+        if (todayLog) {
+          selectedMoodScore = todayLog.score;
+          document.getElementById('reflectionText').value = todayLog.reflection || '';
+          renderMoodScorePicker();
+        }
+      }
+      if (id === 'mountainModal') {
+        renderMountains();
+      }
+      if (id === 'notificationsModal') {
+        renderNotifications();
+      }
+      if (id === 'agentModal') {
+        updateAgentGreeting();
+        switchAgentTab('chat');
+        seedAgentWelcome();
+        maybeAutoWeeklyReport();
+        // Clear badge
+        const badge = document.getElementById('agentBadge');
+        badge.style.display = 'none';
+        // Mark agent notifications as read
+        state.notifications.forEach(n => {
+          if (n.type === 'agent') n.read = true;
+        });
+        saveState();
+      }
+      if (id === 'addHabitModal') {
+        window.selectedCategory = 'spiritual';
+        window.selectedDuration = 21;
+        window.selectedHabitEmoji = '🏔️';
+        window.newHabitAlarmEnabled = true;
+        const nameInput = document.getElementById('newHabitName');
+        if (nameInput) nameInput.value = '';
+        const emojiBadge = document.getElementById('newHabitEmojiBadge');
+        if (emojiBadge) emojiBadge.textContent = '🏔️';
+        const alarmTimeInput = document.getElementById('newHabitAlarmTime');
+        if (alarmTimeInput) alarmTimeInput.value = '08:00';
+        const alarmToggle = document.getElementById('newHabitAlarmToggle');
+        if (alarmToggle) alarmToggle.style.background = '#630ed4';
+        const alarmKnob = document.getElementById('newHabitAlarmKnob');
+        if (alarmKnob) { alarmKnob.classList.add('left-0.5'); alarmKnob.classList.remove('right-0.5'); }
+        document.querySelectorAll('#habitEmojiPicker .habit-emoji-chip').forEach((el, i) => el.classList.toggle('active', i === 0));
+        setTimeout(() => {
+          const spiritualBtn = document.getElementById('catBtnSpiritual');
+          if (spiritualBtn) selectCategory(spiritualBtn, 'spiritual');
+          const duration21Btn = document.querySelector('[onclick*="selectDuration(this, 21)"]');
+          if (duration21Btn) selectDuration(duration21Btn, 21);
+          renderMountainPreview(21);
+        }, 100);
+      }
+    }
+
+    function closeAllModals() {
+      document.getElementById('modalBackdrop').classList.add('hidden');
+      document.getElementById('modalBackdrop').classList.remove('visible');
+      document.querySelectorAll('.modal-sheet').forEach(m => {
+        m.classList.add('hidden');
+        m.classList.remove('visible');
+      });
+      document.body.style.overflow = '';
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = message;
+      toast.style.transform = 'translate(-50%, 0)';
+      setTimeout(() => { toast.style.transform = 'translate(-50%, -150%)'; }, 3000);
+    }
+
+    function triggerConfetti() {
+      if (state.settings.batterySaver) return;
+      const colors = ['#630ed4', '#843700', '#ec4899', '#6b38d4', '#fbbf24', '#06b6d4'];
+      for (let i = 0; i < 40; i++) {
+        const conf = document.createElement('div');
+        conf.style.position = 'fixed';
+        conf.style.width = (4 + Math.random() * 4) + 'px';
+        conf.style.height = conf.style.width;
+        conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+        conf.style.left = '50%';
+        conf.style.top = '40%';
+        conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        conf.style.pointerEvents = 'none';
+        conf.style.zIndex = '100';
+        conf.style.setProperty('--x', (Math.random() - 0.5) * 400 + 'px');
+        conf.style.animation = `confettiFall ${1 + Math.random()}s ease-out forwards`;
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 2000);
+      }
+    }
+
+    let timerInterval = null, timerSeconds = 25 * 60, totalTimerSeconds = 25 * 60, isTimerRunning = false;
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
+      document.getElementById('timerDisplay').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      const circumference = 2 * Math.PI * 45;
+      document.getElementById('timerRing').style.strokeDashoffset = circumference - (1 - (timerSeconds / totalTimerSeconds)) * circumference;
+    }
+    function toggleTimer() {
+      const icon = document.getElementById('timerIcon');
+      if (isTimerRunning) {
+        clearInterval(timerInterval); isTimerRunning = false;
+        icon.textContent = 'play_arrow';
+        document.getElementById('timerStatus').textContent = 'متوقف شده';
+      } else {
+        isTimerRunning = true;
+        icon.textContent = 'pause';
+        document.getElementById('timerStatus').textContent = 'در حال تمرکز...';
+        timerInterval = setInterval(() => {
+          timerSeconds--; updateTimerDisplay();
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval); isTimerRunning = false;
+            icon.textContent = 'play_arrow';
+            document.getElementById('timerStatus').textContent = 'تمام شد! 🎉';
+            showToast('زمان تمرکز به پایان رسید. آفرین!');
+            triggerConfetti(); resetTimer();
+          }
+        }, 1000);
+      }
+    }
+    function resetTimer() {
+      clearInterval(timerInterval); isTimerRunning = false; timerSeconds = totalTimerSeconds;
+      updateTimerDisplay();
+      document.getElementById('timerIcon').textContent = 'play_arrow';
+      document.getElementById('timerStatus').textContent = 'آماده شروع';
+    }
+
+    function toPersian(num) { return String(num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes confettiFall { 0% { transform: translate(0, 0) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--x), 300px) rotate(720deg); opacity: 0; } }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes animated-line { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
+      @keyframes animated-area { from { opacity: 0; } to { opacity: 0.2; } }
+      @keyframes chart-point-animated { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+      .animated-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: animated-line 2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+      .animated-area { opacity: 0; animation: animated-area 1s ease-out 1.5s forwards; }
+      .chart-point-animated { opacity: 0; transform-origin: center; animation: chart-point-animated 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    `;
+    document.head.appendChild(style);
+
+    // ================= FLOATING ICONS: STAGGER ENGINE =================
+    (function () {
+      const rand = () => (-(Math.random() * 3.6)).toFixed(2) + 's';
+      const SEL = '.material-symbols-outlined, .float-icon, .streak-day-icon, .habit-emoji-chip, .music-emoji-pick';
+      const mark = (el) => { if (!el.style.animationDelay) el.style.animationDelay = rand(); };
+      const scan = (node) => {
+        if (!node || node.nodeType !== 1) return;
+        if (node.matches && node.matches(SEL)) mark(node);
+        if (node.querySelectorAll) node.querySelectorAll(SEL).forEach(mark);
+      };
+      scan(document.body);
+      new MutationObserver((muts) => {
+        for (const m of muts) for (const n of m.addedNodes) scan(n);
+      }).observe(document.body, { childList: true, subtree: true });
+    })();
+
+    // ================= AGENT BOOT SCREEN (CINEMATIC ROBOT — LONG CUT) =================
+    function buildBootLines() {
+      const habits = state.habits || [];
+      const n = habits.length;
+      const doneToday = habits.filter(h => h.completions && h.completions[today()]).length;
+      return [
+        'اتصال به شبکه عصبی مرکزی...',
+        `شناسایی ${toPersian(n)} عادت فعال...`,
+        'بارگذاری مغز دیجیتال...',
+        'کالیبره‌سازی مدل زبانی فارسی...',
+        'همگام‌سازی حافظه بلندمدت...',
+        'تحلیل الگوهای رفتاری تو...',
+        'فعال‌سازی ماژول انگیزش...',
+        `بررسی پیشرفت امروز: ${toPersian(doneToday)} از ${toPersian(n)} عادت`,
+        'آخرین بررسی امنیتی...'
+      ];
+    }
+    let bootTimers = [];
+    let bootActive = false;
+
+    function playBootSound() {
+      try {
+        if (state.settings.batterySaver) return;
+        initAudio();
+        const now = audioCtx.currentTime;
+        // 1) deep reactor swell
+        const sub = audioCtx.createOscillator();
+        const subG = audioCtx.createGain();
+        sub.type = 'sine';
+        sub.frequency.setValueAtTime(55, now);
+        sub.frequency.exponentialRampToValueAtTime(190, now + 1.6);
+        subG.gain.setValueAtTime(0.0001, now);
+        subG.gain.exponentialRampToValueAtTime(0.05, now + 0.5);
+        subG.gain.exponentialRampToValueAtTime(0.0001, now + 1.9);
+        sub.connect(subG); subG.connect(masterGain);
+        sub.start(now); sub.stop(now + 2);
+        // 2) rising power sweep
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(760, now + 1.1);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.045, now + 0.35);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
+        osc.connect(g); g.connect(masterGain);
+        osc.start(now); osc.stop(now + 1.4);
+        // 3) ready beeps
+        [880, 1174.66].forEach((f, i) => {
+          const o2 = audioCtx.createOscillator();
+          const g2 = audioCtx.createGain();
+          o2.type = 'triangle'; o2.frequency.value = f;
+          const t0 = now + 2.35 + i * 0.16;
+          g2.gain.setValueAtTime(0.0001, t0);
+          g2.gain.exponentialRampToValueAtTime(0.05, t0 + 0.02);
+          g2.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.24);
+          o2.connect(g2); g2.connect(masterGain);
+          o2.start(t0); o2.stop(t0 + 0.27);
+        });
+        // 4) final rising arpeggio
+        [659.25, 830.61, 987.77].forEach((f, i) => {
+          const o3 = audioCtx.createOscillator();
+          const g3 = audioCtx.createGain();
+          o3.type = 'triangle'; o3.frequency.value = f;
+          const t0 = now + 4.75 + i * 0.12;
+          g3.gain.setValueAtTime(0.0001, t0);
+          g3.gain.exponentialRampToValueAtTime(0.045, t0 + 0.02);
+          g3.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3);
+          o3.connect(g3); g3.connect(masterGain);
+          o3.start(t0); o3.stop(t0 + 0.33);
+        });
+        // 5) ready chord on flash
+        [523.25, 659.25].forEach((f) => {
+          const o4 = audioCtx.createOscillator();
+          const g4 = audioCtx.createGain();
+          o4.type = 'sine'; o4.frequency.value = f;
+          const t0 = now + 5.32;
+          g4.gain.setValueAtTime(0.0001, t0);
+          g4.gain.exponentialRampToValueAtTime(0.05, t0 + 0.04);
+          g4.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.85);
+          o4.connect(g4); g4.connect(masterGain);
+          o4.start(t0); o4.stop(t0 + 0.9);
+        });
+      } catch (e) { /* silent */ }
+    }
+
+    function stopBootTimers() { bootTimers.forEach(clearTimeout); bootTimers = []; }
+
+    function openAgentModalMaterialized() {
+      const m = document.getElementById('agentModal');
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (m && !reduce) {
+        m.classList.remove('agent-materialize');
+        void m.offsetWidth;
+        m.classList.add('agent-materialize');
+        setTimeout(() => m.classList.remove('agent-materialize'), 1300);
+      }
+      openModal('agentModal');
+    }
+
+    function hideBootScreen(thenOpen) {
+      stopBootTimers();
+      const scr = document.getElementById('agentBootScreen');
+      if (!scr || !scr.classList.contains('active')) {
+        if (thenOpen) openAgentModalMaterialized();
+        return;
+      }
+      scr.classList.remove('active');
+      scr.classList.remove('boot-final');
+      bootActive = false;
+      if (thenOpen) setTimeout(() => openAgentModalMaterialized(), 140);
+    }
+
+    function openAgentWithBoot() {
+      if (bootActive) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        openModal('agentModal');
+        return;
+      }
+      bootActive = true;
+      playBootSound();
+      const scr = document.getElementById('agentBootScreen');
+      const term = document.getElementById('bootTerminal');
+      const fill = document.getElementById('bootProgressFill');
+      const pct = document.getElementById('bootPercent');
+      const flash = document.getElementById('bootFlash');
+      const status = document.getElementById('bootStatus');
+      const eq = document.getElementById('bootEq');
+      term.innerHTML = '';
+      fill.style.width = '0%';
+      pct.textContent = '۰٪';
+      status.textContent = 'فاز ۱ — انرژی‌رسانی هسته';
+      flash.classList.remove('fire');
+      scr.classList.remove('boot-final');
+      eq.classList.remove('on');
+      if (!eq.childElementCount) {
+        for (let i = 0; i < 13; i++) {
+          const bar = document.createElement('span');
+          bar.style.animationDelay = (-(Math.random() * 0.9)).toFixed(2) + 's';
+          bar.style.animationDuration = (0.6 + Math.random() * 0.7).toFixed(2) + 's';
+          eq.appendChild(bar);
+        }
+      }
+      scr.classList.add('active');
+      const setPhase = (txt) => { if (bootActive) status.textContent = txt; };
+      const LINES = buildBootLines();
+      const t0 = performance.now(), DUR = 5250;
+      const plateau = (v) => {
+        if (v > 0.32 && v < 0.4) v = 0.32 + (v - 0.32) * 0.22;
+        if (v > 0.68 && v < 0.76) v = 0.68 + (v - 0.68) * 0.22;
+        return v;
+      };
+      const step = (t) => {
+        if (!bootActive) return;
+        const k = Math.min(1, (t - t0) / DUR);
+        const eased = plateau(1 - Math.pow(1 - k, 1.25));
+        const v = Math.round(eased * 100);
+        fill.style.width = v + '%';
+        pct.textContent = toPersian(v) + '٪';
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      bootTimers.push(setTimeout(() => setPhase('فاز ۲ — متریالایز پوسته ربات'), 900));
+      bootTimers.push(setTimeout(() => { if (bootActive) eq.classList.add('on'); }, 2050));
+      bootTimers.push(setTimeout(() => setPhase('فاز ۳ — اتصال شبکه عصبی'), 2150));
+      bootTimers.push(setTimeout(() => setPhase('فاز ۴ — همگام‌سازی حافظه'), 3550));
+      LINES.forEach((line, i) => {
+        bootTimers.push(setTimeout(() => {
+          if (!bootActive) return;
+          term.querySelectorAll('.cur').forEach(cc => cc.remove());
+          const div = document.createElement('div');
+          div.className = 'boot-line';
+          div.innerHTML = line + ' <span class="cur"></span>';
+          term.appendChild(div);
+        }, 1150 + i * 430));
+      });
+      bootTimers.push(setTimeout(() => {
+        if (!bootActive) return;
+        scr.classList.add('boot-final');
+        setPhase('فاز ۵ — آماده‌به‌کار نهایی');
+      }, 4700));
+      bootTimers.push(setTimeout(() => {
+        if (!bootActive) return;
+        term.querySelectorAll('.cur').forEach(cc => cc.remove());
+        const ok = document.createElement('div');
+        ok.className = 'boot-line ok';
+        ok.textContent = '✅ دستیار هوشمند آنلاین است — خوش آمدی';
+        term.appendChild(ok);
+      }, 4820));
+      bootTimers.push(setTimeout(() => { if (bootActive) flash.classList.add('fire'); }, 5300));
+      bootTimers.push(setTimeout(() => { if (bootActive) hideBootScreen(true); }, 5650));
+      bootTimers.push(setTimeout(() => { if (bootActive) hideBootScreen(true); }, 9000));
+    }
+
+    document.getElementById('agentBootScreen').addEventListener('pointerdown', () => hideBootScreen(true));
+
+    if ('serviceWorker' in navigator) {
+      const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(() => new Response('Offline'))); });`;
+      navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' }))).catch(() => {});
+    }
+  </script>
+</body>
+</html>

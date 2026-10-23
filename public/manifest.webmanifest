@@ -1,0 +1,20 @@
+{
+  "name": "Habits Tracker — دستیار هوشمند روزانه",
+  "short_name": "Habits Tracker",
+  "description": "دستیار هوشمند عادت‌سازی فارسی — برنامه شخصی با هوش مصنوعی، کوه‌های پیشرفت، تقویم استریک، کتابخانه موزیک و یادآور روزانه.",
+  "dir": "rtl",
+  "lang": "fa",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fcf8ff",
+  "theme_color": "#fcf8ff",
+  "categories": ["productivity", "lifestyle", "health"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

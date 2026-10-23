@@ -1,0 +1,915 @@
+          </div>
+        </div>
+
+        <div id="agentSocialPlans" class="flex flex-col gap-3"></div>
+
+        <button onclick="generateSocialPlan()" id="agentSocialBtn" class="agent-btn agent-btn-primary w-full">
+          <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+          ساخت برنامه محتوا (۴ هفته · هر هفته ۱ پست)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[92vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base">پروفایل</h3>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-5">
+      
+      <!-- Daily Notebook -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-primary">auto_stories</span>
+            <h4 class="font-bold text-on-surface text-sm">دفترچه یادداشت روزانه</h4>
+          </div>
+          <button onclick="openModal('notebookModal')" class="text-[10px] text-primary font-bold bg-on-primary-container px-2 py-1 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-[12px]">edit</span>
+            نوشتن
+          </button>
+        </div>
+        <div id="notebookPreview" class="space-y-2">
+          <div class="text-center text-on-surface-variant text-xs py-4">
+            <span class="material-symbols-outlined text-3xl opacity-30 block mb-2">auto_stories</span>
+            هنوز یادداشتی ننوشتی. افکار، چالش‌ها و دستاوردهایت را ثبت کن.
+          </div>
+        </div>
+      </div>
+
+      <!-- Alarm Settings -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary flex-shrink-0">
+            <span class="material-symbols-outlined text-[20px]">alarm</span>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-on-surface text-sm mb-1">تنظیمات آلارم</h4>
+            <p class="text-xs text-on-surface-variant">یادآوری روزانه برای هر عادت</p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2" id="alarmSettingsList"></div>
+      </div>
+
+      <!-- Battery Saver -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-tertiary flex-shrink-0">
+              <span class="material-symbols-outlined text-[20px]">battery_saver</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-on-surface text-sm">حالت ذخیره باتری</h4>
+              <p class="text-[10px] text-on-surface-variant">غیرفعال کردن انیمیشن‌ها برای صرفه‌جویی</p>
+            </div>
+          </div>
+          <div class="w-11 h-6 bg-surface-container-highest rounded-full relative cursor-pointer transition-all" id="batterySaverToggle" onclick="toggleBatterySaver()">
+            <div class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full transition-all shadow-sm"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trophy Case -->
+      <div class="trophy-shelf rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px] text-tertiary">military_tech</span>
+            <h4 class="font-bold text-on-surface text-sm">ویترین افتخارات</h4>
+          </div>
+          <span class="text-[10px] text-tertiary font-bold bg-tertiary-fixed px-2 py-0.5 rounded-full" id="trophyCount">۰ کسب شده</span>
+        </div>
+        
+        <div class="grid grid-cols-5 gap-1.5 mb-3">
+          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-diamond" id="medalDiamond">
+            <div class="medal-shine"></div>
+            <span class="text-2xl">💎</span>
+            <span class="text-[7px] font-bold text-cyan-900">الماس</span>
+            <span class="text-[7px] text-cyan-800">۱۰</span>
+          </div>
+          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-platinum" id="medalPlatinum">
+            <div class="medal-shine"></div>
+            <span class="text-2xl"></span>
+            <span class="text-[7px] font-bold text-indigo-900">پلاتین</span>
+            <span class="text-[7px] text-indigo-800">۷۰</span>
+          </div>
+          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-gold" id="medalGold">
+            <div class="medal-shine"></div>
+            <span class="text-2xl">🥇</span>
+            <span class="text-[7px] font-bold text-amber-900">طلا</span>
+            <span class="text-[7px] text-amber-800">۴۰</span>
+          </div>
+          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-silver" id="medalSilver">
+            <div class="medal-shine"></div>
+            <span class="text-2xl">🥈</span>
+            <span class="text-[7px] font-bold text-slate-700">نقره</span>
+            <span class="text-[7px] text-slate-600">۲۱</span>
+          </div>
+          <div class="relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-0.5 medal-bronze" id="medalBronze">
+            <div class="medal-shine"></div>
+            <span class="text-2xl"></span>
+            <span class="text-[7px] font-bold text-amber-900">برنز</span>
+            <span class="text-[7px] text-amber-800">۷</span>
+          </div>
+        </div>
+
+        <div class="border-t border-surface-container-highest pt-3 mt-3">
+          <h5 class="text-xs font-bold text-on-surface mb-2 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px] text-primary">local_fire_department</span>
+            چالش‌های فعال
+          </h5>
+          <div class="space-y-2" id="challengesList"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notebook Modal -->
+  <div id="notebookModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[62] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[92vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base">دفترچه یادداشت روزانه</h3>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-4">
+      <div class="notebook-page">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-[20px] text-primary">edit_note</span>
+          <span class="text-xs font-bold text-on-surface">یادداشت جدید</span>
+        </div>
+        <textarea id="notebookText" rows="6" placeholder="افکار، چالش‌ها، دستاوردها، یا هر چیزی که می‌خواهی به یاد بسپاری..." class="w-full bg-transparent text-on-surface text-sm focus:outline-none placeholder:text-on-surface-variant resize-none leading-7" style="background-image: linear-gradient(rgba(124, 58, 237, 0.08) 1px, transparent 1px); background-size: 100% 28px; line-height: 28px;"></textarea>
+        <div class="flex items-center gap-2 mt-3 pt-3 border-t border-primary/10">
+          <span class="text-[10px] text-on-surface-variant">برچسب (اختیاری):</span>
+          <div class="flex gap-1 flex-wrap" id="notebookTags">
+            <button onclick="toggleNoteTag(this, 'thought')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">💭 فکر</button>
+            <button onclick="toggleNoteTag(this, 'challenge')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">🔥 چالش</button>
+            <button onclick="toggleNoteTag(this, 'achievement')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">🏆 دستاورد</button>
+            <button onclick="toggleNoteTag(this, 'gratitude')" class="text-[9px] px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant border border-surface-container-highest">🙏 سپاس</button>
+          </div>
+        </div>
+      </div>
+      <button onclick="saveNotebookEntry()" class="w-full py-3.5 rounded-xl bg-primary text-on-primary font-bold text-sm active:scale-95 transition-transform shadow-md flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">save</span>
+        ذخیره یادداشت
+      </button>
+      
+      <div class="border-t border-surface-container-highest pt-4">
+        <h4 class="font-bold text-on-surface text-sm mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-primary">history</span>
+          یادداشت‌های قبلی
+        </h4>
+        <div id="notebookHistory" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mountain Modal (REBUILT) -->
+  <div id="mountainModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[92vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-agent-secondary flex items-center justify-center shadow-md">
+          <span class="material-symbols-outlined text-[17px] text-white">mountain_flag</span>
+        </div>
+        <h3 class="font-bold text-on-surface text-base">کوه‌های من</h3>
+      </div>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-4" id="mountainModalBody"></div>
+  </div>
+
+  <!-- Add Habit Modal -->
+  <div id="addHabitModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[95vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md px-5 py-3 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <div class="flex items-center gap-2">
+        <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-container transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+        </button>
+        <div class="flex flex-col text-right">
+          <span class="font-bold text-[15px] text-on-surface">Habits Tracker</span>
+          <div class="flex items-center gap-1 text-[11px] text-on-surface-variant">
+            <span class="material-symbols-outlined text-[13px] text-tertiary">calendar_today</span>
+            <span id="modalDate">امروز</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-9 h-9 rounded-2xl bg-on-primary-container flex items-center justify-center text-primary shadow-sm">
+        <span class="material-symbols-outlined text-[22px]">diversity_1</span>
+      </div>
+    </div>
+    
+    <div class="p-5 flex flex-col gap-4 text-right">
+      
+      <!-- Habit Details Card (REBUILT) -->
+      <div class="bg-white rounded-3xl p-4 shadow-sm border border-surface-container-highest flex flex-col gap-3.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-2xl bg-on-primary-container text-primary flex items-center justify-center shadow-sm">
+              <span class="material-symbols-outlined text-[20px]">edit_note</span>
+            </div>
+            <h3 class="font-bold text-[16px] text-on-surface">مشخصات و عنوان عادت</h3>
+          </div>
+          <span class="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">گام ۱</span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-bold text-on-surface">نام یا هدف عادت <span class="text-error">*</span></label>
+          <div class="relative flex items-center w-full">
+            <div id="newHabitEmojiBadge" class="float-icon absolute right-2 w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-[17px]">🏔️</div>
+            <input type="text" id="newHabitName" maxlength="40" class="w-full bg-surface-container-low text-on-surface text-[13px] font-semibold rounded-2xl pr-12 pl-3 py-3 border border-surface-container-highest focus:outline-none focus:border-primary transition-colors" placeholder="عنوان عادت را بنویسید...">
+          </div>
+        </div>
+
+        <!-- Emoji Picker (NEW) -->
+        <div class="flex flex-col gap-2">
+          <span class="text-[11px] font-semibold text-on-surface-variant">آیکون عادت:</span>
+          <div class="flex gap-1.5 flex-wrap" id="habitEmojiPicker">
+            <button type="button" onclick="selectHabitEmoji(this, '🏔️')" class="habit-emoji-chip active">🏔️</button>
+            <button type="button" onclick="selectHabitEmoji(this, '🕊️')" class="habit-emoji-chip">🕊️</button>
+            <button type="button" onclick="selectHabitEmoji(this, '⚡')" class="habit-emoji-chip">⚡</button>
+            <button type="button" onclick="selectHabitEmoji(this, '📚')" class="habit-emoji-chip">📚</button>
+            <button type="button" onclick="selectHabitEmoji(this, '💪')" class="habit-emoji-chip">💪</button>
+            <button type="button" onclick="selectHabitEmoji(this, '🧘')" class="habit-emoji-chip">🧘</button>
+            <button type="button" onclick="selectHabitEmoji(this, '🌅')" class="habit-emoji-chip">🌅</button>
+            <button type="button" onclick="selectHabitEmoji(this, '💧')" class="habit-emoji-chip">💧</button>
+            <button type="button" onclick="selectHabitEmoji(this, '🎯')" class="habit-emoji-chip">🎯</button>
+            <button type="button" onclick="selectHabitEmoji(this, '🕌')" class="habit-emoji-chip">🕌</button>
+          </div>
+        </div>
+
+        <!-- Quick Suggestions (NEW) -->
+        <div class="bg-surface-container-low/60 border border-surface-container-highest/60 rounded-2xl p-2.5">
+          <span class="text-[10px] font-bold text-on-surface-variant mb-1.5 block">✨ پیشنهاد سریع — بزن تا پر شود:</span>
+          <div class="flex gap-1.5 flex-wrap">
+            <button type="button" onclick="fillHabitSuggestion('نماز صبح پنج وقت', '🕌')" class="text-[10.5px] font-bold px-2.5 py-1.5 rounded-full bg-white text-on-surface border border-surface-container-highest active:scale-95 transition-transform hover:border-primary hover:text-primary transition-colors">🕌 نماز صبح</button>
+            <button type="button" onclick="fillHabitSuggestion('ورزش صبحگاهی', '💪')" class="text-[10.5px] font-bold px-2.5 py-1.5 rounded-full bg-white text-on-surface border border-surface-container-highest active:scale-95 transition-transform hover:border-primary hover:text-primary transition-colors">💪 ورزش صبحگاهی</button>
+            <button type="button" onclick="fillHabitSuggestion('۲۰ دقیقه مطالعه کتاب', '📚')" class="text-[10.5px] font-bold px-2.5 py-1.5 rounded-full bg-white text-on-surface border border-surface-container-highest active:scale-95 transition-transform hover:border-primary hover:text-primary transition-colors">📚 مطالعه کتاب</button>
+            <button type="button" onclick="fillHabitSuggestion('نوشیدن ۸ لیوان آب', '💧')" class="text-[10.5px] font-bold px-2.5 py-1.5 rounded-full bg-white text-on-surface border border-surface-container-highest active:scale-95 transition-transform hover:border-primary hover:text-primary transition-colors">💧 نوشیدن آب</button>
+          </div>
+        </div>
+        
+        <!-- Category Selector -->
+        <div class="flex flex-col gap-2">
+          <span class="text-[11px] font-semibold text-on-surface-variant">دسته‌بندی عادت:</span>
+          <div class="grid grid-cols-2 gap-2" id="categoryPicker">
+            <button type="button" id="catBtnSpiritual" onclick="selectCategory(this, 'spiritual')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+              <div class="flex items-center gap-2">
+                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-spiritual/20 flex items-center justify-center">
+                  <span class="material-symbols-outlined cat-icon text-[18px] text-spiritual">self_improvement</span>
+                </div>
+                <span class="">معنوی و پاکی</span>
+              </div>
+              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+            </button>
+            <button type="button" id="catBtnProductivity" onclick="selectCategory(this, 'productivity')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+              <div class="flex items-center gap-2">
+                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-productivity/20 flex items-center justify-center">
+                  <span class="material-symbols-outlined cat-icon text-[18px] text-productivity">bolt</span>
+                </div>
+                <span class="">بهره‌وری و کار</span>
+              </div>
+              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+            </button>
+            <button type="button" id="catBtnSelfCare" onclick="selectCategory(this, 'self-care')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+              <div class="flex items-center gap-2">
+                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-self-care/20 flex items-center justify-center">
+                  <span class="material-symbols-outlined cat-icon text-[18px] text-self-care">favorite</span>
+                </div>
+                <span class="">مراقبت از خود</span>
+              </div>
+              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+            </button>
+            <button type="button" id="catBtnFamily" onclick="selectCategory(this, 'family')" class="category-btn flex items-center justify-between p-3 rounded-2xl bg-surface-container-low text-on-surface border border-surface-container-highest font-semibold text-[12px] hover:bg-surface-container transition-all active:scale-95">
+              <div class="flex items-center gap-2">
+                <div class="cat-icon-wrap w-7 h-7 rounded-xl bg-tertiary-fixed flex items-center justify-center">
+                  <span class="material-symbols-outlined cat-icon text-[18px] text-tertiary">family_restroom</span>
+                </div>
+                <span class="">خانواده و مهر</span>
+              </div>
+              <span class="material-symbols-outlined cat-check text-[18px] text-outline-variant">radio_button_unchecked</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Card (REBUILT — always visible) -->
+      <div class="bg-white rounded-3xl p-4 shadow-sm border border-surface-container-highest flex flex-col gap-3.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-2xl bg-on-primary-container text-primary flex items-center justify-center shadow-sm">
+              <span class="material-symbols-outlined text-[20px]">flag</span>
+            </div>
+            <div class="flex flex-col text-right">
+              <div class="flex items-center gap-1.5">
+                <h4 class="font-bold text-[15px] text-on-surface">مدت چالش و مسیر قله</h4>
+                <span class="text-[10px] font-bold text-tertiary bg-tertiary-fixed px-2 py-0.5 rounded-full">تایم‌لاین</span>
+              </div>
+              <span class="text-[11px] text-on-surface-variant" id="timelineSubtitle">۲۱ روزه (تثبیت) • مسیر صعود به قله</span>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">گام ۲</span>
+        </div>
+        <div class="flex flex-col gap-3.5 pt-1 border-t border-surface-container-highest">
+          <div class="grid grid-cols-5 gap-1.5">
+            <button type="button" onclick="selectDuration(this, 7)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+              <span class="text-[14px] font-extrabold text-on-surface">۷</span>
+              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">شروع</span>
+            </button>
+            <button type="button" onclick="selectDuration(this, 21)" class="duration-btn bg-primary text-on-primary rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-md border-2 border-primary active:scale-95 transition-all">
+              <span class="text-[14px] font-extrabold text-on-primary">۲۱</span>
+              <span class="text-[8px] font-bold text-on-primary/90 mt-0.5">تثبیت</span>
+            </button>
+            <button type="button" onclick="selectDuration(this, 40)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+              <span class="text-[14px] font-extrabold text-on-surface">۴۰</span>
+              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">شکوه</span>
+            </button>
+            <button type="button" onclick="selectDuration(this, 70)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+              <span class="text-[14px] font-extrabold text-on-surface">۷۰</span>
+              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">استاد</span>
+            </button>
+            <button type="button" onclick="selectDuration(this, 100)" class="duration-btn bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl p-2 flex flex-col items-center justify-center text-center border border-surface-container-highest active:scale-95 transition-all">
+              <span class="text-[14px] font-extrabold text-on-surface">۱۰۰</span>
+              <span class="text-[8px] font-semibold text-on-surface-variant mt-0.5">ریشه</span>
+            </button>
+          </div>
+          
+          <!-- Mountain Preview (always visible) -->
+          <div class="bg-surface rounded-2xl p-3 border border-surface-container-highest flex flex-col gap-2.5 shadow-inner">
+            <div class="flex items-center justify-between text-right px-0.5">
+              <span class="text-[11px] font-bold text-primary" id="progressLabel">۰ از ۲۱ روز</span>
+              <div class="flex items-center gap-1.5 text-[12px] font-bold text-on-surface">
+                <span class="material-symbols-outlined text-[17px] text-primary">linear_scale</span>
+                <span class="">پیش‌نمایش مسیر صعود:</span>
+              </div>
+            </div>
+            <div class="relative w-full h-24 bg-gradient-to-b from-sky-100/50 to-surface-container-low rounded-xl overflow-hidden border border-surface-container-highest">
+              <svg id="mountainPreviewSvg" viewBox="0 0 300 100" class="w-full h-full" preserveAspectRatio="none"></svg>
+            </div>
+            <div class="flex items-center justify-between text-[9px] font-bold text-on-surface-variant px-0.5" id="mountainPreviewLabels"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Reminder Card (NEW) -->
+      <div class="bg-white rounded-3xl p-4 shadow-sm border border-surface-container-highest flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shadow-sm border border-amber-100">
+              <span class="material-symbols-outlined text-[20px]">alarm</span>
+            </div>
+            <div class="flex flex-col text-right">
+              <h4 class="font-bold text-[15px] text-on-surface">یادآور روزانه</h4>
+              <span class="text-[11px] text-on-surface-variant">هر روز سر ساعت یادت می‌اندازیم</span>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">گام ۳</span>
+        </div>
+        <div class="flex items-center justify-between bg-surface-container-low/60 border border-surface-container-highest/60 rounded-2xl px-3 py-2.5">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">schedule</span>
+            <span class="text-[12px] font-bold text-on-surface">ساعت یادآوری</span>
+          </div>
+          <input type="time" id="newHabitAlarmTime" value="08:00" class="bg-white border border-surface-container-highest rounded-xl px-3 py-1.5 text-[12px] font-extrabold text-on-surface focus:outline-none focus:border-primary transition-colors">
+        </div>
+        <div class="flex items-center justify-between px-1">
+          <span class="text-[12px] font-semibold text-on-surface-variant">یادآور فعال باشد؟</span>
+          <div id="newHabitAlarmToggle" onclick="toggleNewHabitAlarm()" class="w-11 h-6 rounded-full relative cursor-pointer transition-all bg-primary">
+            <div id="newHabitAlarmKnob" class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-all shadow-sm"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col gap-2 pt-2 pb-6">
+        <button type="button" onclick="saveNewHabit()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-primary via-primary-container to-secondary text-on-primary font-bold text-[14px] flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(99,14,212,0.35)] active:scale-95 transition-all">
+          <span class="text-[16px]">🚀</span>
+          <span class="">شروع صعود</span>
+          <span class="material-symbols-outlined text-[18px]">verified</span>
+        </button>
+        <button type="button" onclick="closeAllModals()" class="text-center text-[12px] font-semibold text-on-surface-variant hover:text-on-surface py-1 transition-colors">انصراف و بازگشت</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mood Modal -->
+  <div id="moodModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base">حال و بازتاب امروز</h3>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-5">
+      <div>
+        <label class="text-xs font-bold text-on-surface mb-3 block">سطح انرژی عاطفی (۱ تا ۵)</label>
+        <div class="flex justify-between gap-2" id="moodScorePicker"></div>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-on-surface mb-2 block">بازتاب روز</label>
+        <textarea id="reflectionText" rows="4" placeholder="امروز چه حسی داشتی؟" class="w-full bg-surface-container-low border border-surface-container-highest rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:outline-none placeholder:text-on-surface-variant resize-none"></textarea>
+      </div>
+      <div class="bg-surface-container-low rounded-2xl p-3 flex items-start gap-2 border border-surface-container-highest">
+        <span class="material-symbols-outlined text-[16px] text-tertiary flex-shrink-0 mt-0.5">info</span>
+        <p class="text-[11px] text-on-surface-variant leading-relaxed">با ثبت منظم حال و بازتاب، می‌توانی رابطه‌ی بین عادت‌ها و سلامت روانت را بهتر درک کنی.</p>
+      </div>
+      <button onclick="saveMoodAndReflection()" class="w-full py-3.5 rounded-xl bg-primary text-on-primary font-bold text-sm active:scale-95 transition-transform shadow-md">ذخیره حال و بازتاب</button>
+    </div>
+  </div>
+
+  <!-- Mood Chart Modal -->
+  <div id="moodChartModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[92vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base">روند ۷ روزه انرژی</h3>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-4">
+      <div class="bg-white rounded-2xl p-4 relative shadow-sm border border-surface-container-highest" style="height: 220px;" id="moodLineChartContainer"></div>
+      <div class="flex justify-between text-[10px] text-on-surface-variant font-medium px-2" id="moodChartLabels"></div>
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-surface-container-highest" id="moodInsight"></div>
+    </div>
+  </div>
+
+  <!-- Badges Modal -->
+  <div id="badgesModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base">دستاوردها و نشان‌ها</h3>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-2 gap-3" id="badgesGrid"></div>
+    </div>
+  </div>
+
+  <!-- Edit Goals Modal -->
+  <div id="editGoalsModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[62] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base">ویرایش اهداف ماهانه</h3>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-4">
+      <p class="text-xs text-on-surface-variant">۳ هدف اصلی خود را برای این ماه بنویس.</p>
+      <div class="flex flex-col gap-3">
+        <input type="text" id="goal1Input" placeholder="هدف اول" class="w-full bg-surface-container-low border border-surface-container-highest rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:outline-none placeholder:text-on-surface-variant">
+        <input type="text" id="goal2Input" placeholder="هدف دوم" class="w-full bg-surface-container-low border border-surface-container-highest rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:outline-none placeholder:text-on-surface-variant">
+        <input type="text" id="goal3Input" placeholder="هدف سوم" class="w-full bg-surface-container-low border border-surface-container-highest rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:outline-none placeholder:text-on-surface-variant">
+      </div>
+      <button onclick="saveMonthlyGoals()" class="w-full py-3.5 rounded-xl bg-primary text-on-primary font-bold text-sm active:scale-95 transition-transform shadow-md">ذخیره اهداف</button>
+    </div>
+  </div>
+
+  <!-- Notifications Modal -->
+  <div id="notificationsModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px] text-primary">notifications</span>
+        اعلان‌ها و یادآورها
+        <span class="text-[10px] bg-primary text-on-primary px-2 py-0.5 rounded-full" id="notificationCount">۰</span>
+      </h3>
+      <button onclick="clearAllNotifications()" class="text-[10px] text-on-surface-variant hover:text-primary font-bold">پاک کردن همه</button>
+    </div>
+    <div class="p-5 flex flex-col gap-3" id="notificationsList"></div>
+  </div>
+
+  <!-- Timer Modal -->
+  <div id="timerModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto">
+    <div class="p-6 flex flex-col items-center">
+      <div class="w-12 h-1.5 bg-outline-variant rounded-full mb-6"></div>
+      <h3 class="font-bold text-on-surface text-lg mb-1">حالت تمرکز</h3>
+      <p class="text-xs text-on-surface-variant mb-8">عمیق شو، دنیا منتظر می‌مونه</p>
+      <div class="relative w-48 h-48 mb-8">
+        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#e3dfff" stroke-width="4" />
+          <circle id="timerRing" cx="50" cy="50" r="45" fill="none" stroke="#630ed4" stroke-width="4" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="0" class="transition-all duration-1000 linear" />
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="text-4xl font-bold text-on-surface font-mono" id="timerDisplay">25:00</span>
+          <span class="text-xs text-on-surface-variant mt-1" id="timerStatus">آماده شروع</span>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="resetTimer()" class="w-14 h-14 rounded-full bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[24px]">restart_alt</span>
+        </button>
+        <button onclick="toggleTimer()" id="timerToggleBtn" class="w-16 h-16 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg shadow-primary/30 active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[32px]" id="timerIcon">play_arrow</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Journal Modal -->
+  <div id="journalModal" class="modal-sheet hidden fixed bottom-0 left-0 right-0 z-[61] bg-surface rounded-t-[32px] border-t border-surface-container-highest max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface/95 backdrop-blur-md p-4 border-b border-surface-container-highest flex items-center justify-between z-10">
+      <button onclick="closeAllModals()" class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface active:scale-90">
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <h3 class="font-bold text-on-surface text-base">ژورنال روزانه</h3>
+      <div class="w-8"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-4">
+      <textarea id="journalText" rows="8" placeholder="امروز چه اتفاقی افتاد؟" class="w-full bg-surface-container-low border border-surface-container-highest rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:outline-none placeholder:text-on-surface-variant resize-none"></textarea>
+      <button onclick="saveJournal()" class="w-full py-3.5 rounded-xl bg-secondary text-on-secondary font-bold text-sm active:scale-95 transition-transform shadow-md">ذخیره ژورنال</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[70] bg-white border border-primary/30 text-on-surface px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 translate-y-[-150%] transition-transform duration-500 max-w-[90%]">
+    <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-[14px] text-on-primary font-bold">check</span>
+    </div>
+    <span class="text-sm font-bold" id="toastText">عملیات موفق</span>
+  </div>
+
+  <script>
+    // ================= STATE =================
+    const STORAGE_KEY = 'habits_tracker_agent_v1';
+    const today = () => new Date().toISOString().split('T')[0];
+    const currentMonth = () => new Date().toISOString().slice(0, 7);
+
+    const defaultState = {
+      habits: [],
+      moodLog: [],
+      journal: {},
+      journalingResponses: {},
+      notebookEntries: [],
+      settings: { 
+        sound: true, 
+        notifications: true, 
+        masterVolume: 50, 
+        weather: 'sunny', 
+        batterySaver: false, 
+        breathType: '478',
+        // NEW: Agent settings
+        agent: {
+          wakeTime: '06:30',
+          wakeEnabled: false,
+          voiceEnabled: false,
+          lastCheckin: null,
+          checkinHistory: [],
+          moodHistory: []
+        }
+      },
+      chellehStartDate: null,
+      isFirstRun: true,
+      notifications: [],
+      musicTracks: [],
+      musicCollections: []
+    };
+
+    let state;
+    
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        state = JSON.parse(saved);
+        // Merge agent settings if missing
+        if (!state.settings.agent) state.settings.agent = defaultState.settings.agent;
+        if (!state.moodLog) state.moodLog = [];
+        if (!state.journal) state.journal = {};
+        if (!state.journalingResponses) state.journalingResponses = {};
+        if (!state.notebookEntries) state.notebookEntries = [];
+        if (!state.settings) state.settings = defaultState.settings;
+        if (!state.chellehStartDate) state.chellehStartDate = today();
+        if (!state.notifications) state.notifications = [];
+        if (!state.agentChat) state.agentChat = [];
+        if (state.agentWeeklyReport === undefined) state.agentWeeklyReport = null;
+        if (!Array.isArray(state.agentSocialPlans)) state.agentSocialPlans = [];
+        if (!Array.isArray(state.musicTracks)) state.musicTracks = [];
+        if (!Array.isArray(state.musicCollections)) state.musicCollections = [];
+        state.musicTracks.forEach(t => {
+          if (!t.schedule) t.schedule = { enabled: false, time: '07:00', lastPlayedOn: null };
+          if (!t.category) t.category = 'calm';
+          if (typeof t.playCount !== 'number') t.playCount = 0;
+          if (typeof t.favorite !== 'boolean') t.favorite = false;
+          if (!t.emoji) t.emoji = '🎵';
+        });
+        if (state.isFirstRun === undefined) state.isFirstRun = false;
+        state.habits.forEach(h => { 
+          if (!h.notes) h.notes = []; 
+          if (!h.category) h.category = 'productivity';
+          if (!h.duration) h.duration = 21;
+          if (!h.completions) h.completions = {};
+          if (!h.streak) h.streak = 0;
+        });
+      } else {
+        state = JSON.parse(JSON.stringify(defaultState));
+        state.chellehStartDate = today();
+      }
+    } catch (e) {
+      state = JSON.parse(JSON.stringify(defaultState));
+      state.chellehStartDate = today();
+    }
+
+    function saveState() { 
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
+    }
+
+    // ================= CATEGORIES =================
+    const categories = {
+      spiritual: { label: 'معنوی و پاکی', color: '#a78bfa', icon: 'self_improvement', emoji: '🕊️' },
+      productivity: { label: 'بهره‌وری و کار', color: '#34d399', icon: 'bolt', emoji: '' },
+      'self-care': { label: 'مراقبت از خود', color: '#f472b6', icon: 'favorite', emoji: '💖' },
+      family: { label: 'خانواده و مهر', color: '#843700', icon: 'family_restroom', emoji: '👨‍‍👧' }
+    };
+
+    // ================= QUOTES =================
+    const quotes = [
+      "ریشه‌های اراده در سکوت رشد می‌کنند و شاخه‌های آرامش، سایه‌بان کانون گرم خانواده می‌شوند.",
+      "نظم، پل میان اهداف و دستاوردهاست.",
+      "آینده متعلق به کسانی است که به زیبایی رویاهایشان باور دارند.",
+      "هر روز فرصتی جدید برای ساختن نسخه بهتری از خودت است.",
+      "استمرار، کلید تبدیل غیرممکن به ممکن است.",
+      "ذهن آرام، قوی‌ترین سلاح برای فتح دنیای بیرون است.",
+      "عادت‌های کوچک، زندگی‌های بزرگ می‌سازند.",
+      "تو همان چیزی هستی که مکرراً انجام می‌دهی.",
+      "رشد، نتیجه‌ی تصمیم‌های کوچک روزمره است.",
+      "هر قدم کوچک، تو را به نسخه‌ی ایده‌آلت نزدیک‌تر می‌کند.",
+      "تمرکز، هنر نادیده گرفتن چیزهای بی‌اهمیت است.",
+      "ریشه‌های اراده در سکوت رشد می‌کنند.",
+      "امروز، بذر فردای توست.",
+      "باغبان صبور، زیباترین گل‌ها را می‌پروراند.",
+      "ذهنت باغ توست؛ آن را با افکار زیبا آبیار.",
+      "از امروز شروع کن، نه از شنبه.",
+      "نظم شخصی، آزادی واقعی می‌آفریند.",
+      "استقامت، هنر ادامه دادن وقتی همه چیز سخت می‌شود.",
+      "تغییر، با یک تصمیم کوچک آغاز می‌شود.",
+      "آرامش، پاداش ذهنی است که تمرین کرده."
+    ];
+    let currentQuoteIndex = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24) % quotes.length;
+
+    function setDailyQuote() {
+      document.getElementById('dailyQuote').textContent = `«${quotes[currentQuoteIndex]}»`;
+    }
+
+    // ================= AUDIO ENGINE =================
+    let audioCtx = null;
+    let activeSounds = {};
+    let masterGain = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = (state.settings.masterVolume || 50) / 100;
+        masterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function createNoiseBuffer(type = 'white', duration = 2) {
+      const sampleRate = audioCtx.sampleRate;
+      const length = sampleRate * duration;
+      const buffer = audioCtx.createBuffer(1, length, sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastOut = 0;
+      for (let i = 0; i < length; i++) {
+        const white = Math.random() * 2 - 1;
+        if (type === 'white') data[i] = white;
+        else if (type === 'pink' || type === 'brown') {
+          data[i] = (lastOut + (0.02 * white)) / 1.02;
+          lastOut = data[i];
+          data[i] *= 3.5;
+        }
+      }
+      return buffer;
+    }
+
+    function playCrystalChime() {
+      if (state.settings.batterySaver) return;
+      initAudio();
+      const frequencies = [1318.51, 1567.98, 2093.00, 2637.02];
+      const now = audioCtx.currentTime;
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+      gain.connect(masterGain);
+      frequencies.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const oscGain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        oscGain.gain.setValueAtTime(0, now);
+        oscGain.gain.linearRampToValueAtTime(0.3 / (i + 1), now + 0.01 + i * 0.05);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        osc.connect(oscGain);
+        oscGain.connect(gain);
+        osc.start(now + i * 0.05);
+        osc.stop(now + 1.5);
+      });
+    }
+
+    // NEW: Text-to-Speech for Agent
+    function speakText(text) {
+      if (!state.settings.agent.voiceEnabled) return;
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fa-IR';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+    // ================= NOTIFICATIONS =================
+    function updateHeaderNotifBadge() {
+      const badge = document.getElementById('headerNotifBadge');
+      if (!badge) return;
+      const unread = state.notifications.filter(n => !n.read).length;
+      badge.textContent = toPersian(unread);
+      badge.style.display = unread > 0 ? 'flex' : 'none';
+    }
+    function addNotification(type, title, message, icon) {
+      const notification = {
+        id: 'n' + Date.now(),
+        type,
+        title,
+        message,
+        icon,
+        time: new Date().toISOString(),
+        read: false
+      };
+      state.notifications.unshift(notification);
+      if (state.notifications.length > 20) {
+        state.notifications = state.notifications.slice(0, 20);
+      }
+      saveState();
+      renderNotifications();
+    }
+
+    function renderNotifications() {
+      const container = document.getElementById('notificationsList');
+      if (!container) return;
+      updateHeaderNotifBadge();
+      
+      if (state.notifications.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-on-surface-variant text-xs py-8">
+            <span class="material-symbols-outlined text-4xl opacity-30 block mb-2">notifications_none</span>
+            <p>هنوز اعلانی ندارید</p>
+            <p class="text-[10px] mt-1">با تکمیل عادت‌ها، اعلان‌ها اینجا نمایش داده می‌شوند</p>
+          </div>
+        `;
+        document.getElementById('notificationCount').textContent = '۰';
+        return;
+      }
+
+      const unreadCount = state.notifications.filter(n => !n.read).length;
+      document.getElementById('notificationCount').textContent = toPersian(unreadCount);
+
+      container.innerHTML = state.notifications.map(notif => {
+        const d = new Date(notif.time);
+        const timeStr = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = d.toLocaleDateString('fa-IR', { day: 'numeric', month: 'short' });
+        const iconColors = {
+          'habit': 'bg-primary/10 text-primary',
+          'streak': 'bg-tertiary-fixed text-tertiary',
+          'achievement': 'bg-secondary/10 text-secondary',
+          'reminder': 'bg-surface-container-low text-on-surface-variant',
+          'agent': 'bg-agent-primary/10 text-agent-primary'
+        };
+        const iconEmojis = {
+          'habit': '️',
+          'streak': '',
+          'achievement': '🏆',
+          'reminder': '⏰',
+          'agent': '🤖'
+        };
+        
+        return `
+          <div class="notification-item ${notif.read ? '' : 'unread'}" onclick="markNotificationRead('${notif.id}')">
+            <div class="flex items-start gap-3">
+              <div class="notification-icon ${iconColors[notif.type] || iconColors.reminder}">
+                ${iconEmojis[notif.type] || notif.icon || '📌'}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-bold text-on-surface mb-0.5">${notif.title}</div>
+                <div class="text-[11px] text-on-surface-variant leading-relaxed">${notif.message}</div>
+                <div class="notification-time">${dateStr} • ${timeStr}</div>
+              </div>
+              ${!notif.read ? '<div class="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2"></div>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function markNotificationRead(id) {
+      const notif = state.notifications.find(n => n.id === id);
+      if (notif && !notif.read) {
+        notif.read = true;
+        saveState();
+        renderNotifications();
+      }
+    }
+
+    function clearAllNotifications() {
+      if (confirm('آیا مطمئن هستید که می‌خواهید همه اعلان‌ها را پاک کنید؟')) {
+        state.notifications = [];
+        saveState();
+        renderNotifications();
+      }
+    }
+
+    // ================= AI AGENT: CHAT & AUTOMATION ENGINE =================
+    let agentChatBusy = false;
+
+    function getAgentContext() {
+      const t = today();
+      const habitList = state.habits.map(h => ({
+        name: h.name,
+        category: h.category,
+        streak: h.streak || 0,
+        duration: h.duration,
+        completedToday: !!h.completions[t]
+      }));
+      let totalSlots = 0, doneSlots = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split('T')[0];
+        state.habits.forEach(h => { totalSlots++; if (h.completions[ds]) doneSlots++; });
+      }
+      const rate = totalSlots > 0 ? Math.round((doneSlots / totalSlots) * 100) : 0;
+      const moodToday = (state.moodLog || []).find(m => m.date === t);
+      let dateFa = '';
+      try { dateFa = new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) {}
+      return {
+        dateFa: dateFa,
+        wakeTime: (state.settings.agent && state.settings.agent.wakeTime) || '06:30',
+        streak: calculateCurrentStreak(),
+        completionRate7: rate,
+        habits: habitList,
+        moodToday: moodToday ? moodToday.score : undefined
+      };
+    }
+
+    function seedAgentWelcome() {
+      if (!Array.isArray(state.agentChat)) state.agentChat = [];
+      if (state.agentChat.length === 0) {
+        state.agentChat.push({
+          id: 'm' + Date.now(),
+          role: 'agent',
+          content: 'سلام! من ایجنت اتوماسیون هوشمند تو هستم 🤖✨\nکافیه بگی چه هدفی داری یا چه برنامه‌ای می‌خوای — مثلاً «برای کنکور برنامه بده» یا «می‌خوام صبح‌ها زود بیدار شم» — تا یک برنامه تخصصی عادت‌سازی برات طراحی کنم و با یک کلیک، خودکار روی برنامه‌هات نصبش کنم.\nاز وضعیت عادت‌ها و استریک‌هات هم خبر دارم؛ هر سوالی داری بپرس!\nهر هفته یک «گزارش هفتگی» خودکار از پیشرفتت می‌سازم (تب 📈) و در تب «📱 فضای مجازی» اگر شغلت را بگویی، برنامه محتوای اینستاگرام و لینکدین با پرامت آماده به‌ات می‌دهم. 💜',
+          plan: null,
+          ts: Date.now()
+        });
+        saveState();
+      }
+      renderAgentChat();
+    }
+
+    function showAgentTyping(show) {
+      const row = document.getElementById('agentTypingRow');
+      if (!row) return;
+      if (show) {
+        row.classList.add('visible');
+        setTimeout(() => { try { row.scrollIntoView({ block: 'end', behavior: 'smooth' }); } catch (e) {} }, 50);
+      } else {
+        row.classList.remove('visible');
+      }
+    }
+
+    function agentPlanCardHtml(plan, msgId) {
+      const catLabels = { spiritual: '🕊️ معنوی', productivity: '⚡ بهره‌وری', 'self-care': '💖 خودمراقبتی', family: '👨‍👩‍👧 خانواده' };
+      let habitsHtml = '';
+      (plan.habits || []).forEach(h => {
+        habitsHtml += `
+          <div class="agent-plan-habit">
+            <div class="agent-plan-habit-icon">${h.icon || '🏔️'}</div>
+            <div class="flex-1 min-w-0">
+              <div class="agent-plan-habit-name">${escapeHtml(h.name || '')}</div>
+              <div class="agent-plan-habit-meta">⏰ ${toPersian(h.alarmTime || '--:--')} · ${catLabels[h.category] || '⚡ بهره‌وری'} · ${toPersian(h.duration || plan.duration || 21)} روزه</div>
+              ${h.tip ? `<div class="agent-plan-habit-tip">💡 ${escapeHtml(h.tip)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      return `
+        <div class="agent-plan-card">
+          <div class="agent-plan-head">
+            <div class="agent-plan-name">🏔️ ${escapeHtml(plan.name || 'برنامه تخصصی')}</div>
+            <div class="agent-plan-summary">${escapeHtml(plan.summary || '')}</div>
+            <div class="agent-plan-meta">
+              <span class="agent-plan-pill">📅 ${toPersian(plan.duration || 21)} روز</span>

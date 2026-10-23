@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
         s.setLoadWithOverviewMode(true);
         s.setUseWideViewPort(true);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        s.setUserAgentString(s.getUserAgentString() + " HabitTrackerAndroid/2.2");
+        s.setUserAgentString(s.getUserAgentString() + " HabitTrackerAndroid/2.3");
 
         web.addJavascriptInterface(new Bridge(), "AndroidApp");
 

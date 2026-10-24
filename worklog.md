@@ -325,3 +325,19 @@ Work Log:
 Stage Summary:
 - هر ۹ خواسته پیاده شد؛ اپ حالا روی هر صفحه سکانس ۴۵ ثانیه‌ای مخصوص خودش با رباتِ ساخته‌شده از عکس کاربر دارد، دستیار بدون اینترنت هم روی گوشی جواب می‌دهد و ۱۳۲ قطعه موزیک بدون فایل صوتی تولید می‌شود. خروجی: download/habits-tracker-v5.apk (نسخه ۲.۳).
 - فایل‌های کلیدی: scripts/task18_patch_a.py تا task18_patch_d.py، task18_fix_robot.py، task18_robot_edit.mjs، task18_build_apk.sh، upload/robot_avatar.png، download/habits-tracker-v5.apk.
+
+---
+Task ID: G1 (continue)
+Agent: Main Agent (Z.ai)
+Task: ادامه کاربر («ادامه بده») — تلاش مجدد push پس از تغییرات کاربر در GitHub.
+
+Work Log:
+- کشف: کاربر دو مخزن جدید ساخته (ghadir 22:45 و ghadir23 22:46 UTC) و دسترسی مخزنی توکن را اصلاح کرده — توکن حالا هر دو مخزن را می‌بیند (قبلاً لیست خالی بود).
+- اما push به ghadir23 هنوز 403 «Permission denied» → پروب API: توکن فقط metadata=read دارد و پیام خطای Contents API صریحاً contents=write لازم می‌گوید. (admin/push در JSON مخزن، مجوز «کاربر» است نه «توکن».)
+- diagnose با هدر x-accepted-github-permissions: برای push باید «Contents: Read and write» در تنظیمات توکن فعال شود.
+- زیرساخت کامل شد: remote دوم ghadir اضافه شد (origin=ghadir23)، git_sync.sh ارتقا یافت تا به هر دو مخزن push کند، کامیت‌های باقی‌مانده اعمال شد (Task 18 final sync + G1 sync script).
+- راستی‌آزمایی payload: ۴۰۵ آبجکت / ۲۹.۰MB از main قابل دسترس؛ هر ۴ APK (v2/v3/v4/v5) داخل main ✓؛ تاریخ قدیم ۲۵۰MB فقط محلی و از main دست‌نیافتنی ✓.
+
+Stage Summary:
+- همه‌چیز محلی ۱۰۰٪ آماده است (main تمیز، ۲۹۳ فایل، ۲۹MB، هر ۴ APK). تنها مانع باقی‌مانده: توکن باید مجوز «Contents: Read and write» بگیرد (یا توکن classic با اسکوپ repo ساخته شود). بلافاصله بعد از آن، یک اجرای «bash scripts/git_sync.sh» به هر دو مخزن push می‌کند.
+- مخزن‌های هدف: https://github.com/ghadirs405-a11y/ghadir23 (origin) و https://github.com/ghadirs405-a11y/ghadir

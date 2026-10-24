@@ -341,3 +341,18 @@ Work Log:
 Stage Summary:
 - همه‌چیز محلی ۱۰۰٪ آماده است (main تمیز، ۲۹۳ فایل، ۲۹MB، هر ۴ APK). تنها مانع باقی‌مانده: توکن باید مجوز «Contents: Read and write» بگیرد (یا توکن classic با اسکوپ repo ساخته شود). بلافاصله بعد از آن، یک اجرای «bash scripts/git_sync.sh» به هر دو مخزن push می‌کند.
 - مخزن‌های هدف: https://github.com/ghadirs405-a11y/ghadir23 (origin) و https://github.com/ghadirs405-a11y/ghadir
+
+---
+Task ID: G1-COMPLETE
+Agent: Main Agent (Z.ai)
+Task: آپلود همه نسخه‌ها به GitHub با توکن classic جدید کاربر (ghp_SKXi…RGNL، اسکوپ repo).
+
+Work Log:
+- توکن classic جدید اعتبارسنجی شد (login: ghadirs405-a11y، x-oauth-scopes: repo).
+- هر دو ریموت با توکن جدید به‌روز شد؛ push موفق: origin (ghadir23) و ghadir هر دو «main -> main» ساختند.
+- راستی‌آزمایی API: هر ۴ APK (v2 747KB / v3 751KB / v4 756KB / v5 784KB) + app.html + README فارسی + upload/ در هر دو مخزن موجود است؛ SHA محلی و ریموت برابر (b4ab7d8).
+- نکته: نسخه ۱ هرگز APK نداشته (فقط وب) — «همه نسخه‌ها» = v2 تا v5.
+
+Stage Summary:
+- مخازن نهایی: https://github.com/ghadirs405-a11y/ghadir23 (اصلی) و https://github.com/ghadirs405-a11y/ghadir (پشتیبان) — ۲۹۳ فایل / ~۲۹MB، شاخه main.
+- قانون اصلی از این پس با scripts/git_sync.sh (push به هر دو مخزن) به کار خود ادامه می‌دهد.
